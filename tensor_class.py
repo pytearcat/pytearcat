@@ -1,0 +1,1955 @@
+import numpy as np 
+from itertools import product
+import re
+import time
+import interp
+import config
+from IPython.display import display, Latex, Math
+from sympy.tensor.array import Array
+from tqdm import tqdm_notebook
+import symengine as se
+from sympy import factor, simplify
+from numpy import full
+from interp import syntax,add_examine,mul_examine,der_examine
+#import sympy as sp 
+
+def reload_all(new_module):
+
+    ''' 
+
+    This function reloads all the variables in __all__ from module
+        
+    Thanks to hurturk on https://stackoverflow.com/questions/44492803/python-dynamic-import-how-to-import-from-module-name-from-variable?newreg=9312458d429647fc8ec2a72e5655d197
+        
+    '''
+
+    string = "globals().update({{n: getattr(module, n) for n in module.__all__}} if hasattr(module, '_all_') else {k: v for (k, v) in module.__dict__.items() if not k.startswith('_')})"
+
+    string = string.replace('module',new_module)
+
+    return string
+
+def out_intersection(L1,I1,L2,I2):
+    '''
+    example: not_intersection(conf_vars,new_vars)
+
+    retorna las variables que no son compartidas en L1 y L2
+    '''
+    L = L1+L2
+    
+    I = I1+I2
+
+    lista_intersection = [i for i in L2 if i in L1]
+
+    lista = [x for x in L if x not in lista_intersection]
+
+    out = {lista[i] : i for i in range(len(lista))}
+
+    ind_dict =  dict((k,i) for i,k in enumerate(L))
+    
+    ind_out = [ str(I[ind_dict[x]]) + (L[ind_dict[x]]) for x in out ]
+
+    string = ','.join(map(str, ind_out))
+
+    return out, string
+
+def in_intersection(L1,I1,L2,I2):
+
+    '''
+    example: in_intersection(conf_vars,new_vars)  ['^i','_j'] ['_i','^l']
+
+    ['i','j','i','l']
+
+    retorna un diccionario con la interseccion
+    '''
+
+    L = L1+L2
+    
+    I = I1+I2
+
+    lista_intersection = [i for i in L2 if i in L1]
+
+    in_dict = {lista_intersection[i] : i for i in range(len(lista_intersection))}
+
+    full_rep = []
+
+    for i in range(len(L)):
+
+        if L[i] in lista_intersection:
+
+            full_rep.append('%s%s'%(I[i],L[i]))
+
+    return in_dict, full_rep
+
+def construct(elem,dim,n):
+    
+    '''
+    It builds a nested list filled with elem on every item. 
+    It returns an object with shape (dim,dim,dim,...,dim) of n entries.
+    elem must be a string and you can recover each elem by using result[i][j][k] with i,j,k integers < dim
+    '''
+    
+    string = ('%s,'%elem)*dim
+
+    string = '['+string[:-1]+'],'
+
+    for k in range(n-1):
+
+        string = '['+(string*dim)[:-1]+'],' 
+    
+    return eval(string[:-1])
+
+def ordenar(n):
+
+    '''
+    Returns a list with all the possible combinations of indexes for a tensor of n indexes [['_','_'],['^','_'],['_','^'],['^','^']]
+    '''
+
+    return [','.join(i) for i in product(['_','^'],repeat = n)]
+
+
+class gError(Exception):
+
+    pass
+
+def compare(n,string):
+
+    '''
+    Returns de index corresponding to the element in the list of all the combination of indices that mathces string
+    '''
+
+    if n == 0:
+
+        return None
+
+    lista = ordenar(n)
+
+    if string not in lista:
+
+        raise ValueError('Bad index definition') # Verificar que se levante el error correcto
+
+    for i in range(len(lista)):
+
+        if lista[i] == string:
+
+            return i # esto es un numero
+
+        else:
+            pass
+
+
+def bajarindice(tensor,i,kstring,kstring2):
+
+    # i: primera posicion que tiene un indice arriba ej: en un string de indices '_,^,^' -> i = 1 (contando desde 0)
+
+    # kstring: string original de los indices tensor ej: '_,^,^'
+
+    # kstring2: string objetivo (con el indice i abajo) de los indices del tencor ej: '_,_,^'
+
+    index = compare(tensor.n,kstring)
+
+    index2 = compare(tensor.n,kstring2)
+
+    dim = config.dim
+
+    greek = config.greek
+
+    g = config.g.tensor
+
+    NAME = tensor.name
+
+    if NAME in config.default_tensors:
+
+        NAME = config.default_tensors[NAME]
+
+    #---
+
+    iterstring = ''
+
+    greek_desc = ''
+
+    count2 = 1
+
+    for count in range(tensor.n):
+
+        if count == i:
+
+            iterstring += '[j]'
+
+        else:
+
+            iterstring += '[p[%d]]'%count2
+
+            count2 += 1
+
+    iterstring2 = ''
+
+    for count in range(tensor.n):
+
+        greek_desc += '{%s%s}'%(kstring2.split(',')[count],greek[count])
+
+        iterstring2 += '[p[%d]]'%count
+
+    #---
+
+    description =  '%s Tensor $%s%s$'%(tensor.name,NAME,greek_desc)
+
+    for p in tqdm_notebook(product(range(dim),repeat=tensor.n),total=dim**tensor.n,desc= description):
+
+        temporal = 0
+
+        for j in range(dim):
+
+            bla2 = 'g[0][p[0]][j]*tensor.tensor[index]%s'%iterstring
+
+            temporal += eval(bla2)
+
+        if config.ord_status == True:
+
+            bla = 'tensor.tensor[index2]%s = tensor_series(temporal)'%iterstring2 
+
+        else:
+
+            bla = 'tensor.tensor[index2]%s = temporal'%iterstring2       # Esto asigna a los indices que queremos llegar
+
+        exec(bla,globals(),locals())
+
+    tensor.indexes[index2] = True
+
+    # hasta aqui todo okidoki uwu
+
+    # ESTA FUNCION SE TENDRA QUE LLAMAR CUANTAS VECES SEA NECESARIA HASTA LLEGAR A TENER TODO ABAJO _ _ _
+
+    # REVISAR EL RESULTADO DE LA PRIMERA BAJADA DE INDICES COMPARAR CON GRTENSOR
+
+
+
+def subirindice(tensor,kstring):
+
+    # Recibe:
+
+    # 1) Nombre de la variable de clase Tensor al cual queremos subir los indices
+
+    # 2) string de la forma '_,^,_'
+
+    index = compare(tensor.n,kstring)
+
+    klista = kstring.split(',') # ['_','^','_']
+
+    NAME = tensor.name
+
+    dim = config.dim
+
+    greek = config.greek
+
+    g = config.g.tensor
+
+    if NAME in config.default_tensors:
+
+        NAME = config.default_tensors[NAME]
+
+    for i in range(len(klista)):
+
+        klista2 = list(klista)
+
+        if klista[i] == '_':
+
+            klista2[i] = '^'
+
+            kstring2 = ','.join(klista2)
+
+            index2 = compare(tensor.n,kstring2) # numero correspondiente a '^,^' o '^,_' del tensor
+
+            if tensor.indexes[index2] == True: # si ya esta calculado no hace nada
+
+                pass
+
+            else:
+
+                bla = ''
+
+                iterstring = ''
+
+                iterstring2 = ''
+
+                greek_desc = ''
+
+                cosa2 = 1
+
+                for count in range(tensor.n):
+
+                    greek_desc += '{%s%s}'%(klista2[count],greek[count])
+
+                    iterstring2 += '[p[%d]]'%count
+
+                    if count == i:
+
+                        iterstring += '[j]'
+
+                    else:
+
+                        iterstring += '[p[%d]]'%cosa2
+
+                        cosa2 += 1
+
+                description =  '%s Tensor $%s%s$'%(tensor.name,NAME,greek_desc)
+
+                #---
+
+                for p in tqdm_notebook(product(range(dim),repeat=tensor.n),total=dim**tensor.n,desc= description):
+
+                    temporal = 0
+
+                    for j in range(dim):
+
+                        bla2 = 'g[3][p[0]][j]*tensor.tensor[index]%s'%iterstring
+
+                        temporal += eval(bla2)
+
+                    if config.ord_status == True:
+
+                        bla = 'tensor.tensor[index2]%s = tensor_series(temporal)'%iterstring2 
+
+                    else:
+
+                        bla = 'tensor.tensor[index2]%s = temporal'%iterstring2      # Esto asigna a los indices que queremos llegar
+
+                    exec(bla,globals(),locals())
+
+                    tensor.indexes[index2] = True
+
+            subirindice(tensor,kstring2)
+
+def createfirstindex(tensor,kstring):
+
+    # kstring: string original de los indices ej: '^,_,_' ...
+    # tensor: tensor de la clase Tensor
+
+    N = tensor.n # Number of index
+
+    objetivo = tensor.orden[0].split(',') # ['_','_','_']
+
+    lista = kstring.split(',')  # ['^','_','_']
+
+    for i in range(len(lista)):
+
+        if lista[i] != '_':
+
+            lista[i] = '_'
+
+            kstring_new = ','.join(lista)
+
+            bajarindice(tensor,i,kstring,kstring_new)
+
+            kstring = kstring_new
+
+# class Tdata:
+
+#     def __init__(self,name,str_index,elements):
+
+#         self.name = name
+
+#         self.index = # 
+
+
+class Tensor:
+
+    # CREATE A TENSOR WITH A name, n: NUMBER OF INDEXES AND tensor: values of the tensor with coordinates given by the index
+
+    def __init__(self,name,n):
+
+        # NAME
+
+        dim = config.dim
+
+        try:
+
+            if dim == 0:
+
+                raise ValueError
+
+            if name == 'g':
+
+                if config.g == True:
+
+                    while True:
+
+                        answer = input('Warning g is already defined as the metric tensor. Are you sure that you want to overwrite it?\nyes/no?')
+
+                        if answer == 'yes' or answer == 'y' or answer == 'Yes':
+
+                            print('g has been overwritten')
+
+                            break
+
+                        if answer == 'no' or answer == 'n' or answer == 'No':
+
+                            raise gError
+
+                        else:
+
+                            print('Please try again.\n')
+
+            self.name = name
+
+            #NUMBER OF INDEX
+
+            self.n = n
+
+            #ORDEN DE LOS INDICES up Y down
+
+            self.orden = ordenar(n)
+
+            self.indexes = np.full((2**n), False)
+
+            if n != 0:
+
+                string = 'se.sympify(np.nan),'*dim
+
+                string = '['+string[:-1]+'],'
+
+                for k in range(n-1):
+
+                    string = '['+(string*dim)[:-1]+'],'  
+
+                # if n == 1:
+
+                #     string = string[:-1] 
+
+                string = 'self.tensor = [' + (string*(2**n))[:-1]+']'
+
+                exec(string)# primer casillero corresponde al indice de la combinacion de indices (^,_,_,^,_), son 2**n combinaciones, los demas son primer indice, segundo indice, tercer indice, .... del tensor cada uno de ellos va desde 0 a dim, donde hay n dimnesiones
+
+                #----
+
+                string = 'se.sympify(np.nan),'*(dim-1)
+
+                string = '['+string[:-1]+'],'
+
+                for k in range(n-1):
+
+                    string = '['+(string*(dim-1))[:-1]+'],'  
+
+                # if n == 1:
+
+                #     string = string[:-1] 
+
+                string = 'self.tensor_sp = [' + (string*(2**n))[:-1]+']'
+
+                exec(string)# primer casillero corresponde al indice de la combinacion de indices (^,_,_,^,_), son 2**n combinaciones, los demas son primer indice, segundo indice, tercer indice, .... del tensor cada uno de ellos va desde 0 a dim, donde hay n dimnesiones
+
+            else: # Caso de un escalar. HAY Q AGREGAR UNA EXCEPCION AQUI
+
+                self.tensor = 0
+
+        except ValueError:
+
+            print('dimension is undefined')
+
+        except gError:
+
+            print('Cannot use g as tensor name')
+
+    def __repr__(self):
+
+        return '%s tensor defined'%self.name
+
+    def __str__(self):
+
+        if self.n <=2:
+
+            self.display()
+
+            string = ''
+
+        else:
+
+            string = 'Too many tensor indexes. Please use the display method.'
+        
+        return string
+
+    def __call__(self,str_index):
+
+        '''
+        Solo acepta a lo mas la contraccion de 1 solo indice. Hay que incluir esto
+        en el examine de este call
+
+        Funcionando para space only
+        '''
+
+        syntax(str_index,self.n)
+
+        if config.space_time == True:
+
+            dim = config.dim
+
+            ten_call = 'tensor'
+
+        else:
+
+            dim = config.dim - 1
+
+            ten_call = 'tensor_sp'
+
+        lista = str_index.split(',')
+
+        updn = [symbol[0] for symbol in lista]
+
+        coord = [symbol[1:] for symbol in lista]
+        
+        Nindex = compare(len(updn),(',').join(updn))
+
+        repeated_coord = set([x for x in lista if coord.count(x[1:]) > 1])
+
+        non_repeated_coord = set([x for x in lista if coord.count(x[1:]) == 1])
+
+        if len(repeated_coord) == 0:
+
+            elements = eval('self.%s[Nindex]'%ten_call,locals(),globals())
+
+            return Tdata(str_index,elements)
+
+        else: # Repeated Index
+
+            new_string = ''
+
+            old_string = ''
+
+            return_string = ''
+
+            new_rank = len(lista) - 2
+
+            if new_rank != 0:
+
+                temp = construct(0,dim,new_rank)
+
+            k = 0
+            rep_count = 0
+            variable = ''
+
+            for var in lista:
+
+                if coord.count(var[1:]) == 2 and rep_count != 2:
+
+                    if variable == var[1:] or variable == '':
+
+                        old_string += '[q]'
+
+                        rep_count += 1
+
+                        variable = var[1:]
+
+                    else:# coord.count(var[1:]) == 1 :
+
+                        old_string += '[p[%d]]'%k
+
+                        return_string += '%s,'%var
+
+                        k += 1
+
+
+                else:# coord.count(var[1:]) == 1 :
+
+                    old_string += '[p[%d]]'%k
+
+                    return_string += '%s,'%var
+
+                    k += 1
+
+            return_string = return_string[:-1]
+
+            for k in range(new_rank):
+
+                new_string += '[p[%d]]'%k
+
+
+            if new_rank != 0:
+
+                for p in product(range(dim), repeat = new_rank):
+
+                    var = 0
+
+                    for q in range(dim):
+
+                        var += eval('self.%s[Nindex]%s'%(ten_call,old_string),locals(),globals())
+
+                        exec('temp%s = var'%new_string,locals(),globals())
+
+                data_result = Tdata(return_string,temp)
+
+                TEMP = Tensor('TEMP',new_rank)
+
+                TEMP.assign(data_result,return_string,printing=False)
+
+                return TEMP(return_string)
+
+            else:
+                
+                var = 0
+
+                for q in range(dim):
+
+                    var += eval('self.%s[Nindex]%s'%(ten_call,old_string),locals(),globals())
+
+                return var 
+
+    def space(self):
+        
+        '''
+        Retorna solo las componentes espaciales del tensor completo
+        
+        Generalizar para todos los indices. El [1:,1:,....,1:]
+        
+        
+        '''
+        
+        for k in range(2**self.n):
+            
+            index = k
+        
+            iterstring = ''
+            iterstring2 = ''
+
+            for i in range(self.n):
+
+                iterstring += '[p[%d]]'%i
+                iterstring2 += '[p[%d]+1]'%i
+
+            for p in product(range(config.dim-1),repeat=self.n):
+
+                exec_str = 'self.tensor_sp[%d]%s = self.tensor[%d]%s'%(index,iterstring,index,iterstring2)
+
+                exec(exec_str,locals(),globals())
+        
+    def indexcomb(self, kstring):
+
+        # Recibe:
+
+        # 1) Objeto de clase Tensor al cual queremos subir los indices
+
+        # 2) string de la forma '_,^,_'
+
+        createfirstindex(self,kstring) # oki
+
+        lista = []
+
+        for i in range(self.n):
+
+            lista.append('_,')
+
+        string = ''.join(lista)
+
+        string = string[:-1] # '_,_,_'
+
+        subirindice(self,string) # aqui vamoh x3
+
+        NAME = self.name 
+
+        if NAME in config.default_tensors:
+
+            NAME = config.default_tensors[NAME]
+
+        display_string = 'All other indexes of %s Tensor $%s$  already calculated.'%(self.name,NAME)
+
+        display(Latex(display_string))
+
+    def assign(self, elements, index=None, All = False,printing = True):
+
+        '''
+        # Revisar el nombre de printing. Puede ser Verbose
+
+        It assigns the elements to the tensor on the corresponding index. 
+        If All = True, then it computes the thensor with the rest of the indexes combinations.
+
+        index = '^,^,_'
+        elements = [[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]]]
+
+        NOTE: the argument "elements" has to be shaped like the example so the indexation goes like elements[i][j][k]
+
+        '''
+        dim = config.dim
+
+        if isinstance(elements,Tdata):
+
+            new_lista = index.split(',')
+
+            old_lista = elements.full_index.split(',')
+
+            rank = len(old_lista)
+
+            New_data = construct(0,dim,rank)
+
+            new_index = ''
+            old_index = ''
+
+            for i in range(rank):
+
+                new_index += '[p[%d]]'%i
+
+            for j in range(rank):
+
+                i = 0
+
+                while old_lista[j][1:] != new_lista[i][1:]:
+
+                    i += 1
+
+                old_index += '[p[%d]]'%i
+
+            for p in product(range(dim),repeat=rank):
+
+                string = 'New_data%s = elements.elements%s'%(new_index,old_index)
+
+                exec(string,locals(),globals())
+
+            new_updn = (',').join(x[0] for x in new_lista)
+
+            self.assign(New_data,new_updn,printing=False)
+
+        elif index == None:
+
+            print(ERROR)
+
+        else:
+
+            dim = config.dim
+
+            k = compare(self.n,index) # numero correspondiente a '^,^' o '_,^', etc
+
+
+            for p in product(range(dim),repeat=self.n):
+                            
+                string = 'self.tensor[%s]'%k 
+                string2 = ''
+
+                for l in p:
+                        
+                    string2 += '[%s]'%l
+
+                string = '%s%s = se.sympify(elements%s)'%(string,string2,string2)
+
+                try: 
+
+                    exec(string,locals(),globals())
+
+                except AttributeError:
+
+                    pass
+            
+            self.indexes[k] = True
+
+            if printing == True:
+        
+                print('Elements assigned correctly to the components %s'%index)
+
+            if All == True:
+
+                self.indexcomb(index)
+
+        self.space()
+
+    def simplify(self,index=None):
+
+        '''
+        Simplify the Tensor. If index is given, it will simplify only the given index combination ('^,_,_')
+        '''
+
+        dim = config.dim
+
+        if (index not in self.orden and index is not None) or index == '':
+
+            raise ValueError('Bad index definition')
+        
+
+        if index is None:
+
+            listax = list(range(2**self.n))
+
+            if self.n == 0:
+
+
+                self.tensor = self.tensor.simplify()  
+
+        else:
+
+            listax = [compare(self.n,index)]
+        
+        for k in listax: 
+            
+            if self.indexes[k] == True:
+
+                if self.name == 'Riemann' and k == 0: 
+
+                    Riemann_list = construct('False',dim,4)
+
+                    for p in product(range(dim),repeat=self.n):
+
+                        counta = p[0]
+                        countb = p[1]
+                        countc = p[2]
+                        countd = p[3]
+
+                        if Riemann_list[counta][countb][countc][countd] == False:
+                            
+                            string = 'self.tensor[%s]'%k 
+
+                            for l in p:
+                                    
+                                string += '[%s]'%l
+
+                            string = string + '=' + string + '.simplify()'
+
+                            exec(string,locals(),globals())
+
+                            print('Fully Simplified:  ',counta,countb,countc,countd)
+
+                            # Skew Symmetry
+
+                            if Riemann_list[counta][countb][countd][countc] == False:
+
+                                self.tensor[0][counta][countb][countd][countc] = -self.tensor[0][counta][countb][countc][countd]
+
+                                Riemann_list[counta][countb][countd][countc] = True
+
+                            if Riemann_list[countb][counta][countc][countd] == False:
+
+                                self.tensor[0][countb][counta][countc][countd] = -self.tensor[0][counta][countb][countc][countd]
+
+                                Riemann_list[countb][counta][countc][countd] = True
+
+                            # Interchange Symmetry
+
+                            if Riemann_list[countc][countd][counta][countb] == False:
+
+                                self.tensor[0][countc][countd][counta][countb] = self.tensor[0][counta][countb][countc][countd]
+
+                                Riemann_list[countc][countd][counta][countb] = True
+
+                            # Bianchi Identity (First)
+
+                            if Riemann_list[counta][countc][countd][countb] == False and Riemann_list[counta][countd][countb][countc] == True:
+
+                                self.tensor[0][counta][countc][countd][countb] = -self.tensor[0][counta][countb][countc][countd] - self.tensor[0][counta][countd][countb][countc]
+
+                                Riemann_list[counta][countc][countd][countb] = True
+
+                            if Riemann_list[counta][countd][countb][countc] == False and Riemann_list[counta][countc][countd][countb] == True:
+
+                                self.tensor[0][counta][countd][countb][countc] = -self.tensor[0][counta][countb][countc][countd] - self.tensor[0][counta][countc][countd][countb]
+
+                                Riemann_list[counta][countd][countb][countc] = True
+
+
+                            Riemann_list[counta][countb][countc][countd] = True
+                    
+                else:
+                
+
+                    for p in product(range(dim),repeat=self.n):
+                                
+                        string = 'self.tensor[%s]'%k 
+
+                        for l in p:
+                                
+                            string += '[%s]'%l
+
+                        string = string + '=' + string + '.simplify()'
+
+                        #print(string)
+
+                        exec(string,locals(),globals())
+
+        self.space()
+
+    def factor(self,index=None):
+
+        '''
+        Simplify the Tensor. If index is given, it will simplify only the given index combination ('^,_,_')
+        '''
+
+        dim = config.dim
+
+        if (index not in self.orden and index is not None) or index == '':
+
+            raise ValueError('Bad index definition')
+        
+
+        if index is None:
+
+            listax = list(range(2**self.n))
+
+            if self.n == 0:
+
+
+                self.tensor = factor(self.tensor)
+
+        else:
+
+            listax = [compare(self.n,index)]
+        
+        for k in listax: 
+            
+            if self.indexes[k] == True:
+
+                if self.name == 'Riemann' and k == 0: 
+
+                    Riemann_list = construct('False',dim,4)
+
+                    for p in product(range(dim),repeat=self.n):
+
+                        counta = p[0]
+                        countb = p[1]
+                        countc = p[2]
+                        countd = p[3]
+
+                        if Riemann_list[counta][countb][countc][countd] == False:
+                            
+                            string = 'self.tensor[%s]'%k 
+
+                            for l in p:
+                                    
+                                string += '[%s]'%l
+
+                            string = string + '= se.sympify(factor(%s))'%string
+
+                            exec(string,locals(),globals())
+
+                            print('Simplified:  ',counta,countb,countc,countd)
+
+                            # Skew Symmetry
+
+                            if Riemann_list[counta][countb][countd][countc] == False:
+
+                                self.tensor[0][counta][countb][countd][countc] = -self.tensor[0][counta][countb][countc][countd]
+
+                                Riemann_list[counta][countb][countd][countc] = True
+
+                            if Riemann_list[countb][counta][countc][countd] == False:
+
+                                self.tensor[0][countb][counta][countc][countd] = -self.tensor[0][counta][countb][countc][countd]
+
+                                Riemann_list[countb][counta][countc][countd] = True
+
+                            # Interchange Symmetry
+
+                            if Riemann_list[countc][countd][counta][countb] == False:
+
+                                self.tensor[0][countc][countd][counta][countb] = self.tensor[0][counta][countb][countc][countd]
+
+                                Riemann_list[countc][countd][counta][countb] = True
+
+                            # Bianchi Identity (First)
+
+                            if Riemann_list[counta][countc][countd][countb] == False and Riemann_list[counta][countd][countb][countc] == True:
+
+                                self.tensor[0][counta][countc][countd][countb] = -self.tensor[0][counta][countb][countc][countd] - self.tensor[0][counta][countd][countb][countc]
+
+                                Riemann_list[counta][countc][countd][countb] = True
+
+                            if Riemann_list[counta][countd][countb][countc] == False and Riemann_list[counta][countc][countd][countb] == True:
+
+                                self.tensor[0][counta][countd][countb][countc] = -self.tensor[0][counta][countb][countc][countd] - self.tensor[0][counta][countc][countd][countb]
+
+                                Riemann_list[counta][countd][countb][countc] = True
+
+
+                            Riemann_list[counta][countb][countc][countd] = True
+                    
+                else:
+                
+
+                    for p in product(range(dim),repeat=self.n):
+                                
+                        string = 'self.tensor[%s]'%k 
+
+                        for l in p:
+                                
+                            string += '[%s]'%l
+
+                        string = string + '= se.sympify(factor(%s))'%string
+
+                        #print(string)
+
+                        exec(string,locals(),globals())
+
+        self.space()
+
+    def display(self, index=None, lista = None):
+        
+        if index is None:
+
+            index = self.orden[0]
+
+        if lista == None:
+
+            if self.n <= 2:
+
+                lista = False
+            
+            else:
+
+                lista = True
+
+        dim = config.dim
+        
+        k = 0
+        for i in self.orden:
+            if i == index:
+                break 
+            k += 1
+
+        se.init_printing()
+
+        if k == len(self.orden):
+
+            raise ValueError('Bad index definition')
+
+        if index == '' and self.n == 0: # Scalar
+
+            display(self.tensor)
+        
+        
+        elif lista == False:
+
+            # if k == len(self.orden):
+
+            #     raise ValueError('Bad index definition')
+
+            if self.n == 1 and index == '^':
+
+                display(Array(self.tensor[k]).reshape(dim,1))
+
+            else:
+            
+                display(Array(self.tensor[k]))
+            
+        else:
+
+            count = 0
+                
+            for p in product(range(dim),repeat=self.n):
+                    
+                string = 'valor = self.tensor[%s]'%k
+                    
+                for l in p:
+                        
+                    string += '[%s]'%l
+
+                exec(string,locals(),globals())
+                
+                if self.name in config.default_tensors:
+                    
+                    str_name = config.default_tensors[self.name]
+
+                else:
+
+                    str_name = self.name
+                
+                string = "{%s}"%str_name
+                    
+                i = 0
+                    
+                for l in index.split(','):
+                        
+                    string = '%s{}%s{%s}'%(string,l,str(p[i]))
+
+                    i += 1
+                    
+                if valor != 0:
+                        
+                    string += " = %s"% (se.latex(valor))
+                    
+                    display(Math(string))
+
+                    count += 1
+
+            if count == 0:
+
+                print('All components are zero')
+
+# class LeviCivita(Tensor):
+
+#     def __init__(self):
+
+#         Tensor.__init__(self)
+
+#     def __call__(self):
+
+
+
+class Tdata:
+
+    def __init__(self,str_index,elements):
+
+        '''
+        elements es lo mismo que self.tensor
+        
+        '''
+        
+        self.full_index = str_index # '^i,_j' 
+
+        self.full_list = self.full_index.split(',')
+        
+        self.updn = [symbol[0] for symbol in self.full_list]
+            
+        self.index_names = [symbol[1:] for symbol in self.full_list]
+            
+        self.elements = elements # T
+
+    def auto_sum(self):
+
+        '''
+        recibe tdata
+
+        se fija en el index_names y busca los indices repetidos. Suma sobre si mismo una sola vez.
+        Un solo indice repetido
+
+        '''
+
+        exec(reload_all('config'),locals(),globals())
+
+        if config.space_time == True:
+
+            dim = config.dim
+
+        else:
+
+            dim = config.dim - 1
+
+        # AGREGAR UN EXAMINE PARA AUTO_SUM
+
+        lista = self.index_names
+
+        rep = False
+
+        #print('en el auto_sum',self.full_list)
+
+        for i,name_i in enumerate(lista):
+
+            for j,name_j in enumerate(lista):
+
+                if name_i == name_j and i != j:
+
+                    pos_i,pos_j = i,j
+
+                    rep = True
+                    #print(pos_i,pos_j,name_i,name_j)
+
+                    break
+
+        self_index = ''
+
+        return_index = ''
+
+        full_index = ''
+
+        k = 0
+
+        if rep == True: # Si encuentra un indice repetido
+
+            for i in range(len(self.updn)):
+
+                if i == pos_i or i == pos_j:
+                
+                    self_index += '[q]'
+                
+                else:
+                    
+                    self_index += '[p[%d]]'%k
+
+                    return_index += '[p[%d]]'%k
+
+                    full_index += '%s,'%self.full_list[i]
+
+                    k += 1
+
+            full_index = full_index[:-1]
+
+            return_tensor = construct(0,dim,len(self.updn)-2)
+
+            for p in product(range(dim),repeat=len(self.updn)-2): # for para ir asignarlo
+
+                temp = 0
+
+                for q in range(dim):
+
+                    string = 'self.elements%s'%(self_index)
+
+                    temp += eval(string,locals(),globals())
+                
+                string = 'return_tensor%s = temp'%return_index
+
+                exec(string,locals(),globals())
+                
+            return Tdata(full_index,return_tensor)   #se retorna como el self
+
+        else:
+
+            return self
+
+
+
+        
+    def __mul__(self,other):
+
+        exec(reload_all('config'),locals(),globals())
+
+        if config.space_time == True:
+
+            dim = config.dim
+
+        else:
+
+            dim = config.dim - 1
+        
+        if isinstance(other,Tdata):
+        
+            rep_index, rep_list = in_intersection(self.index_names,self.updn,other.index_names,other.updn)
+
+            mul_examine(rep_list)
+
+            new_index, return_string = out_intersection(self.index_names,self.updn,other.index_names,other.updn)
+
+            new_rank = len(new_index)
+
+            if new_rank != 0:
+                
+                return_tensor = construct(0,dim,new_rank)
+
+            if len(rep_index) != 0: # Si hay indices repetidos
+
+                new_iterstr = ''
+
+                for i in range(new_rank):
+
+                    new_iterstr += '[p[%d]]'%i
+
+                self_iterstr = ''
+
+                for i, name in enumerate(self.index_names):
+
+                    if name in rep_index:
+
+                        self_iterstr += '[q[%d]]'%rep_index[name]
+
+                    else:
+
+                        self_iterstr += '[p[%d]]'%new_index[name]
+
+                other_iterstr = ''
+
+                for i, name in enumerate(other.index_names):
+
+                    if name in rep_index:
+
+                        other_iterstr += '[q[%d]]'%rep_index[name]
+
+                    else:
+
+                        other_iterstr += '[p[%d]]'%new_index[name]
+
+                #print('%s\t;\t%s'%(self_iterstr,other_iterstr))
+
+                if new_rank != 0:
+
+                    for p in product(range(dim),repeat=new_rank): # for para ir asignarlo
+
+                        temp = 0
+
+                        for q in product(range(dim), repeat = len(rep_index)):
+
+                            string = 'self.elements%s*other.elements%s'%(self_iterstr,other_iterstr)
+
+                            temp += eval(string,locals(),globals())
+
+                        string = 'return_tensor%s = temp'%new_iterstr
+
+                        exec(string,locals(),globals())
+                
+                else:
+
+                    temp = 0
+
+                    for q in product(range(dim), repeat = len(rep_index)):
+
+                        string = 'self.elements%s*other.elements%s'%(self_iterstr,other_iterstr)
+
+                        temp += eval(string,locals(),globals())
+
+                    return temp
+
+            else:
+
+                return_string = '%s,%s'%(self.full_index,other.full_index)
+
+                new_iterstr = ''
+
+                for i in range(new_rank):
+
+                    new_iterstr += '[p[%d]]'%i
+
+                self_iterstr = ''
+
+                k = 0
+
+                while k < len(self.updn):
+
+                    self_iterstr += '[p[%d]]'%k
+
+                    k += 1
+
+                other_iterstr = ''
+
+                while k < len(self.updn)+len(other.updn):
+
+                    other_iterstr += '[p[%d]]'%k
+                    
+                    k += 1
+
+                for p in product(range(dim),repeat=new_rank): # for para ir asignarlo
+
+                    temp = 0
+                    
+                    string = 'self.elements%s*other.elements%s'%(self_iterstr,other_iterstr)
+
+                    temp = eval(string,locals(),globals())
+
+                    string = 'return_tensor%s = temp'%new_iterstr
+
+                    exec(string,locals(),globals())
+
+            return  Tdata(return_string,return_tensor)            
+
+        else: # Not Tdata * Tdata
+
+            same_rank = len(self.updn)
+            
+            return_tensor = construct(0,dim,same_rank)
+
+            index = ''
+
+            for i in range(same_rank):
+
+                index += '[p[%d]]'%i
+
+            for p in product(range(dim),repeat = same_rank):
+
+                string = 'return_tensor%s = self.elements%s*other'%(index,index)
+
+                exec(string,locals(),globals())
+
+            return Tdata(self.full_index,return_tensor)
+        
+    def __rmul__(self,other):
+
+        exec(reload_all('config'),locals(),globals())
+
+        if config.space_time == True:
+
+            dim = config.dim
+
+        else:
+
+            dim = config.dim - 1
+
+        same_rank = len(self.updn)
+            
+        return_tensor = construct(0,dim,same_rank)
+
+        index = ''
+
+        for i in range(same_rank):
+
+            index += '[p[%d]]'%i
+
+        for p in product(range(dim),repeat = same_rank):
+
+            string = 'return_tensor%s = self.elements%s*other'%(index,index)
+
+            exec(string,locals(),globals())
+
+        return Tdata(self.full_index,return_tensor)
+
+    def __add__(self,other):
+
+        exec(reload_all('config'),locals(),globals())
+
+        if config.space_time == True:
+
+            dim = config.dim
+
+        else:
+
+            dim = config.dim - 1
+
+        add_examine(self.full_index,other.full_index)
+
+        self_lista = self.full_index.split(',')
+        other_lista = other.full_index.split(',')
+
+        if set(self_lista) == set(other_lista): 
+
+            self_index = ''
+            other_index = ''
+
+            for i in range(len(self.updn)):
+
+                self_index += '[p[%d]]'%i
+
+            for j in range(len(other.updn)):
+
+                i = 0
+
+                while other_lista[j][1:] != self_lista[i][1:]:
+
+                    i += 1
+
+                other_index += '[p[%d]]'%i
+
+            return_tensor = construct(0,dim,len(self.updn))
+
+            for p in product(range(dim),repeat=len(self.updn)): # for para ir asignarlo
+
+                temp = 0
+
+                string = 'self.elements%s+other.elements%s'%(self_index,other_index)
+
+                temp = eval(string,locals(),globals())
+
+                string = 'return_tensor%s = temp'%self_index   # se ordena como el self
+
+                exec(string,locals(),globals())
+            
+            return Tdata(self.full_index,return_tensor)   #se retorna como el self
+
+        else:
+
+            print('ERROR')
+
+    def __sub__(self,other):
+
+        exec(reload_all('config'),locals(),globals())
+
+        if config.space_time == True:
+
+            dim = config.dim
+
+        else:
+
+            dim = config.dim - 1
+
+        self_lista = self.full_index.split(',')
+        other_lista = other.full_index.split(',')
+
+        if set(self_lista) == set(other_lista): 
+
+            self_index = ''
+            other_index = ''
+
+            for i in range(len(self.updn)):
+
+                self_index += '[p[%d]]'%i
+
+            for j in range(len(other.updn)):
+
+                i = 0
+
+                while other_lista[j][1:] != self_lista[i][1:]:
+
+                    i += 1
+
+                other_index += '[p[%d]]'%i
+
+            return_tensor = construct(0,dim,len(self.updn))
+
+            for p in product(range(dim),repeat=len(self.updn)): # for para ir asignarlo
+
+                temp = 0
+
+                string = 'self.elements%s - other.elements%s'%(self_index,other_index)
+
+                temp = eval(string,locals(),globals())
+
+                string = 'return_tensor%s = temp'%self_index   # se ordena como el self
+
+                exec(string,locals(),globals())
+            
+            return Tdata(self.full_index,return_tensor)   #se retorna como el self
+
+        else:
+
+            print('error')
+
+    def factor(self):
+
+        '''
+        Simplify the Tensor. If index is given, it will simplify only the given index combination ('^,_,_')
+        '''
+
+        self.elements = se.sympify(factor(self.elements))
+
+    def simplify(self):
+
+        '''
+        Simplify the Tensor. If index is given, it will simplify only the given index combination ('^,_,_')
+        '''
+
+        self.elements = se.sympify(simplify(np.array(self.elements)).tolist())
+
+def D(a,b):
+
+    der_examine(b)
+
+    if config.space_time == True:
+
+        dim = config.dim
+
+        coords = config.coords
+
+    else:
+
+        dim = config.dim - 1
+
+        coords = config.coords_sp
+    
+    if isinstance(a,Tdata): #si es un Tdata
+        
+        old_rank = len(a.updn)
+        
+        if b[0] == '_':  # si es _
+
+            #print('entro al _')
+
+            if b[1:] in a.index_names:  #si se deriva con respecto a un indice repetido
+                
+                new_rank = old_rank - 1
+            
+                string_return = ''
+
+                for i in range(len(a.index_names)):
+
+                    if a.index_names[i] != b[1:]:
+
+                        string_return += a.updn[i] + a.index_names[i] + ','
+
+                string_return = string_return[:-1]
+
+
+                temp = construct(0,dim,new_rank)
+
+                new_index = ''
+                
+                k = 0
+
+                while k < new_rank:
+
+                    new_index +='[p[%d]]'%k
+
+                    k += 1
+
+                old_index = ''
+
+                k = 0
+
+                j = 0
+
+                while k < old_rank:
+
+                    if a.index_names[k] == b[1:]:
+
+                        der_index ='q'
+
+                        old_index +='[q]'
+
+                    else:
+
+                        old_index +='[p[%d]]'%j
+
+                        j += 1
+                    
+                    k += 1
+                
+                k = 0
+
+                exec(reload_all('config'),locals(),globals())
+
+                for p in product(range(dim),repeat = new_rank): 
+
+                    var = 0
+                    
+                    for q in range(dim):
+    
+                        string = 'se.diff(a.elements%s,coords[%s])'%(old_index,der_index)
+
+                        var += eval(string,locals(),globals())
+
+                    string = 'temp%s = var'%new_index
+
+                    exec(string,locals(),globals())
+                
+                return Tdata(string_return, temp)
+                
+            else:                   #si se deriva con respecto a un indice no repetido 
+
+                new_rank = old_rank + 1
+            
+                string_return = a.full_index +','+ b
+                
+                temp = construct(0,dim,new_rank)
+                
+                k = 0
+
+                old_index = ''
+
+                while k < old_rank:
+
+                    old_index +='[p[%d]]'%k
+
+                    k += 1
+                
+                k = 0
+                
+                new_index = ''
+                
+                while k < new_rank:
+
+                    new_index +='[p[%d]]'%k
+
+                    k += 1
+
+                exec(reload_all('config'),locals(),globals())
+
+                for p in product(range(dim),repeat = new_rank): 
+    
+                    string = 'temp%s = se.diff(a.elements%s,%s)'%(new_index,old_index,coords[p[-1]])
+
+                    exec(string,locals(),globals())
+                
+                return Tdata(string_return, temp)
+            
+        else:           # si es ^
+
+            #print('entro al ^')
+
+            new_rank = old_rank + 1
+        
+            new_var = 'dummy'
+
+            while new_var in a.index_names:
+
+                new_var += '0'
+
+            new_var = '_' + new_var
+
+            string_return = a.full_index +','+ new_var
+            
+            temp = construct(0,dim,new_rank)
+            
+            k = 0
+
+            old_index = ''
+
+            while k < old_rank:
+
+                old_index +='[p[%d]]'%k
+
+                k += 1
+            
+            k = 0
+            
+            new_index = ''
+            
+            while k < new_rank:
+
+                new_index +='[p[%d]]'%k
+
+                k += 1
+
+            exec(reload_all('config'),locals(),globals())
+
+            for p in product(range(dim),repeat = new_rank): 
+
+                string = 'temp%s = se.diff(a.elements%s,%s)'%(new_index,old_index,coords[p[-1]])
+
+                exec(string,locals(),globals())
+
+            new_var2 = '^' + new_var[1:]
+
+            string_return = a.full_index +','+ new_var
+
+            if b[1:] not in a.index_names:
+
+                g_string = b + ',' + new_var2
+
+                #print(g_string, string_return)
+
+                return config.g(g_string)*Tdata(string_return, temp)
+
+            else:
+
+                new_var = 'dummy'
+
+                while new_var in a.index_names or new_var == new_var2[1:]:
+
+                    new_var += '0'
+
+                new_var = '^' + new_var
+
+                g_string = new_var + ',' + new_var2
+
+                #print(g_string, string_return)
+
+                temp_return = config.g(g_string)*Tdata(string_return, temp)
+
+                temp_return.full_list[0] = '^' + temp_return.full_list[-1][1:]
+
+                string = ','.join(temp_return.full_list)     
+
+                temp_return = Tdata(string,temp_return.elements)
+
+                return temp_return.auto_sum()
+
+    else: # si var es un int o sympy o symengine
+
+        temp = construct(0,dim,1)
+
+        string_return = b
+
+        exec(reload_all('config'),locals(),globals())
+
+        for p in range(dim):
+
+            string = 'temp[%d] = se.diff(a,%s)'%(p,coords[p])
+
+            exec(string,locals(),globals())
+        
+        return Tdata(string_return, temp)
+
+def C(a,b):
+
+    der_examine(b)
+
+    if config.space_time == True:
+
+        dim = config.dim
+
+    else:
+
+        dim = config.dim - 1
+
+    if isinstance(a,Tdata): #si es un Tdata
+
+        if config.christ is None:
+
+            raise(NotImplementedError)
+
+        was_up = False
+        was_rep = False
+
+        if b[0] == '^':  # si es _
+
+            was_up = True
+
+            b = '_' + b[1:]
+
+        if b[1:] in a.index_names:  #si se deriva con respecto a un indice repetido
+
+            rep_symbol = b[1:][:]
+
+            new_symbol = 'dummy'
+            i = 0
+
+            was_symbol = b[1:][:]
+
+            was_rep = True
+
+            while new_symbol in a.index_names or new_symbol == b[1:]:
+
+                new_symbol += '%d'%i
+                i += 1
+
+            b = b[0] + new_symbol[:]
+
+        old_rank = len(a.updn)
+
+        new_rank = old_rank + 1
+    
+        string_return = a.full_index +','+ b  # _i,_j + _k
+
+        temp_full_index = '%s'%a.full_index
+        
+        return_tensor = construct(0,dim,new_rank)
+
+        a_list_index = a.full_index.split(',')
+
+        k = 0
+
+        old_index = ''
+
+        while k < old_rank:
+
+            old_index +='[p[%d]]'%k
+
+            k += 1
+        
+        k = 0
+        
+        new_index = ''
+        
+        while k < new_rank:
+
+            new_index +='[p[%d]]'%k
+
+            k += 1
+
+        dummy = 'dummy'
+
+        i = 0
+
+        while dummy in a.index_names or dummy == b[1:]:
+
+            dummy += '%d'%i
+            i += 1
+
+        exec(reload_all('config'),locals(),globals())
+            
+        var = D(a,b)
+
+        for num, ind in enumerate(a_list_index):  # ['^x','_y']
+
+            tdata_str = ''
+
+            if ind[0] == '^':
+        
+                chrstr = '^%s,_%s,_%s'%(ind[1:],dummy,b[1:])
+
+                for l in range(len(a_list_index)):
+
+                    if l == num:
+
+                        tdata_str += '^%s,'%dummy
+                    else:
+                        tdata_str += '%s,'%a_list_index[l]
+
+                tdata_str = tdata_str[:-1]
+
+                TEMP_tdata = Tdata(tdata_str,a.elements)
+
+                var = var + config.christ(chrstr)*TEMP_tdata
+
+            elif ind[0] == '_':
+        
+                chrstr = '^%s,_%s,_%s'%(dummy,ind[1:],b[1:])
+
+                for l in range(len(a_list_index)):
+
+                    if l == num:
+
+                        tdata_str += '_%s,'%dummy
+                    else:
+                        tdata_str += '%s,'%a_list_index[l]
+
+                tdata_str = tdata_str[:-1]
+
+                TEMP_tdata = Tdata(tdata_str,a.elements)
+
+                var = var - config.christ(chrstr)*TEMP_tdata
+
+        # si el indice c/r al que se deriva estaba arriba entonces multiplicamos por la metrica inversa
+
+        # hay que revisar si esta dando bien porque hay q constatar el orden de los indices
+
+        # esta hecho CON LA IDEA DE QUE, HAY Q REVISARLO...., LA IDEA ES: QUE SIEMPRE EL INDICE QUE SE HEREDA QUEDA AL FINAL
+        # POR ORDEN, ASI QUE SIEMPRE HAY QUE REEMPLAZAR SOLO EL ULTIMO INDICE
+
+        if was_up == True:  # solo sube el indice NO SE FIJA SI HAY REPETICION
+
+            dummy = 'dummy'
+
+            i = 0
+
+            while dummy in var.index_names:
+
+                dummy += '%d'%i
+                i += 1
+
+            moved_symbol = var.index_names[-1][:]
+            
+            str_temp = var.full_index[:]
+
+            var = var*config.g('^%s,^%s'%(dummy,moved_symbol))
+
+            var = Tdata(str_temp,var.elements)
+
+        if was_rep == True:
+
+            moved_symbol = var.index_names[-1][:]
+
+            str_temp = ''
+
+            for i,name in enumerate(var.index_names):
+
+                if i == len(var.index_names) - 1:
+
+                    str_temp += '^' + var.updn[i][1:] + rep_symbol +','
+
+                else: 
+                    
+                    str_temp += var.updn[i] + var.index_names[i]  +','
+
+            str_temp = str_temp[:-1]
+
+            var = Tdata(str_temp,var.elements)     
+######################### SON MUCHOS CASOS ARRIBA REPETIDOS ABAJO REPETIDOS, ABAJO SIN REPETIR ARRIBA SIN REPETIR
+
+        #print(var.full_index)
+
+        #print('antes d entrar al autosum')
+
+        return var.auto_sum()
+        
+    else: # si var es un int o sympy o symengine
+    
+        return D(a,b)
+
+def create(name,TD):
+
+    '''
+    Ponerla como function de un TDATA entonces hacemos algo como A = TD.save('name')
+    '''
+    
+    rank = len(TD.full_list)
+    
+    T = new_ten(name,rank)
+    
+    T.assign(TD,TD.full_index)
+    
+    T.factor((',').join(TD.updn))
+    
+    return T
+
+def create_tensor(T_name,n):
+    
+    create_temp(name,obj)
+
+    T_object = Tensor(T_name,n)
+
+    return config.create_ten(T_name,T_object)
+
+def tensor_series(element):
+
+    # element is an element with sympy functions i.e. epsilon*cos(x)*y**2 + epsilon**2*sin(x)*exp(y)
+
+    #reload_all('config')
+
+    #-------
+
+    string = 'result = se.sympify(factor(se.series(element, x = config.ord_var, n = config.ord_n)))'#.simplify()'
+
+    exec(string,locals(),globals())
+
+    #str3 = 'result = se.sympify(sp.Poly(result,config.ord_var).as_expr())'
+
+    #exec(str3,locals(),globals())
+
+    return result
