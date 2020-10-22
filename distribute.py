@@ -1,4 +1,4 @@
-import sympy as sp
+#import sympy as sp
 #sp.init_printing(use_latex='mathjax')
 import sys
 import re # TO CUT THE STRINGS

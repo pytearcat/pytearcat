@@ -1,13 +1,17 @@
-from sympy import expand, latex, Matrix, nsimplify, sympify
-from IPython.display import display, Math, Latex
+#from sympy import expand, latex, Matrix, nsimplify, sympify
 import config
-from misc import new_var,new_ten, n_order, reload_all
+from core import *
+from misc import new_var,new_ten, reload_all
 from tensor_class import Tensor, tensor_series
-from itertools import product
+from itertools import product as iterprod
 from config import *
-import symengine as se
+#import symengine as se
+from sympy import sympify as sp_sympify
+from sympy import latex as sp_latex
 
 def create_metric(ds2 = ''):
+
+    print('Inicio de create_metric')
 
     global g
 
@@ -33,13 +37,20 @@ def create_metric(ds2 = ''):
 
             config.G = None
 
-    coords = ','.join([*config.coords.values()])
+    
+
+    #coords = ','.join([*config.coords.values()])
+
+    coords = ','.join(list(map(str,config.coords.values())))
+    print('Antes de metric')
 
     g_matrix,line_element = metric(config.fun, coords, ds2)
 
+    print('Antes del display')
+
     display_ds(g_matrix)
     
-    display(Math(latex(sympify(Matrix(g_matrix)))))  
+    display(Math(sp_latex(sp_sympify(Matrix(g_matrix)))))  
 
     return config.g
 
@@ -50,7 +61,7 @@ def display_ds(gmatrix):
 
     ds = r'ds^2 = '
 
-    for p in product(range(dim),repeat=2):
+    for p in iterprod(range(dim),repeat=2):
     
         i = p[0]
         j = p[1]
@@ -61,11 +72,11 @@ def display_ds(gmatrix):
 
             if i == j:
                 
-                ds += r'%s*d%s^2+'%(latex(sympify(value)),coords[i])
+                ds += r'%s*d%s^2+'%(latex(sp_sympify(value)),coords[i])
 
             elif j > i:
 
-                ds += r'%s*d%s*d%s+'%(latex(sympify(value*2)),coords[i],coords[j])
+                ds += r'%s*d%s*d%s+'%(latex(sp_sympify(value*2)),coords[i],coords[j])
 
     ds = ds[:-1]
 
@@ -130,7 +141,7 @@ def create_metric_matrix(dim, variables_string, ds_input):
 
         # HERE WE CREATE THE DIFFERENTIAL COORDINATES WITH THE INPUT NAMES: e.g. dt,dx,dy,dz
 
-        string = "d%s = se.Symbol('d%s')" % (COORDENADA[i],COORDENADA[i])
+        string = "d%s = Symbol('d%s')" % (COORDENADA[i],COORDENADA[i])
         
         exec(string,locals(),globals())
     
@@ -144,52 +155,44 @@ def create_metric_matrix(dim, variables_string, ds_input):
     
     exec(ds_input,locals(),globals())
     
-    g_matrix=se.zeros(dim, dim)  #g_matrix=(row i, column j)
+    g_matrix=zeros(dim, dim)  #g_matrix=(row i, column j)
 
     c = config.coords
     
-    for p in product(range(dim),repeat=2):
+    for i,j in iterprod(range(dim),repeat=2):
     
-        i = p[0]
-        j = p[1]
-
         factor='d%s*d%s'%(c[i],c[j])
         
         element = expand(ds2)
 
         coef = eval(r"element.coeff(%s)"%factor,locals(),globals())
 
-        coef = se.sympify(nsimplify(coef))
+        coef = sympify(nsimplify(coef))
 
         if i!=j:
 
-            if config.ord_status == True:
-
-                g_matrix[i,j] = tensor_series(coef/2)
-
-            else:
-
-                g_matrix[i,j] =coef/2
+            g_matrix[i,j] =coef/2
             
         else:
 
-            if config.ord_status == True:
-
-                g_matrix[i,j] = tensor_series(coef)
-
-            else:
-
-                g_matrix[i,j] =coef 
-
+            g_matrix[i,j] =coef 
+    
     g_matrix_inv = g_matrix.inv()
+
+    if config.ord_status == True:
+
+        for i,j in iterprod(range(dim),repeat=2):
+
+            g_matrix[i,j] = tensor_series(g_matrix[i,j])
+            g_matrix_inv[i,j] = tensor_series(g_matrix_inv[i,j])
 
     g = new_ten('g',2)
 
     # SOLO EL TENSOR g uv TENDRA DOS OPCIONES DD Y UU, NO HAY DU Y UD PORQUE ESOS SIEMPRE SERAN IDENTIDAD, LUEGO
     
-    identidad = se.eye(dim)
+    identidad = eye(dim)
 
-    for p in product(range(dim),repeat=2):
+    for p in iterprod(range(dim),repeat=2):
 
         i = p[0]
         j = p[1]
@@ -241,7 +244,7 @@ def coord_index(coordinates):
     for i in range(0,dim):
 
         a[i] = i
-        b[i] = coord[i]
+        b[i] = new_var(coord[i])
 
     return dict(zip(a,b))
 

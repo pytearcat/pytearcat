@@ -1,14 +1,11 @@
-import sympy as sp 
+from core import sympify, factor, Latex, display
 import numpy as np 
 import tqdm
 from itertools import product
 from misc import new_ten,reload_all
 from christoffel import calculate_christoffel, D
 from riemann import calculate_riemann
-from IPython.display import display, Latex, Math
 import config
-from sympy import factor
-from symengine import sympify
 from tensor_class import tensor_series
 
 def calculate_ricci(All = False):

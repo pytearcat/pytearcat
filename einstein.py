@@ -1,13 +1,11 @@
-from symengine import diff, Rational, sympify
+from core import Rational, sympify, factor, display, Latex
 import tqdm
 from itertools import product
 from misc import new_ten,reload_all
 from riemann import calculate_riemann
 from ricci import calculate_ricci, calculate_ricci_scalar
-from IPython.display import display, Latex, Math
 import config
 from tensor_class import construct
-from sympy import factor
 from tensor_class import tensor_series
 
 def calculate_einstein_tensor(All = False):

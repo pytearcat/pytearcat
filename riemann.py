@@ -2,11 +2,9 @@ from tqdm import tqdm_notebook
 from itertools import product
 from misc import new_ten,reload_all
 from christoffel import calculate_christoffel, D
-from IPython.display import display, Latex, Math
+from core import sympify, factor, display, Latex, Math
 import config
 from tensor_class import construct
-from sympy import factor
-from symengine import sympify
 from tensor_class import tensor_series
 
 def calculate_riemann(default = True, All = False):

@@ -1,4 +1,5 @@
 import numpy as np 
+from core import Symbol,get_name
 import config 
 from tensor_class import Tensor
 from errors import TensorSyntaxError
@@ -20,13 +21,29 @@ def intersection(L1,L2):
     '''
     return [i for i in L2 if i in L1]
 
-def order(var,n):
+def setorder(var,n):
 
-    # Esto define el orden al que se va a trabajar considerando una expansion
+    '''
+    Sets the expansion order equal to "n" around variable "var". 
+
+    Note: 
+    This sets the expansion order equal to "n", allowing the program to truncate
+    all the calculations up to this order. You can also revert to a value lower
+    than "n" without having to restart the kernel. However, this does not work
+    if the new order is greater than the first defined order since all the 
+    higher-order terms were discarded in the first execution of this function.
+
+    '''
 
     config.ord_status = True
 
     config.ord_var = new_var(str(var))
+
+    config.var.append(config.ord_var)
+
+    config.__all__.append(var)
+    
+    #new_var(str(var))
 
     config.ord_n = n
 
@@ -37,10 +54,12 @@ def new_var(*args):
     example: new_var('x','y',...)
     
     '''
-    # revisar que cada elemento de args sea un string, de lo contrario arrojar error.
-    # var_symbol siempre debe ser un string
 
     input_vars = list(args)
+
+    if not all(isinstance(var, str) for var in input_vars):
+
+        raise(TypeError("Arguments must be str."))
 
     names = []
 
@@ -81,6 +100,10 @@ def new_var(*args):
 def new_con(*args):
 
     input_const = list(args)
+
+    if not all(isinstance(var, str) for var in input_const):
+
+        raise(TypeError("Arguments must be str."))
 
     names = []
 
@@ -128,11 +151,15 @@ def new_fun(fun_symbol,var_symbol,overwrite=False):
 
     # Aca se puede definir con un kwargs para que entren n funciones de la forma (f,variables)
 
+    if not isinstance(fun_symbol,str):
+
+        raise(TypeError("Function symbol must be a string"))
+
     existing_names = []
 
     for i in config.fun:
 
-        existing_names.append(i.get_name())
+        existing_names.append(get_name(i))
 
     new_var(*var_symbol.split(',')) # creates the variables if they not exist
 
@@ -181,26 +208,6 @@ def delete_temp():
 
     config.temp_name = []
 
-
-def n_order(var,n):
-
-    '''
-    The program will work up to order 'n' in the variable 'var'.
-    
-    '''
-    # Falta ver que var sea string y n sea un entero.
-
-    config.ord_status = True
-
-    str4="config.ord_var = sp.Symbol('xVAR', real=True)"
-    str4=str4.replace('xVAR',var)
-    exec(str4,globals())
-
-    config.ord_n = n
-
-def get_name(elem):
-
-        return elem.name
 
 def in_var(name):
 
@@ -251,9 +258,6 @@ def in_temp(name):
         return False
 
 
-
-
-
 def name_handler(string, name):
 
     # Revisar esto, deberia ser con un for i in config.var revisar si config.var[i].name == name.
@@ -263,8 +267,6 @@ def name_handler(string, name):
     var_list = list(map(get_name,config.var))
 
     fun_list =list(map(get_name,config.fun))
-
-
 
 
 def reload_all(new_module):

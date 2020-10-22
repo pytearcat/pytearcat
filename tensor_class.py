@@ -1,14 +1,14 @@
 import numpy as np 
-from itertools import product
+from itertools import product as iterprod
 import re
 import time
 import interp
 import config
-from IPython.display import display, Latex, Math
-from sympy.tensor.array import Array
 from tqdm import tqdm_notebook
-import symengine as se
-from sympy import factor, simplify
+from core import *
+#import symengine as se
+#from sympy import factor, simplify, series
+#from sympy.tensor.array import Array
 from numpy import full
 from interp import syntax,add_examine,mul_examine,der_examine
 #import sympy as sp 
@@ -105,7 +105,7 @@ def ordenar(n):
     Returns a list with all the possible combinations of indexes for a tensor of n indexes [['_','_'],['^','_'],['_','^'],['^','^']]
     '''
 
-    return [','.join(i) for i in product(['_','^'],repeat = n)]
+    return [','.join(i) for i in iterprod(['_','^'],repeat = n)]
 
 
 class gError(Exception):
@@ -194,7 +194,7 @@ def bajarindice(tensor,i,kstring,kstring2):
 
     description =  '%s Tensor $%s%s$'%(tensor.name,NAME,greek_desc)
 
-    for p in tqdm_notebook(product(range(dim),repeat=tensor.n),total=dim**tensor.n,desc= description):
+    for p in tqdm_notebook(iterprod(range(dim),repeat=tensor.n),total=dim**tensor.n,desc= description):
 
         temporal = 0
 
@@ -296,7 +296,7 @@ def subirindice(tensor,kstring):
 
                 #---
 
-                for p in tqdm_notebook(product(range(dim),repeat=tensor.n),total=dim**tensor.n,desc= description):
+                for p in tqdm_notebook(iterprod(range(dim),repeat=tensor.n),total=dim**tensor.n,desc= description):
 
                     temporal = 0
 
@@ -404,7 +404,7 @@ class Tensor:
 
             if n != 0:
 
-                string = 'se.sympify(np.nan),'*dim
+                string = 'sympify(np.nan),'*dim
 
                 string = '['+string[:-1]+'],'
 
@@ -422,7 +422,7 @@ class Tensor:
 
                 #----
 
-                string = 'se.sympify(np.nan),'*(dim-1)
+                string = 'sympify(np.nan),'*(dim-1)
 
                 string = '['+string[:-1]+'],'
 
@@ -565,7 +565,7 @@ class Tensor:
 
             if new_rank != 0:
 
-                for p in product(range(dim), repeat = new_rank):
+                for p in iterprod(range(dim), repeat = new_rank):
 
                     var = 0
 
@@ -615,7 +615,7 @@ class Tensor:
                 iterstring += '[p[%d]]'%i
                 iterstring2 += '[p[%d]+1]'%i
 
-            for p in product(range(config.dim-1),repeat=self.n):
+            for p in iterprod(range(config.dim-1),repeat=self.n):
 
                 exec_str = 'self.tensor_sp[%d]%s = self.tensor[%d]%s'%(index,iterstring,index,iterstring2)
 
@@ -696,7 +696,7 @@ class Tensor:
 
                 old_index += '[p[%d]]'%i
 
-            for p in product(range(dim),repeat=rank):
+            for p in iterprod(range(dim),repeat=rank):
 
                 string = 'New_data%s = elements.elements%s'%(new_index,old_index)
 
@@ -717,7 +717,7 @@ class Tensor:
             k = compare(self.n,index) # numero correspondiente a '^,^' o '_,^', etc
 
 
-            for p in product(range(dim),repeat=self.n):
+            for p in iterprod(range(dim),repeat=self.n):
                             
                 string = 'self.tensor[%s]'%k 
                 string2 = ''
@@ -726,7 +726,7 @@ class Tensor:
                         
                     string2 += '[%s]'%l
 
-                string = '%s%s = se.sympify(elements%s)'%(string,string2,string2)
+                string = '%s%s = sympify(elements%s)'%(string,string2,string2)
 
                 try: 
 
@@ -782,7 +782,7 @@ class Tensor:
 
                     Riemann_list = construct('False',dim,4)
 
-                    for p in product(range(dim),repeat=self.n):
+                    for p in iterprod(range(dim),repeat=self.n):
 
                         counta = p[0]
                         countb = p[1]
@@ -845,7 +845,7 @@ class Tensor:
                 else:
                 
 
-                    for p in product(range(dim),repeat=self.n):
+                    for p in iterprod(range(dim),repeat=self.n):
                                 
                         string = 'self.tensor[%s]'%k 
 
@@ -895,7 +895,7 @@ class Tensor:
 
                     Riemann_list = construct('False',dim,4)
 
-                    for p in product(range(dim),repeat=self.n):
+                    for p in iterprod(range(dim),repeat=self.n):
 
                         counta = p[0]
                         countb = p[1]
@@ -910,7 +910,7 @@ class Tensor:
                                     
                                 string += '[%s]'%l
 
-                            string = string + '= se.sympify(factor(%s))'%string
+                            string = string + '= sympify(factor(%s))'%string
 
                             exec(string,locals(),globals())
 
@@ -958,7 +958,7 @@ class Tensor:
                 else:
                 
 
-                    for p in product(range(dim),repeat=self.n):
+                    for p in iterprod(range(dim),repeat=self.n):
                                 
                         string = 'self.tensor[%s]'%k 
 
@@ -966,7 +966,7 @@ class Tensor:
                                 
                             string += '[%s]'%l
 
-                        string = string + '= se.sympify(factor(%s))'%string
+                        string = string + '= sympify(factor(%s))'%string
 
                         #print(string)
 
@@ -998,7 +998,7 @@ class Tensor:
                 break 
             k += 1
 
-        se.init_printing()
+        init_printing()
 
         if k == len(self.orden):
 
@@ -1027,7 +1027,7 @@ class Tensor:
 
             count = 0
                 
-            for p in product(range(dim),repeat=self.n):
+            for p in iterprod(range(dim),repeat=self.n):
                     
                 string = 'valor = self.tensor[%s]'%k
                     
@@ -1057,7 +1057,7 @@ class Tensor:
                     
                 if valor != 0:
                         
-                    string += " = %s"% (se.latex(valor))
+                    string += " = %s"% (latex(valor))
                     
                     display(Math(string))
 
@@ -1167,7 +1167,7 @@ class Tdata:
 
             return_tensor = construct(0,dim,len(self.updn)-2)
 
-            for p in product(range(dim),repeat=len(self.updn)-2): # for para ir asignarlo
+            for p in iterprod(range(dim),repeat=len(self.updn)-2): # for para ir asignarlo
 
                 temp = 0
 
@@ -1252,11 +1252,11 @@ class Tdata:
 
                 if new_rank != 0:
 
-                    for p in product(range(dim),repeat=new_rank): # for para ir asignarlo
+                    for p in iterprod(range(dim),repeat=new_rank): # for para ir asignarlo
 
                         temp = 0
 
-                        for q in product(range(dim), repeat = len(rep_index)):
+                        for q in iterprod(range(dim), repeat = len(rep_index)):
 
                             string = 'self.elements%s*other.elements%s'%(self_iterstr,other_iterstr)
 
@@ -1270,7 +1270,7 @@ class Tdata:
 
                     temp = 0
 
-                    for q in product(range(dim), repeat = len(rep_index)):
+                    for q in iterprod(range(dim), repeat = len(rep_index)):
 
                         string = 'self.elements%s*other.elements%s'%(self_iterstr,other_iterstr)
 
@@ -1306,7 +1306,7 @@ class Tdata:
                     
                     k += 1
 
-                for p in product(range(dim),repeat=new_rank): # for para ir asignarlo
+                for p in iterprod(range(dim),repeat=new_rank): # for para ir asignarlo
 
                     temp = 0
                     
@@ -1332,7 +1332,7 @@ class Tdata:
 
                 index += '[p[%d]]'%i
 
-            for p in product(range(dim),repeat = same_rank):
+            for p in iterprod(range(dim),repeat = same_rank):
 
                 string = 'return_tensor%s = self.elements%s*other'%(index,index)
 
@@ -1362,7 +1362,7 @@ class Tdata:
 
             index += '[p[%d]]'%i
 
-        for p in product(range(dim),repeat = same_rank):
+        for p in iterprod(range(dim),repeat = same_rank):
 
             string = 'return_tensor%s = self.elements%s*other'%(index,index)
 
@@ -1408,7 +1408,7 @@ class Tdata:
 
             return_tensor = construct(0,dim,len(self.updn))
 
-            for p in product(range(dim),repeat=len(self.updn)): # for para ir asignarlo
+            for p in iterprod(range(dim),repeat=len(self.updn)): # for para ir asignarlo
 
                 temp = 0
 
@@ -1462,7 +1462,7 @@ class Tdata:
 
             return_tensor = construct(0,dim,len(self.updn))
 
-            for p in product(range(dim),repeat=len(self.updn)): # for para ir asignarlo
+            for p in iterprod(range(dim),repeat=len(self.updn)): # for para ir asignarlo
 
                 temp = 0
 
@@ -1486,7 +1486,7 @@ class Tdata:
         Simplify the Tensor. If index is given, it will simplify only the given index combination ('^,_,_')
         '''
 
-        self.elements = se.sympify(factor(self.elements))
+        self.elements = sympify(factor(self.elements))
 
     def simplify(self):
 
@@ -1494,9 +1494,30 @@ class Tdata:
         Simplify the Tensor. If index is given, it will simplify only the given index combination ('^,_,_')
         '''
 
-        self.elements = se.sympify(simplify(np.array(self.elements)).tolist())
+        self.elements = sympify(simplify(np.array(self.elements)).tolist())
 
 def D(a,b):
+
+    '''
+    Derivative of a tensor "a" with respect to the index "b".
+
+    a is an object of class Tdata
+    b is a string that indicates the index, written as "_index"
+
+    It returns an object of class Tdata. 
+
+    -------------
+    Example:
+
+    A = D(G("^a, ^b"), "_c")
+
+    We suggest to save this into a Tensor object as
+
+    B = new_ten("B", 3)
+
+    B.assign(A, "^a, ^b, _c")
+
+    '''
 
     der_examine(b)
 
@@ -1573,13 +1594,13 @@ def D(a,b):
 
                 exec(reload_all('config'),locals(),globals())
 
-                for p in product(range(dim),repeat = new_rank): 
+                for p in iterprod(range(dim),repeat = new_rank): 
 
                     var = 0
                     
                     for q in range(dim):
     
-                        string = 'se.diff(a.elements%s,coords[%s])'%(old_index,der_index)
+                        string = 'diff(a.elements%s,coords[%s])'%(old_index,der_index)
 
                         var += eval(string,locals(),globals())
 
@@ -1619,9 +1640,9 @@ def D(a,b):
 
                 exec(reload_all('config'),locals(),globals())
 
-                for p in product(range(dim),repeat = new_rank): 
+                for p in iterprod(range(dim),repeat = new_rank): 
     
-                    string = 'temp%s = se.diff(a.elements%s,%s)'%(new_index,old_index,coords[p[-1]])
+                    string = 'temp%s = diff(a.elements%s,%s)'%(new_index,old_index,coords[p[-1]])
 
                     exec(string,locals(),globals())
                 
@@ -1667,9 +1688,9 @@ def D(a,b):
 
             exec(reload_all('config'),locals(),globals())
 
-            for p in product(range(dim),repeat = new_rank): 
+            for p in iterprod(range(dim),repeat = new_rank): 
 
-                string = 'temp%s = se.diff(a.elements%s,%s)'%(new_index,old_index,coords[p[-1]])
+                string = 'temp%s = diff(a.elements%s,%s)'%(new_index,old_index,coords[p[-1]])
 
                 exec(string,locals(),globals())
 
@@ -1719,13 +1740,34 @@ def D(a,b):
 
         for p in range(dim):
 
-            string = 'temp[%d] = se.diff(a,%s)'%(p,coords[p])
+            string = 'temp[%d] = diff(a,%s)'%(p,coords[p])
 
             exec(string,locals(),globals())
         
         return Tdata(string_return, temp)
 
 def C(a,b):
+
+    '''
+    Covariant derivative of a tensor "a" with respect to the index "b".
+
+    a is an object of class Tdata
+    b is a string that indicates the index, written as "_index"
+
+    It returns an object of class Tdata. 
+
+    -------------
+    Example:
+
+    A = C(G("^a, ^b"), "_c")
+
+    We suggest to save this into a Tensor object as
+
+    B = new_ten("B", 3)
+
+    B.assign(A, "^a, ^b, _c")
+
+    '''
 
     der_examine(b)
 
@@ -1938,18 +1980,12 @@ def create_tensor(T_name,n):
 
 def tensor_series(element):
 
-    # element is an element with sympy functions i.e. epsilon*cos(x)*y**2 + epsilon**2*sin(x)*exp(y)
+    '''
+    Compute the series of an element.
+    '''
 
-    #reload_all('config')
+    string = "factor(series(element, x = config.ord_var, n = config.ord_n+1))"
 
-    #-------
-
-    string = 'result = se.sympify(factor(se.series(element, x = config.ord_var, n = config.ord_n)))'#.simplify()'
-
-    exec(string,locals(),globals())
-
-    #str3 = 'result = se.sympify(sp.Poly(result,config.ord_var).as_expr())'
-
-    #exec(str3,locals(),globals())
+    result = eval(string,locals(),globals())
 
     return result

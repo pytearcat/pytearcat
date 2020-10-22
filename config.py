@@ -1,4 +1,4 @@
-from symengine import Symbol,Function
+from core import Symbol, Function
 
 # Quiero que las cosas se ejecuten en misc y pasarle el elemento listo a config para que lo guarde en las listas correspondientes
 # la razon de esto es que si queremos guardar tensores, habría que hacer import de la clase tensor y tensorclass ya importa a config
@@ -92,6 +92,10 @@ ds = ''
 coords = {}
 
 coords_sp = {}
+
+geo = None
+
+geocoords = {}
 
 space_time = True
 

@@ -1,10 +1,8 @@
 from tqdm import tqdm_notebook
 from itertools import product
 from misc import new_ten,reload_all
-from IPython.display import display, Latex, Math
 import config
-from symengine import diff, Rational, sympify
-from sympy import factor
+from core import diff, Rational, sympify, factor, display, Latex, Math
 from tensor_class import tensor_series
 
 def D(element,i):

@@ -1,5 +1,3 @@
-import sympy as sp
-#sp.init_printing(use_latex='mathjax')
 import sys
 import re # TO CUT THE 
 import numpy as np
@@ -588,19 +586,19 @@ def der_examine(b):
 
     if len(b)<2:
 
-        raise(TensorSyntaxError('Typo error'))
+        raise(TensorSyntaxError('Syntax Error.'))
 
     elif b[0] != '_' and b[0] != '^':
 
-        raise(TensorSyntaxError('Bad symbol'))
-
-    elif b.count('_') + b.count('^') > 1:
-
-        raise(TensorSyntaxError('It must be only one index'))
+        raise(TensorSyntaxError('Wrong symbol.'))
 
     elif b.count(',') !=  0:
 
-        raise(TensorSyntaxError('It must be only one index'))
+        raise(TensorSyntaxError('It must be only one index.'))
+
+    elif b.count('_') + b.count('^') > 1:
+
+        raise(TensorSyntaxError("Syntax Error. Problem with the '_' or '^' symbols."))
 
 def syntax(string,rank):
     
