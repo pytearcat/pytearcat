@@ -1,21 +1,13 @@
 import numpy as np 
 from itertools import product as iterprod
-import re
-import time
-import interp
-import config
 from tqdm import tqdm_notebook
-from core import *
-#import symengine as se
-#from sympy import factor, simplify, series
-#from sympy.tensor.array import Array
-from numpy import full
-from interp import syntax,add_examine,mul_examine,der_examine
-#import sympy as sp 
+from .core import config
+from .core.core import *
+from .core.interp import syntax, add_examine, mul_examine, der_examine
 
 def reload_all(new_module):
 
-    ''' 
+    ''' x
 
     This function reloads all the variables in __all__ from module
         

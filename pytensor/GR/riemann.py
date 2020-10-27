@@ -1,11 +1,12 @@
 from tqdm import tqdm_notebook
-from itertools import product
-from misc import new_ten,reload_all
-from christoffel import calculate_christoffel, D
-from core import sympify, factor, display, Latex, Math
-import config
-from tensor_class import construct
-from tensor_class import tensor_series
+from itertools import product as iterprod 
+
+from pytensor.Tensor.misc import new_ten,reload_all
+from pytensor.Tensor.core.core import sympify, factor, display, Latex, Math
+from pytensor.Tensor.core import config
+from pytensor.Tensor.tensor_class import construct, tensor_series
+
+from .christoffel import calculate_christoffel, D
 
 def calculate_riemann(default = True, All = False):
 
@@ -46,7 +47,7 @@ def calculate_riemann(default = True, All = False):
 
         #wolfram alpha = counta ; beta = countb ; gamma = countc ; delta = countd
 
-        for p in tqdm_notebook(product(range(dim),repeat=4),total=dim**4,desc= r'Riemann Tensor $R_{\alpha \beta \gamma \delta}$'):
+        for p in tqdm_notebook(iterprod(range(dim),repeat=4),total=dim**4,desc= r'Riemann Tensor $R_{\alpha \beta \gamma \delta}$'):
 
             counta = p[0]
             countb = p[1]
@@ -133,7 +134,7 @@ def calculate_riemann(default = True, All = False):
         Riem8 = Riemann.tensor[8]
         #wolfram alpha = counta ; beta = countb ; gamma = countc ; delta = countd
 
-        for p in tqdm_notebook(product(range(dim),repeat=4),total=dim**4,desc= r'Riemann Tensor $R^{\alpha}_{\beta \gamma \delta}$'):
+        for p in tqdm_notebook(iterprod(range(dim),repeat=4),total=dim**4,desc= r'Riemann Tensor $R^{\alpha}_{\beta \gamma \delta}$'):
 
             counta = p[0]
             countb = p[1]

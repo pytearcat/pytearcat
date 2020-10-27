@@ -1,16 +1,7 @@
-#import sympy as sp
-#sp.init_printing(use_latex='mathjax')
-import sys
-import re # TO CUT THE STRINGS
 import numpy as np
-import itertools
-import collections
-import copy
-from IPython.display import display, Math, Latex
-import weakref
-from errors import TensorSyntaxError
 
-########################         AQUI COMIENZA           PyTensor - dist
+from .core import display, Math, Latex
+from .errors import TensorSyntaxError
 
 def delete_blanks(element):
     

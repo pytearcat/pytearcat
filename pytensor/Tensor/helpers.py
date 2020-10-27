@@ -1,8 +1,7 @@
-import symengine as se
-from itertools import product
-import config
-from misc import new_ten, order
-from tensor_class import ordenar,construct
+from itertools import product as iterprod
+from .core import core, config
+from .misc import new_ten, order
+from .tensor_class import ordenar,construct
 
 def tdata_construct(elem,dim,n):
 
@@ -45,9 +44,9 @@ def LeviCivita(name='LeviCivita'):
     
     for k in range(2**rank):
 
-        for p in product(range(rank), repeat = rank):
+        for p in iterprod(range(rank), repeat = rank):
             
-            string = 'Ten.tensor[k]%s = se.LeviCivita(%s)'%(iterstring,Larg)
+            string = 'Ten.tensor[k]%s = core.LeviCivita(%s)'%(iterstring,Larg)
             
             exec(string,locals(),globals())
 
@@ -70,9 +69,9 @@ def LeviCivita(name='LeviCivita'):
     
     for k in range(2**rank):
 
-        for p in product(range(rank), repeat = rank):
+        for p in iterprod(range(rank), repeat = rank):
 
-            string = 'Ten.tensor_sp[k]%s = se.LeviCivita(%s)'%(iterstring,Larg)
+            string = 'Ten.tensor_sp[k]%s = core.LeviCivita(%s)'%(iterstring,Larg)
             
             exec(string,locals(),globals())
 
@@ -89,7 +88,7 @@ def KroneckerDelta(name='KroneckerDelta'):
     
     Ten = new_ten(name,2)
     
-    Eye = se.eye(dim)
+    Eye = core.eye(dim)
     
     Ten.assign(Eye.tolist(),'_,_')
     Ten.assign(Eye.tolist(),'^,_')

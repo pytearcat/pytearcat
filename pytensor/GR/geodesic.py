@@ -1,10 +1,12 @@
 from tqdm import tqdm_notebook
 from itertools import product as iterprod
-from christoffel import calculate_christoffel
-from core import sympify, factor, diff
-from misc import new_var, new_fun
-import config
-from tensor_class import tensor_series
+
+from pytensor.Tensor.core.core import sympify, factor, diff
+from pytensor.Tensor.misc import new_var, new_fun
+from pytensor.Tensor.core import config
+from pytensor.Tensor.tensor_class import tensor_series
+
+from .christoffel import calculate_christoffel
 
 def geodesic():
 

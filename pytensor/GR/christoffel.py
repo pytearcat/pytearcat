@@ -1,9 +1,9 @@
 from tqdm import tqdm_notebook
-from itertools import product
-from misc import new_ten,reload_all
-import config
-from core import diff, Rational, sympify, factor, display, Latex, Math
-from tensor_class import tensor_series
+from itertools import product as iterprod
+from pytensor.Tensor.misc import new_ten,reload_all
+from pytensor.Tensor.core import config
+from pytensor.Tensor.core.core import diff, Rational, sympify, factor, display, Latex, Math
+from pytensor.Tensor.tensor_class import tensor_series
 
 def D(element,i):
 
@@ -131,7 +131,7 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
         return Christoffel
 
 
-    for p in tqdm_notebook(product(range(dim),repeat=3),total=dim**3,desc= description):
+    for p in tqdm_notebook(iterprod(range(dim),repeat=3),total=dim**3,desc= description):
 
         if p[2] >= p[1]:
 

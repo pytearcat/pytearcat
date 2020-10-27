@@ -1,12 +1,14 @@
-from core import sympify, factor, Latex, display
 import numpy as np 
 import tqdm
-from itertools import product
-from misc import new_ten,reload_all
-from christoffel import calculate_christoffel, D
-from riemann import calculate_riemann
-import config
-from tensor_class import tensor_series
+from itertools import product as iterprod 
+
+from pytensor.Tensor.core.core import sympify, factor, Latex, display
+from pytensor.Tensor.misc import new_ten,reload_all
+from pytensor.Tensor.core import config
+from pytensor.Tensor.tensor_class import tensor_series
+
+from .christoffel import calculate_christoffel, D
+from .riemann import calculate_riemann
 
 def calculate_ricci(All = False):
 
@@ -40,7 +42,7 @@ def calculate_ricci(All = False):
 
         Ricci_list = np.full((config.dim,config.dim), False, dtype=bool)
 
-        for p in tqdm.tqdm_notebook(product(range(config.dim),repeat=2),total=config.dim**2,desc=r'Ricci Tensor $R_{\alpha \beta}$'):
+        for p in tqdm.tqdm_notebook(iterprod(range(config.dim),repeat=2),total=config.dim**2,desc=r'Ricci Tensor $R_{\alpha \beta}$'):
 
             i = p[0]
             j = p[1]
@@ -110,7 +112,7 @@ def calculate_ricci_scalar():
 
         Ricci_local = config.ricci
 
-    for p in tqdm.tqdm_notebook(product(range(config.dim),repeat=2),total=config.dim**2,desc= r'Ricci Scalar $R$'):
+    for p in tqdm.tqdm_notebook(iterprod(range(config.dim),repeat=2),total=config.dim**2,desc= r'Ricci Scalar $R$'):
 
         i = p[0]
         j = p[1]

@@ -1,12 +1,13 @@
-from core import Rational, sympify, factor, display, Latex
 import tqdm
-from itertools import product
-from misc import new_ten,reload_all
-from riemann import calculate_riemann
-from ricci import calculate_ricci, calculate_ricci_scalar
-import config
-from tensor_class import construct
-from tensor_class import tensor_series
+from itertools import product as iterprod 
+
+from pytensor.Tensor.core.core import Rational, sympify, factor, display, Latex
+from pytensor.Tensor.misc import new_ten,reload_all
+from pytensor.Tensor.core import config
+from pytensor.Tensor.tensor_class import construct, tensor_series
+
+from .riemann import calculate_riemann
+from .ricci import calculate_ricci, calculate_ricci_scalar
 
 def calculate_einstein_tensor(All = False):
 
@@ -50,7 +51,7 @@ def calculate_einstein_tensor(All = False):
 
         Einstein_list = construct('False',dim,2)
 
-        for p in tqdm.tqdm_notebook(product(range(config.dim),repeat=2),total=config.dim**2,desc= r'Einstein Tensor $G_{\alpha \beta}$'):
+        for p in tqdm.tqdm_notebook(iterprod(range(config.dim),repeat=2),total=config.dim**2,desc= r'Einstein Tensor $G_{\alpha \beta}$'):
 
             m = p[0]
             n = p[1]

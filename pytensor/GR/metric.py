@@ -1,13 +1,12 @@
 #from sympy import expand, latex, Matrix, nsimplify, sympify
-import config
-from core import *
-from misc import new_var,new_ten, reload_all
-from tensor_class import Tensor, tensor_series
 from itertools import product as iterprod
-from config import *
-#import symengine as se
-from sympy import sympify as sp_sympify
-from sympy import latex as sp_latex
+from sympy import sympify as sp_sympify, latex as sp_latex
+from pytensor.Tensor.core import config
+from pytensor.Tensor.core.core import *
+from pytensor.Tensor.misc import new_var,new_ten, reload_all
+from pytensor.Tensor.tensor_class import Tensor, tensor_series
+from pytensor.Tensor.core.config import *
+
 
 def create_metric(ds2 = ''):
 
