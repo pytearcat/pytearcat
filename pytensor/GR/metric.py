@@ -10,8 +10,6 @@ from pytensor.Tensor.core.config import *
 
 def create_metric(ds2 = ''):
 
-    print('Inicio de create_metric')
-
     global g
 
     if config.g_status == True:
@@ -41,11 +39,8 @@ def create_metric(ds2 = ''):
     #coords = ','.join([*config.coords.values()])
 
     coords = ','.join(list(map(str,config.coords.values())))
-    print('Antes de metric')
 
     g_matrix,line_element = metric(config.fun, coords, ds2)
-
-    print('Antes del display')
 
     display_ds(g_matrix)
     
