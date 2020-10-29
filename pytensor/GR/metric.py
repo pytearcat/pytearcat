@@ -69,12 +69,24 @@ def display_ds(gmatrix):
         if value != 0:            
 
             if i == j:
+
+                if value.is_Add:
+
+                    ds += r'\left(%s\right)*d%s^2+'%(latex(sp_sympify(value)),coords[i])
+
+                else:
                 
-                ds += r'%s*d%s^2+'%(latex(sp_sympify(value)),coords[i])
+                    ds += r'%s*d%s^2+'%(latex(sp_sympify(value)),coords[i])
 
             elif j > i:
 
-                ds += r'%s*d%s*d%s+'%(latex(sp_sympify(value*2)),coords[i],coords[j])
+                if value.is_Add:
+
+                    ds += r'\left(%s\right)*d%s*d%s+'%(latex(sp_sympify(value*2)),coords[i],coords[j])
+
+                else:
+
+                    ds += r'%s*d%s*d%s+'%(latex(sp_sympify(value*2)),coords[i],coords[j])
 
     ds = ds[:-1]
 
