@@ -52,13 +52,17 @@ def display_ds(gmatrix):
 
     dim = config.dim
     coords = config.coords
+    greek = config.greek_dict
+
+    for i in coords:
+
+        if str(coords[i]) in list(greek.keys()):
+
+            coords[i] = greek[str(coords[i])]
 
     ds = r'ds^2 = '
 
-    for p in iterprod(range(dim),repeat=2):
-    
-        i = p[0]
-        j = p[1]
+    for i,j in iterprod(range(dim),repeat=2):
 
         value = gmatrix[i,j]
 
