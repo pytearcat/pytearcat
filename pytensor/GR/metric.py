@@ -51,7 +51,7 @@ def create_metric(ds2 = ''):
 def display_ds(gmatrix):
 
     dim = config.dim
-    coords = config.coords
+    coords = config.coords.copy()
     greek = config.greek_dict
 
     for i in coords:
