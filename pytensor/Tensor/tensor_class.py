@@ -1059,15 +1059,6 @@ class Tensor:
 
                 print('All components are zero')
 
-# class LeviCivita(Tensor):
-
-#     def __init__(self):
-
-#         Tensor.__init__(self)
-
-#     def __call__(self):
-
-
 
 class Tdata:
 

@@ -1,6 +1,6 @@
 from itertools import product as iterprod
 from .core import core, config
-from .misc import new_ten, order
+from .misc import new_ten, setorder
 from .tensor_class import ordenar,construct
 
 def tdata_construct(elem,dim,n):

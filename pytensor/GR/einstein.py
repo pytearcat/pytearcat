@@ -9,7 +9,7 @@ from pytensor.Tensor.tensor_class import construct, tensor_series
 from .riemann import calculate_riemann
 from .ricci import calculate_ricci, calculate_ricci_scalar
 
-def calculate_einstein_tensor(All = False):
+def calculate_einstein(All = False):
 
     global Einstein
 
