@@ -966,21 +966,21 @@ class Tensor:
 
         self.space()
 
-    def display(self, index=None, lista = None):
+    def display(self, index=None, aslist = None):
         
         if index is None:
 
             index = self.orden[0]
 
-        if lista == None:
+        if aslist == None:
 
             if self.n <= 2:
 
-                lista = False
+                aslist = False
             
             else:
 
-                lista = True
+                aslist = True
 
         dim = config.dim
         
@@ -1001,7 +1001,7 @@ class Tensor:
             display(self.tensor)
         
         
-        elif lista == False:
+        elif aslist == False:
 
             # if k == len(self.orden):
 
