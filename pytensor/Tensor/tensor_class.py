@@ -1113,6 +1113,10 @@ class Tdata:
             
         self.elements = elements # T
 
+    def __getitem__(self,item):
+
+        return self.elements[item]
+
     def auto_sum(self):
 
         '''
