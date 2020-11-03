@@ -1,7 +1,7 @@
 import numpy as np 
 from re import findall
 from .core import config
-from .core.core import Symbol,get_name
+from .core.core import Symbol, get_name, simplify, expand, series as Series
 from .core.errors import TensorSyntaxError
 from .tensor_class import Tensor
 
@@ -47,7 +47,7 @@ def series(element):
     Compute the series of an element.
     '''
 
-    string = "factor(series(element, x = config.ord_var, n = config.ord_n+1))"
+    string = "simplify(expand(Series(element, x = config.ord_var, n = config.ord_n+1)))"
 
     result = eval(string,locals(),globals())
 

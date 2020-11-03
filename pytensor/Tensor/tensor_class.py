@@ -612,6 +612,40 @@ class Tensor:
                 exec_str = 'self.tensor_sp[%d]%s = self.tensor[%d]%s'%(index,iterstring,index,iterstring2)
 
                 exec(exec_str,locals(),globals())
+
+    def series(self,index = None):
+
+        '''
+        Expands each element of the tensor with the given index.
+        
+        '''
+
+        if index is None:
+
+            index = self.orden[0]
+
+        dim = config.dim
+
+        k = 0
+        for i in self.orden:
+            if i == index:
+                break 
+            k += 1
+
+        iterstring = ""
+
+        for i in range(self.n):
+
+            iterstring += '[p[%d]]'%i
+
+        for p in iterprod(range(dim),repeat=self.n):
+
+            execstr = "self.tensor[k]%s = tensor_series(self.tensor[k]%s)"%(iterstring,iterstring)
+
+            exec(execstr,locals(),globals())
+
+        
+
         
     def indexcomb(self, kstring):
 
@@ -1967,7 +2001,7 @@ def tensor_series(element):
     Compute the series of an element.
     '''
 
-    string = "factor(series(element, x = config.ord_var, n = config.ord_n+1))"
+    string = "simplify(expand(series(element, x = config.ord_var, n = config.ord_n+1)))"
 
     result = eval(string,locals(),globals())
 
