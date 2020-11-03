@@ -125,14 +125,14 @@ def metric(functions, coords, ds2):
         ds2 = input('Enter the metric in the form: ds2=-dt*dt+a**2*(dx**2+dy**2+dz**2): \n' )
     
         config.ds = ds2 ####--!!! Guarda el string ds en el archivo config.
-        
-    print('Metric was defined successfully: \n')
     
-    print('Dimension = %d'%config.dim)
+    print('\nDimension = %d'%config.dim)
     
     print('Coordinates = %s'%variables_string)
     
-    g_matrix, line_element = create_metric_matrix(config.dim, variables_string, ds2)      
+    g_matrix, line_element = create_metric_matrix(config.dim, variables_string, ds2)  
+
+    print('Metric was defined successfully: \n')    
     
     return g_matrix, line_element
 
