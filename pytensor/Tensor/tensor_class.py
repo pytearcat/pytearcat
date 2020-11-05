@@ -160,13 +160,19 @@ def bajarindice(tensor,i,kstring,kstring2):
 
     greek_desc = ''
 
-    count2 = 1
+    iterg = ''
+
+    count2 = 0
 
     for count in range(tensor.n):
 
         if count == i:
 
             iterstring += '[j]'
+
+            iterg += '[p[%d]][j]'%i
+
+            count2 += 1
 
         else:
 
@@ -192,7 +198,7 @@ def bajarindice(tensor,i,kstring,kstring2):
 
         for j in range(dim):
 
-            bla2 = 'g[0][p[0]][j]*tensor.tensor[index]%s'%iterstring
+            bla2 = 'g[0]%s*tensor.tensor[index]%s'%(iterg,iterstring)
 
             temporal += eval(bla2)
 
@@ -240,11 +246,11 @@ def subirindice(tensor,kstring):
 
         NAME = config.default_tensors[NAME]
 
-    for i in range(len(klista)):
+    for i in range(len(klista)): # _,_
 
         klista2 = list(klista)
 
-        if klista[i] == '_':
+        if klista[i] == '_': # _,^ 
 
             klista2[i] = '^'
 
@@ -266,7 +272,9 @@ def subirindice(tensor,kstring):
 
                 greek_desc = ''
 
-                cosa2 = 1
+                iterg = ''
+
+                cosa2 = 0
 
                 for count in range(tensor.n):
 
@@ -277,6 +285,10 @@ def subirindice(tensor,kstring):
                     if count == i:
 
                         iterstring += '[j]'
+
+                        iterg += '[p[%d]][j]'%i
+
+                        cosa2 += 1
 
                     else:
 
@@ -294,7 +306,7 @@ def subirindice(tensor,kstring):
 
                     for j in range(dim):
 
-                        bla2 = 'g[3][p[0]][j]*tensor.tensor[index]%s'%iterstring
+                        bla2 = 'g[3]%s*tensor.tensor[index]%s'%(iterg,iterstring)
 
                         temporal += eval(bla2)
 
@@ -305,6 +317,8 @@ def subirindice(tensor,kstring):
                     else:
 
                         bla = 'tensor.tensor[index2]%s = temporal'%iterstring2      # Esto asigna a los indices que queremos llegar
+
+                    print('En subir indice\t', iterg, iterstring, iterstring2)
 
                     exec(bla,globals(),locals())
 
