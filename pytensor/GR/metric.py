@@ -99,7 +99,7 @@ def display_ds(gmatrix):
 
                 coords[i] = greek[gpcoord]
 
-    del(gpcoord)
+            del(gpcoord)
 
     ds = r'ds^2 = '
 

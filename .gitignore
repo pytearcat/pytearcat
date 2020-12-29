@@ -1,2 +1,6 @@
 *.pyc
 *.vscode
+venv/
+.DS_Store
+Testing.ipynb
+.ipynb_checkpoints
