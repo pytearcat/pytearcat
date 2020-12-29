@@ -1,12 +1,18 @@
 from tqdm import tqdm_notebook
 from itertools import product as iterprod
-
-from pytensor.Tensor.core.core import sympify, factor, diff
 from pytensor.Tensor.misc import new_var, new_fun
 from pytensor.Tensor.core import config
 from pytensor.Tensor.tensor_class import tensor_series
-
+from pytensor.Tensor.core.core import core_calc
 from .christoffel import calculate_christoffel
+
+if core_calc == 'sp':
+
+    from pytensor.Tensor.core.core import diff, Rational, sympify, factor
+    
+elif core_calc == 'gp':
+
+    from pytensor.Tensor.core.core import diff, divide as Rational
 
 def geodesic():
 

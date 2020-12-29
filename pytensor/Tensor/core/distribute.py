@@ -1,6 +1,4 @@
 import numpy as np
-
-from .core import display, Math, Latex
 from .errors import TensorSyntaxError
 
 def delete_blanks(element):

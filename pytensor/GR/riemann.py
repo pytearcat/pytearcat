@@ -2,7 +2,7 @@ from tqdm import tqdm_notebook
 from itertools import product as iterprod 
 
 from pytensor.Tensor.misc import new_ten,reload_all
-from pytensor.Tensor.core.core import sympify, factor, display, Latex, Math
+from pytensor.Tensor.core.core import factor, display_IP, Latex_IP,core_calc,simplify
 from pytensor.Tensor.core import config
 from pytensor.Tensor.tensor_class import construct, tensor_series
 
@@ -47,7 +47,9 @@ def calculate_riemann(default = True, All = False):
 
         #wolfram alpha = counta ; beta = countb ; gamma = countc ; delta = countd
 
-        for p in tqdm_notebook(iterprod(range(dim),repeat=4),total=dim**4,desc= r'Riemann Tensor $R_{\alpha \beta \gamma \delta}$'):
+        display_IP(Latex_IP(r'Riemann Tensor $R_{\alpha \beta \gamma \delta}$'))
+
+        for p in tqdm_notebook(iterprod(range(dim),repeat=4),total=dim**4):
 
             counta = p[0]
             countb = p[1]
@@ -65,7 +67,13 @@ def calculate_riemann(default = True, All = False):
 
                     Right += (Ch2[countk][countb][countd]*Ch1[counta][countk][countc] - Ch2[countk][countb][countc]*Ch1[counta][countk][countd])#.simplify()
 
-                Rie_val = sympify(factor((Value + Right)))#.simplify()
+                if core_calc == 'gp':
+
+                    Rie_val = simplify(Value + Right)                   
+
+                elif core_calc == 'sp':
+
+                    Rie_val = factor((Value + Right))
 
                 if config.ord_status == True:
 
@@ -134,7 +142,9 @@ def calculate_riemann(default = True, All = False):
         Riem8 = Riemann.tensor[8]
         #wolfram alpha = counta ; beta = countb ; gamma = countc ; delta = countd
 
-        for p in tqdm_notebook(iterprod(range(dim),repeat=4),total=dim**4,desc= r'Riemann Tensor $R^{\alpha}_{\beta \gamma \delta}$'):
+        display_IP(Latex_IP(r'Riemann Tensor $R^{\alpha}_{\beta \gamma \delta}$'))
+
+        for p in tqdm_notebook(iterprod(range(dim),repeat=4),total=dim**4):
 
             counta = p[0]
             countb = p[1]
@@ -164,7 +174,15 @@ def calculate_riemann(default = True, All = False):
 
                 else:
 
-                    Riem8[counta][countb][countc][countd] = sympify(factor(Rie_val))
+                    if core_calc == 'gp':
+
+                        Rie_val = simplify(Rie_val)                   
+
+                    elif core_calc == 'sp':
+
+                        Rie_val = factor(Rie_val)
+
+                    Riem8[counta][countb][countc][countd] = Rie_val
 
                 Riemann_list[counta][countb][countc][countd] = True 
                 
@@ -182,7 +200,7 @@ def calculate_riemann(default = True, All = False):
 
     else:
 
-        display(Latex(r"Riemann Tensor $R_{\alpha \beta \gamma \delta}$ already calculated"))
+        display_IP(Latex_IP(r"Riemann Tensor $R_{\alpha \beta \gamma \delta}$ already calculated"))
 
     if All == True:
 

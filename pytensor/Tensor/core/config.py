@@ -1,11 +1,26 @@
-from .core import Symbol, Function
+from .core import core_calc
+
+if core_calc == 'sp':
+
+    from .core import Symbol, Function
+
+elif core_calc == 'gp':
+
+    from .core import giac
 
 # Quiero que las cosas se ejecuten en misc y pasarle el elemento listo a config para que lo guarde en las listas correspondientes
 # la razon de esto es que si queremos guardar tensores, habría que hacer import de la clase tensor y tensorclass ya importa a config
 
 def create_var(i):
 
-    def_var = "%s = Symbol('%s', real=True)"%(i,i)
+    if core_calc == 'sp':
+
+        def_var = "%s = Symbol('%s', real=True)"%(i,i)
+
+    elif core_calc == 'gp':
+
+        def_var = "%s = giac('%s')"%(i,i)
+
     exec(def_var,locals(),globals())
     
     append_str = "__all__.append('%s')"%i
@@ -16,10 +31,16 @@ def create_var(i):
     
     return var[-1]
 
-
 def create_con(i):
 
-    string = "%s = Symbol('%s', real=True, constant = True)"%(i,i)
+    if core_calc == 'gp':
+
+        string = "%s = giac('%s')"%(i,i)
+
+    elif core_calc == 'sp':
+
+        string = "%s = Symbol('%s', real=True, constant = True)"%(i,i)
+
     exec(string,locals(),globals())
     
     string = "__all__.append('%s')"%i
@@ -30,10 +51,15 @@ def create_con(i):
 
     return con[-1]
 
-
 def create_fun(f_symbol,var_symbol):
+
+    if core_calc == 'gp':
+
+        str5 = "%s=giac('%s(%s)')"%(f_symbol,f_symbol,var_symbol)
+
+    elif core_calc == 'sp':
     
-    str5 = "%s=Function('%s', real=True)(%s)"%(f_symbol,f_symbol,var_symbol)
+        str5 = "%s=Function('%s', real=True)(%s)"%(f_symbol,f_symbol,var_symbol)
 
     exec(str5,locals(),globals())  
 
@@ -143,9 +169,9 @@ ord_n = 0
 
 # Greek Alphabet
 
-greek = [r'\alpha',  r'\beta', r'\gamma', r'\delta',r'\mu', r'\nu', r'\rho',r'\sigma',r'\tau', r'\omega', r'\kappa', r'\lambda', r'\epsilon', r'\eta',  r'\theta', r'\iota',r'\zeta', r'\omicron', r'\pi', r'\upsilon',r'\phi',r'\chi',r'\psi']
+greek = [r'\alpha',  r'\beta', r'\gamma', r'\delta',r'\mu', r'\nu',r'\varrho', r'\rho',r'\sigma',r'\tau', r'\omega', r'\kappa', r'\lambda',r'\varepsilon', r'\epsilon', r'\eta',r'\vartheta',  r'\theta', r'\iota',r'\zeta', r'\omicron', r'\pi', r'\upsilon', r'\varphi',r'\phi',r'\chi',r'\psi']
 
-greek_dict = {'alpha' : r'\alpha', 'beta' : r'\beta', 'gamma' : r'\gamma', 'delta': r'\delta', 'mu' : r'\mu', 'nu' : r'\nu', 'rho' : r'\rho', 'sigma' : r'\sigma', 'tau' : r'\tau', 'omega' : r'\omega', 'kappa' : r'\kappa', 'lambda' : r'\lambda', 'epsilon' : r'\epsilon', 'eta' : r'\eta', 'theta' : r'\theta', 'iota': r'\iota', 'zeta' : r'\zeta', 'omicron' : r'\omicron', 'pi' : r'\pi', 'upsilon' : r'\upsilon', 'phi': r'\phi', 'chi': r'\chi', 'psi' : r'\psi',\
+greek_dict = {'alpha' : r'\alpha', 'beta' : r'\beta', 'gamma' : r'\gamma', 'delta': r'\delta', 'mu' : r'\mu', 'nu' : r'\nu','varrho' : r'\rho', 'rho' : r'\rho', 'sigma' : r'\sigma', 'tau' : r'\tau', 'omega' : r'\omega', 'kappa' : r'\kappa', 'lambda' : r'\lambda','varepsilon' : r'\epsilon', 'epsilon' : r'\epsilon', 'eta' : r'\eta','vartheta' : r'\theta', 'theta' : r'\theta', 'iota': r'\iota', 'zeta' : r'\zeta', 'omicron' : r'\omicron', 'pi' : r'\pi', 'upsilon' : r'\upsilon','varphi' : r'\phi', 'phi': r'\phi', 'chi': r'\chi', 'psi' : r'\psi',\
     'Alpha' : r'\Alpha', 'Beta' : r'\Beta', 'Gamma' : r'\Gamma', 'Delta': r'\Delta', 'Mu' : r'\Mu', 'Nu' : r'\Nu', 'Rho' : r'\Rho', 'Sigma' : r'\Sigma', 'Tau' : r'\Tau', 'Omega' : r'\Omega', 'Kappa' : r'\Kappa', 'Lambda' : r'\Lambda', 'Epsilon' : r'\Epsilon', 'Eta' : r'\Eta', 'Theta' : r'\Theta', 'Iota': r'\Iota', 'Zeta' : r'\Zeta', 'Omicron' : r'\Omicron', 'Pi' : r'\Pi', 'Upsilon' : r'\Upsilon', 'Phi' : r'\Phi', 'Chi' : r'\Chi', 'Psi' : r'\Psi'}
 
 __all__ = ['g','christ','riemann','ricci','ricciS','G']

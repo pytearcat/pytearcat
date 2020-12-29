@@ -2,8 +2,16 @@ from tqdm import tqdm_notebook
 from itertools import product as iterprod
 from pytensor.Tensor.misc import new_ten,reload_all
 from pytensor.Tensor.core import config
-from pytensor.Tensor.core.core import diff, Rational, sympify, factor, display, Latex, Math
 from pytensor.Tensor.tensor_class import tensor_series
+from pytensor.Tensor.core.core import core_calc, display_IP, Math_IP, Latex_IP
+
+if core_calc == 'sp':
+
+    from pytensor.Tensor.core.core import diff, Rational, factor
+
+elif core_calc == 'gp':
+
+    from pytensor.Tensor.core.core import diff, divide, simplify,series
 
 def D(element,i):
 
@@ -71,6 +79,7 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
 
     description = r'Christoffel '
 
+
     if First_kind == True and Second_kind==True:
 
         if calc_fk == True:
@@ -110,7 +119,7 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
 
         #print('First Kind Christoffel already calculated.')
 
-        display(Latex(r"First Kind Christoffel Symbol $\Gamma_{\alpha \beta \gamma}$ already calculated"))
+        display_IP(Latex_IP(r"First Kind Christoffel Symbol $\Gamma_{\alpha \beta \gamma}$ already calculated"))
 
         return Christoffel
 
@@ -118,7 +127,7 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
 
         #print('Second Kind Christoffel already calculated.')
 
-        display(Latex(r"Second Kind Christoffel Symbol $\Gamma^{\alpha \beta \gamma}$ already calculated"))
+        display_IP(Latex_IP(r"Second Kind Christoffel Symbol $\Gamma^{\alpha \beta \gamma}$ already calculated"))
 
         return Christoffel
 
@@ -126,12 +135,19 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
 
         #print('First and Second kind Christoffel already calculated.')
 
-        display(Latex(r"First and Second Kind Christoffel Symbol $\Gamma_{\alpha \beta \gamma}$ and $\Gamma^{\alpha \beta \gamma}$ already calculated"))
+        display_IP(Latex_IP(r"First and Second Kind Christoffel Symbol $\Gamma_{\alpha \beta \gamma}$ and $\Gamma^{\alpha \beta \gamma}$ already calculated"))
 
         return Christoffel
 
+    if core_calc == 'gp':
 
-    for p in tqdm_notebook(iterprod(range(dim),repeat=3),total=dim**3,desc= description):
+        display_IP(Latex_IP(description))
+
+    elif core_calc == 'sp':
+
+        display_IP(Latex_IP(description))
+
+    for p in tqdm_notebook(iterprod(range(dim),repeat=3),total=dim**3):
 
         if p[2] >= p[1]:
 
@@ -141,15 +157,27 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
             
             if First_kind==True and not(calc_fk):  #First Kind ('_,_,_')
 
-                FirstTemp = Rational(1,2)*(diff(g.tensor[0][countm][countj],var[counti])+diff(g.tensor[0][countm][counti],var[countj])-diff(g.tensor[0][counti][countj],var[countm]))
+                if core_calc == 'sp':
+                
+                    FirstTemp = Rational(1,2)*(diff(g.tensor[0][countm][countj],var[counti])+diff(g.tensor[0][countm][counti],var[countj])-diff(g.tensor[0][counti][countj],var[countm]))
+                
+                elif core_calc == 'gp':
+                    
+                    FirstTemp = divide(1,2)[0]*(diff(g.tensor[0][countm][countj],var[counti])+diff(g.tensor[0][countm][counti],var[countj])-diff(g.tensor[0][counti][countj],var[countm]))
                 
                 if ord_status == True:
-                    
+
                     Christoffel.tensor[0][countm][counti][countj] = tensor_series(FirstTemp)
 
                 else:
 
-                    Christoffel.tensor[0][countm][counti][countj] = sympify(factor(FirstTemp))
+                    if core_calc == 'sp':
+
+                        Christoffel.tensor[0][countm][counti][countj] = factor(FirstTemp)
+
+                    elif core_calc == 'gp':
+
+                        Christoffel.tensor[0][countm][counti][countj] = simplify(FirstTemp)
 
                 # Simetria
                 Christoffel.tensor[0][countm][countj][counti] = Christoffel.tensor[0][countm][counti][countj]
@@ -161,16 +189,28 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
                 SecondTemp = 0
                     
                 for countk in range(dim):
-                        
-                    SecondTemp += Rational(1,2)*g.tensor[3][countk][countm]*(diff(g.tensor[0][counti][countk],var[countj]) + diff(g.tensor[0][countj][countk],var[counti]) - diff(g.tensor[0][counti][countj],var[countk]) )
+                    
+                    if core_calc == 'sp':
+
+                        SecondTemp += Rational(1,2)*g.tensor[3][countk][countm]*(diff(g.tensor[0][counti][countk],var[countj]) + diff(g.tensor[0][countj][countk],var[counti]) - diff(g.tensor[0][counti][countj],var[countk]) )
                 
+                    elif core_calc == 'gp':
+
+                        SecondTemp += divide(1,2)[0]*g.tensor[3][countk][countm]*(diff(g.tensor[0][counti][countk],var[countj]) + diff(g.tensor[0][countj][countk],var[counti]) - diff(g.tensor[0][counti][countj],var[countk]) )
+
                 if ord_status == True:
 
                     Christoffel.tensor[4][countm][counti][countj] = tensor_series(SecondTemp)
 
                 else:
+                    
+                    if core_calc == 'sp':
 
-                    Christoffel.tensor[4][countm][counti][countj] = sympify(factor(SecondTemp))
+                        Christoffel.tensor[4][countm][counti][countj] = factor(SecondTemp)
+
+                    elif core_calc == 'gp':
+
+                        Christoffel.tensor[4][countm][counti][countj] = simplify(SecondTemp)
 
                 # Simetria
                 Christoffel.tensor[4][countm][countj][counti] = Christoffel.tensor[4][countm][counti][countj]

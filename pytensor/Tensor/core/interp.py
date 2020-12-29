@@ -2,7 +2,6 @@ import re
 import numpy as np
 from collections import Counter
 from copy import deepcopy
-from .core import display, Math, Latex
 from .errors import TensorSyntaxError
 from .config import greek_dict
 from .distribute import distribute

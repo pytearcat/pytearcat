@@ -1,13 +1,19 @@
 import tqdm
 from itertools import product as iterprod 
-
-from pytensor.Tensor.core.core import Rational, sympify, factor, display, Latex
 from pytensor.Tensor.misc import new_ten,reload_all
 from pytensor.Tensor.core import config
 from pytensor.Tensor.tensor_class import construct, tensor_series
-
 from .riemann import calculate_riemann
 from .ricci import calculate_ricci, calculate_ricci_scalar
+from pytensor.Tensor.core.core import core_calc,display_IP,Latex_IP
+
+if core_calc == 'sp':
+
+    from pytensor.Tensor.core.core import diff, Rational, sympify, factor
+
+elif core_calc == 'gp':
+
+    from pytensor.Tensor.core.core import diff, divide, simplify
 
 def calculate_einstein(All = False):
 
@@ -51,14 +57,22 @@ def calculate_einstein(All = False):
 
         Einstein_list = construct('False',dim,2)
 
-        for p in tqdm.tqdm_notebook(iterprod(range(config.dim),repeat=2),total=config.dim**2,desc= r'Einstein Tensor $G_{\alpha \beta}$'):
+        display_IP(Latex_IP(r'Einstein Tensor $G_{\alpha \beta}$'))
+
+        for p in tqdm.tqdm_notebook(iterprod(range(config.dim),repeat=2),total=config.dim**2):
 
             m = p[0]
             n = p[1]
 
             if Einstein_list[m][n] == False:
 
-                EinstTemp = Ricci_local.tensor[0][m][n] - Rational(1,2)*(g[0][m][n])*R.tensor
+                if core_calc == 'sp':
+
+                    EinstTemp = Ricci_local.tensor[0][m][n] - Rational(1,2)*(g[0][m][n])*R.tensor
+
+                elif core_calc == 'gp':
+
+                    EinstTemp = Ricci_local.tensor[0][m][n] - divide(1,2)[0]*(g[0][m][n])*R.tensor
 
                 if config.ord_status == True:
 
@@ -66,7 +80,13 @@ def calculate_einstein(All = False):
 
                 else:
 
-                    Einstein.tensor[0][m][n] = sympify(factor(EinstTemp))
+                    if core_calc == 'sp':
+
+                        Einstein.tensor[0][m][n] = sympify(factor(EinstTemp))
+
+                    elif core_calc == 'gp':
+
+                        Einstein.tensor[0][m][n] = simplify(EinstTemp)
 
                 Einstein_list[m][n] = True
 
@@ -80,7 +100,7 @@ def calculate_einstein(All = False):
 
     else:
 
-        display(Latex(r"Einstein Tensor $G_{\alpha \beta}$ already calculated"))
+        display_IP(Latex_IP(r"Einstein Tensor $G_{\alpha \beta}$ already calculated"))
 
     if All == True:
 

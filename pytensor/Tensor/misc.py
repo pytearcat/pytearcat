@@ -1,9 +1,15 @@
 import numpy as np 
-from re import findall
+from re import findall,search
 from .core import config
-from .core.core import Symbol, get_name, simplify, expand, series as Series
+from .core.core import get_name, simplify, expand, series as Series,core_calc
+from .core import core
 from .core.errors import TensorSyntaxError
 from .tensor_class import Tensor
+
+if core_calc == 'gp':
+
+    import io
+    from contextlib import redirect_stdout
 
 def not_intersection(L1,L2):
     '''
@@ -35,9 +41,17 @@ def setorder(var,n):
 
     '''
 
+    if core_calc == 'gp' and not isinstance(var,core.giacpy.Pygen):
+
+        raise(TypeError("var must be a giacpy object."))
+
+    elif core_calc == 'sp' and not isinstance(var,core.Expr):
+
+        raise(TypeError("var must be a sympy object."))
+
     config.ord_status = True
 
-    config.ord_var = new_var(str(var))
+    config.ord_var = var
 
     config.ord_n = n
 
@@ -47,7 +61,13 @@ def series(element):
     Compute the series of an element.
     '''
 
-    string = "simplify(expand(Series(element, x = config.ord_var, n = config.ord_n+1)))"
+    if core_calc == 'gp':
+
+        string = "simplify(Series(element, x = config.ord_var, n = config.ord_n+1))"
+
+    elif core_calc == 'sp':
+
+        string = "simplify(expand(Series(element, x = config.ord_var, n = config.ord_n+1)))"
 
     result = eval(string,locals(),globals())
 
@@ -69,14 +89,14 @@ def new_var(*args):
     names = []
 
     for i in config.var:
-        names.append(i.name)
+        names.append(get_name(i))
 
     
     new_vars = not_intersection(names,input_vars)
     old_vars = intersection(names,input_vars)
 
     variables = []
-    def_variables = [i for i in config.var if i.name in old_vars]
+    def_variables = [i for i in config.var if get_name(i) in old_vars]
 
     if len(new_vars) != 0:
 
@@ -89,8 +109,6 @@ def new_var(*args):
         return variables[0]
 
     elif len(variables) == 0:
-
-        #print('Variable(s) already defined.')  # Quizas permitir este print cuando sea __name_ = 'main'
 
         if len(def_variables) == 1:
 
@@ -113,14 +131,13 @@ def new_con(*args):
     names = []
 
     for i in config.con:
-        names.append(i.name)
-
+        names.append(get_name(i))
     
     new_const = not_intersection(names,input_const)
     old_const = intersection(names,input_const)
 
     constants = []
-    def_constants = [i for i in config.con if i.name in old_const]
+    def_constants = [i for i in config.con if get_name(i) in old_const]
 
     if len(new_const) != 0:
 
@@ -145,8 +162,6 @@ def new_con(*args):
     else:
         
         return constants
-
-
 
 def new_fun(fun_symbol,var_symbol,overwrite=False):
 
@@ -273,7 +288,6 @@ def name_handler(string, name):
 
     fun_list =list(map(get_name,config.fun))
 
-
 def reload_all(new_module):
 
     ''' 
@@ -289,15 +303,3 @@ def reload_all(new_module):
     string = string.replace('module',new_module)
 
     return string
-
-# def reload_all(module):
-
-    # version penita de joaquin
-    
-    #     string = 'from XXXX import *'
-    
-    #     string = string.replace('XXXX',module)
-    
-    #     exec(string,locals(),globals())
-
-    # reload_all('config')

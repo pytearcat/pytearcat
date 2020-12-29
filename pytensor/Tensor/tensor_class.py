@@ -3,7 +3,14 @@ from itertools import product as iterprod
 from tqdm import tqdm_notebook
 from .core import config
 from .core.core import *
+from .core.display import display
 from .core.interp import syntax, add_examine, mul_examine, der_examine
+
+if core_calc == 'gp':
+
+    import io
+    from contextlib import redirect_stdout
+    from .core.display import gp_pretty_latex
 
 def reload_all(new_module):
 
@@ -38,10 +45,10 @@ def out_intersection(L1,I1,L2,I2):
     out = {lista[i] : i for i in range(len(lista))}
 
     ind_dict =  dict((k,i) for i,k in enumerate(L))
-    
-    ind_out = [ str(I[ind_dict[x]]) + (L[ind_dict[x]]) for x in out ]
 
-    string = ','.join(map(str, ind_out))
+    ind_out = [ I[ind_dict[x]] + L[ind_dict[x]] for x in out ]
+
+    string = ','.join(ind_out)
 
     return out, string
 
@@ -410,7 +417,13 @@ class Tensor:
 
             if n != 0:
 
-                string = 'sympify(np.nan),'*dim
+                if core_calc == 'sp':
+
+                    string = 'sympify(np.nan),'*dim
+
+                elif core_calc == 'gp':
+                    
+                    string = 'np.nan,'*dim
 
                 string = '['+string[:-1]+'],'
 
@@ -428,7 +441,13 @@ class Tensor:
 
                 #----
 
-                string = 'sympify(np.nan),'*(dim-1)
+                if core_calc == 'sp':
+
+                    string = 'sympify(np.nan),'*(dim-1)
+
+                elif core_calc == 'gp':
+                    
+                    string = 'np.nan,'*(dim-1)
 
                 string = '['+string[:-1]+'],'
 
@@ -657,10 +676,7 @@ class Tensor:
             execstr = "self.tensor[k]%s = tensor_series(self.tensor[k]%s)"%(iterstring,iterstring)
 
             exec(execstr,locals(),globals())
-
-        
-
-        
+   
     def indexcomb(self, kstring):
 
         # Recibe:
@@ -691,7 +707,7 @@ class Tensor:
 
         display_string = 'All other indexes of %s Tensor $%s$  already calculated.'%(self.name,NAME)
 
-        display(Latex(display_string))
+        display_IP(Latex_IP(display_string))
 
     def assign(self, elements, index=None, All = False,printing = True):
 
@@ -766,7 +782,7 @@ class Tensor:
                         
                     string2 += '[%s]'%l
 
-                string = '%s%s = sympify(elements%s)'%(string,string2,string2)
+                string = '%s%s = elements%s'%(string,string2,string2)
 
                 try: 
 
@@ -884,7 +900,6 @@ class Tensor:
                     
                 else:
                 
-
                     for p in iterprod(range(dim),repeat=self.n):
                                 
                         string = 'self.tensor[%s]'%k 
@@ -893,7 +908,13 @@ class Tensor:
                                 
                             string += '[%s]'%l
 
-                        string = string + '=' + string + '.simplify()'
+                        if config.ord_status == False:
+
+                            string = string + '= simplify(' + string + ')'
+
+                        else:
+
+                            string = string + '= simplify(tensor_series(' + string + '))'
 
                         #print(string)
 
@@ -1038,7 +1059,9 @@ class Tensor:
                 break 
             k += 1
 
-        init_printing()
+        if core_calc == 'sp':
+
+            init_printing()
 
         if k == len(self.orden):
 
@@ -1056,12 +1079,39 @@ class Tensor:
             #     raise ValueError('Bad index definition')
 
             if self.n == 1 and index == '^':
+                
+                if core_calc == 'sp':
 
-                display(Array(self.tensor[k]).reshape(dim,1))
+                    display_IP(Array(self.tensor[k]).reshape(dim,1))
+
+                elif core_calc == 'gp':
+
+                    f = io.StringIO()
+                    with redirect_stdout(f):
+                        print(latex(matrix(self.tensor[k].reshape(dim,1))))
+                    out = f.getvalue()
+
+                    out = out.replace(r"\\",r"\\\\").replace("\\text{","").replace("\"}\"","").replace('\"','').replace('\\}','}').replace('\\{','{')#.replace('\\\\','\\')
+
+                    display_IP(Math_IP(gp_pretty_latex(out)))
 
             else:
+
+                if core_calc == 'sp':
             
-                display(Array(self.tensor[k]))
+                    display_IP(Array(self.tensor[k]))
+
+                elif core_calc == 'gp':
+
+                    f = io.StringIO()
+                    with redirect_stdout(f):
+                        print(latex(matrix(self.tensor[k])))
+                    out = f.getvalue()
+
+                    out = out.replace(r"\\",r"\\\\").replace("\\text{","").replace("\"}\"","").replace('\"','').replace('\\}','}').replace('\\{','{')#.replace('\\\\','\\')
+
+                    display_IP(Math_IP(gp_pretty_latex(out)))
+
             
         else:
 
@@ -1091,15 +1141,34 @@ class Tensor:
                     
                 for l in index.split(','):
                         
-                    string = '%s{}%s{%s}'%(string,l,str(p[i]))
+                    if core_calc == 'gp':
+
+                        f = io.StringIO()
+                        with redirect_stdout(f):
+                            print(p[i])
+                        out = f.getvalue()
+                            
+                        string = '%s{}%s{%s}'%(string,l,out)
+                    
+                    elif core_calc == 'sp':
+
+                        string = '%s{}%s{%s}'%(string,l,str(p[i]))
 
                     i += 1
                     
                 if valor != 0:
                         
-                    string += " = %s"% (latex(valor))
+                    #string += " = %s"% (latex(valor))
                     
-                    display(Math(string))
+                    #display_IP(Math(string))
+
+                    if core_calc == 'gp':
+
+                        display(valor,string)
+
+                    elif core_calc == 'sp':
+
+                        display(valor,string)
 
                     count += 1
 
@@ -2019,8 +2088,12 @@ def tensor_series(element):
     Compute the series of an element.
     '''
 
-    string = "simplify(expand(series(element, x = config.ord_var, n = config.ord_n+1)))"
+    if core_calc == 'gp':
 
-    result = eval(string,locals(),globals())
+        result = series(element,config.ord_var,0,config.ord_n)
+
+    elif core_calc == 'sp':
+
+        result = expand(series(element, config.ord_var,0, config.ord_n+1))
 
     return result

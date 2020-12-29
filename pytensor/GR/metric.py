@@ -1,11 +1,15 @@
-#from sympy import expand, latex, Matrix, nsimplify, sympify
 from itertools import product as iterprod
-from sympy import sympify as sp_sympify, latex as sp_latex
 from pytensor.Tensor.core import config
 from pytensor.Tensor.core.core import *
 from pytensor.Tensor.misc import new_var,new_ten, reload_all
 from pytensor.Tensor.tensor_class import Tensor, tensor_series
 from pytensor.Tensor.core.config import *
+
+if core_calc == 'gp':
+
+    import io
+    from contextlib import redirect_stdout
+    from pytensor.Tensor.core.display import gp_pretty_latex
 
 
 def create_metric(ds2 = ''):
@@ -34,17 +38,42 @@ def create_metric(ds2 = ''):
 
             config.G = None
 
-    
+    if core_calc == 'sp':
 
-    #coords = ','.join([*config.coords.values()])
+        coords = ','.join(list(map(str,config.coords.values())))
 
-    coords = ','.join(list(map(str,config.coords.values())))
+    elif core_calc == 'gp':
+
+        temp = ''
+
+        for i in list(config.coords.values()):
+            
+            lol = "%s"%str(i)
+
+            lol = lol[1:-1]
+
+            temp = temp[:] + lol[:] + ','
+            
+        coords = temp[:-1]
 
     g_matrix,line_element = metric(config.fun, coords, ds2)
 
     display_ds(g_matrix)
     
-    display(Math(sp_latex(sp_sympify(Matrix(g_matrix)))))  
+    if core_calc == 'gp':
+
+        f = io.StringIO()
+        with redirect_stdout(f):
+            print(latex(matrix(g_matrix)))
+        out = f.getvalue()
+
+        out = out.replace(r"\\",r"\\\\").replace("\\text{","").replace("\"}\"","").replace('\"','').replace('\\}','}').replace('\\{','{')#.replace('\\\\','\\')
+
+        display_IP(Math_IP(gp_pretty_latex(r"%s"%out)))
+
+    elif core_calc == 'sp':
+
+        display(Matrix(g_matrix))
 
     return config.g
 
@@ -56,9 +85,21 @@ def display_ds(gmatrix):
 
     for i in coords:
 
-        if str(coords[i]) in list(greek.keys()):
+        if core_calc == 'sp':
 
-            coords[i] = greek[str(coords[i])]
+            if str(coords[i]) in list(greek.keys()):
+
+                coords[i] = greek[str(coords[i])]
+
+        elif core_calc == 'gp':
+
+            gpcoord = tolatex(coords[i]).replace("\\","")
+
+            if gpcoord in list(greek.keys()):
+
+                coords[i] = greek[gpcoord]
+
+    del(gpcoord)
 
     ds = r'ds^2 = '
 
@@ -70,23 +111,35 @@ def display_ds(gmatrix):
 
             if i == j:
 
-                if value.is_Add:
+                if core_calc == 'gp':
 
-                    ds += r'\left(%s\right)*d%s^2+'%(latex(sp_sympify(value)),coords[i])
+                    ds += r"\left(%s\right)*d%s^2+"%(tolatex(value),coords[i])
 
-                else:
-                
-                    ds += r'%s*d%s^2+'%(latex(sp_sympify(value)),coords[i])
+                elif core_calc == 'sp':
+
+                    if value.is_Add:
+
+                        ds += r"\left(%s\right)*d%s^2+"%(latex(value),coords[i])
+
+                    else:
+                    
+                        ds += r"%s*d%s^2+"%(latex(value),coords[i])
 
             elif j > i:
 
-                if value.is_Add:
+                if core_calc == 'gp':
 
-                    ds += r'\left(%s\right)*d%s*d%s+'%(latex(sp_sympify(value*2)),coords[i],coords[j])
+                    ds += r"\left(%s\right)*d%s*d%s+"%(tolatex(2*value),coords[i],coords[j])
 
-                else:
+                elif core_calc == 'sp':
 
-                    ds += r'%s*d%s*d%s+'%(latex(sp_sympify(value*2)),coords[i],coords[j])
+                    if value.is_Add:
+
+                        ds += r"\left(%s\right)*d%s*d%s+"%(latex(value*2),coords[i],coords[j])
+
+                    else:
+
+                        ds += r"%s*d%s*d%s+"%(latex(value*2),coords[i],coords[j])
 
     ds = ds[:-1]
 
@@ -95,7 +148,13 @@ def display_ds(gmatrix):
     ds = ds.replace(r'**',r'^')
     ds = ds.replace(r'*',r' \cdot ')
 
-    display(Math(ds))
+    if core_calc == 'gp':
+
+        display_IP(Math_IP(gp_pretty_latex(ds)))
+        
+    elif core_calc == 'sp':
+
+        display_IP(Math_IP(ds))
         
 
 def metric(functions, coords, ds2):
@@ -151,8 +210,14 @@ def create_metric_matrix(dim, variables_string, ds_input):
 
         # HERE WE CREATE THE DIFFERENTIAL COORDINATES WITH THE INPUT NAMES: e.g. dt,dx,dy,dz
 
-        string = "d%s = Symbol('d%s')" % (COORDENADA[i],COORDENADA[i])
+        if core_calc == 'gp':
+
+            string = "d%s = giac('d%s')" % (COORDENADA[i],COORDENADA[i])
         
+        elif core_calc == 'sp':
+
+            string = "d%s = Symbol('d%s')" % (COORDENADA[i],COORDENADA[i])
+
         exec(string,locals(),globals())
     
     #HERE WE ASSIGN A INDEX NUMBER TO EVERY COORDINATE CREATED BY DE USER 
@@ -170,20 +235,37 @@ def create_metric_matrix(dim, variables_string, ds_input):
     c = config.coords
     
     for i,j in iterprod(range(dim),repeat=2):
-    
-        factor='d%s*d%s'%(c[i],c[j])
         
-        element = expand(ds2)
+        if core_calc == 'sp':
 
-        coef = eval(r"element.coeff(%s)"%factor,locals(),globals())
+            factor='d%s*d%s'%(c[i],c[j])
 
-        coef = sympify(nsimplify(coef))
+            element = expand(ds2)
+            
+            coef = eval(r"element.coeff(%s)"%factor,locals(),globals())
+
+            coef = nsimplify(coef)
+
+        elif core_calc == 'gp':
+
+            factor0='d%s'%c[i]
+            factor1='d%s'%c[j]
+
 
         if i!=j:
+
+            if core_calc == 'gp':
+
+                coef = eval(r"coeff(coeff(ds2,%s,1),%s,1)"%(factor0,factor1),locals(),globals())
+
 
             g_matrix[i,j] =coef/2
             
         else:
+
+            if core_calc == 'gp':
+
+                coef = eval(r"coeff(ds2,%s,2)"%factor0,locals(),globals())
 
             g_matrix[i,j] =coef 
     
@@ -199,8 +281,13 @@ def create_metric_matrix(dim, variables_string, ds_input):
     g = new_ten('g',2)
 
     # SOLO EL TENSOR g uv TENDRA DOS OPCIONES DD Y UU, NO HAY DU Y UD PORQUE ESOS SIEMPRE SERAN IDENTIDAD, LUEGO
-    
-    identidad = eye(dim)
+    if core_calc == 'gp':
+
+        identidad = idn(dim)
+
+    elif core_calc == 'sp':
+
+        identidad = eye(dim)
 
     for p in iterprod(range(dim),repeat=2):
 

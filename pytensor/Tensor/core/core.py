@@ -1,37 +1,49 @@
+from IPython.display import display as display_IP, Math as Math_IP, Latex as Latex_IP
 
-__core = 'sp' # sympy
-#__core = 'se' # symengine
+core_calc = 'gp'
 
-if __core == 'sp':
+if core_calc == 'gp':
+
+    from giacpy import *
+    import io
+    from contextlib import redirect_stdout
+
+    def get_name(element):
+        
+        f = io.StringIO()
+        with redirect_stdout(f):
+            print(element)
+        element = f.getvalue()
+
+        return element[:-1]
+
+
+    def tolatex(element):
+
+        f = io.StringIO()
+        with redirect_stdout(f):
+            print(latex(element))
+        element = f.getvalue()
+
+        string =  element[1:-2]
+
+        return string
+
+elif core_calc == 'sp':
 
     from sympy import *
-    # import sympy as sp
-    # from sympy import sympify
-    # from sympy import Symbol, Function
-    # from sympy import diff, Rational
-    # from sympy import zeros, eye
-    # from sympy import init_printing, latex
+    
     def get_name(f):
 
         return f.name
 
-elif __core == 'se':
+elif core_calc == 'se':
 
     from symengine import *
-    # import symengine as se
-    # from symengine import sympify
-    # from symengine import Symbol, Function 
-    # from symengine import diff, Rational
-    # from symengine import zeros, eye
-    # from symengine import init_printing, latex
+
     def get_name(f):
 
         return f.get_name()
-
-from sympy import factor, simplify, series, nsimplify, expand, Matrix # Si o si deben ser de sympy
-from sympy.tensor.array import Array
-from IPython.display import display, Math, Latex
-
 
 
 
