@@ -1,6 +1,19 @@
 from IPython.display import display as display_IP, Math as Math_IP, Latex as Latex_IP
+from platform import system
 
-core_calc = 'gp'
+OS = system()
+
+if OS == "Darwin": # macOS
+    
+    core_calc = "sp"
+    
+elif OS == "Windows" or OS == "Linux":
+    
+    core_calc = "gp"
+    
+else: # Not determined
+
+    core_calc = "sp"
 
 if core_calc == 'gp':
 
