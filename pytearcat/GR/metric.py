@@ -1,15 +1,15 @@
 from itertools import product as iterprod
-from pytensor.Tensor.core import config
-from pytensor.Tensor.core.core import *
-from pytensor.Tensor.misc import new_var,new_ten, reload_all
-from pytensor.Tensor.tensor_class import Tensor, tensor_series
-from pytensor.Tensor.core.config import *
+from pytearcat.Tensor.core import config
+from pytearcat.Tensor.core.core import *
+from pytearcat.Tensor.misc import new_var,new_ten, reload_all
+from pytearcat.Tensor.tensor_class import Tensor, tensor_series
+from pytearcat.Tensor.core.config import *
 
 if core_calc == 'gp':
 
     import io
     from contextlib import redirect_stdout
-    from pytensor.Tensor.core.display import gp_pretty_latex
+    from pytearcat.Tensor.core.display import gp_pretty_latex
 
 
 def create_metric(ds2 = ''):

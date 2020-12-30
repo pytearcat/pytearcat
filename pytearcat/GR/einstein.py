@@ -1,19 +1,19 @@
 import tqdm
 from itertools import product as iterprod 
-from pytensor.Tensor.misc import new_ten,reload_all
-from pytensor.Tensor.core import config
-from pytensor.Tensor.tensor_class import construct, tensor_series
+from pytearcat.Tensor.misc import new_ten,reload_all
+from pytearcat.Tensor.core import config
+from pytearcat.Tensor.tensor_class import construct, tensor_series
 from .riemann import calculate_riemann
 from .ricci import calculate_ricci, calculate_ricci_scalar
-from pytensor.Tensor.core.core import core_calc,display_IP,Latex_IP
+from pytearcat.Tensor.core.core import core_calc,display_IP,Latex_IP
 
 if core_calc == 'sp':
 
-    from pytensor.Tensor.core.core import diff, Rational, sympify, factor
+    from pytearcat.Tensor.core.core import diff, Rational, sympify, factor
 
 elif core_calc == 'gp':
 
-    from pytensor.Tensor.core.core import diff, divide, simplify
+    from pytearcat.Tensor.core.core import diff, divide, simplify
 
 def calculate_einstein(All = False):
 

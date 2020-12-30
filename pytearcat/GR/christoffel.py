@@ -1,17 +1,17 @@
 from tqdm import tqdm_notebook
 from itertools import product as iterprod
-from pytensor.Tensor.misc import new_ten,reload_all
-from pytensor.Tensor.core import config
-from pytensor.Tensor.tensor_class import tensor_series
-from pytensor.Tensor.core.core import core_calc, display_IP, Math_IP, Latex_IP
+from pytearcat.Tensor.misc import new_ten,reload_all
+from pytearcat.Tensor.core import config
+from pytearcat.Tensor.tensor_class import tensor_series
+from pytearcat.Tensor.core.core import core_calc, display_IP, Math_IP, Latex_IP
 
 if core_calc == 'sp':
 
-    from pytensor.Tensor.core.core import diff, Rational, factor
+    from pytearcat.Tensor.core.core import diff, Rational, factor
 
 elif core_calc == 'gp':
 
-    from pytensor.Tensor.core.core import diff, divide, simplify,series
+    from pytearcat.Tensor.core.core import diff, divide, simplify,series
 
 def D(element,i):
 

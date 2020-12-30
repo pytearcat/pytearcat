@@ -1,10 +1,10 @@
 from tqdm import tqdm_notebook
 from itertools import product as iterprod 
 
-from pytensor.Tensor.misc import new_ten,reload_all
-from pytensor.Tensor.core.core import factor, display_IP, Latex_IP,core_calc,simplify
-from pytensor.Tensor.core import config
-from pytensor.Tensor.tensor_class import construct, tensor_series
+from pytearcat.Tensor.misc import new_ten,reload_all
+from pytearcat.Tensor.core.core import factor, display_IP, Latex_IP,core_calc,simplify
+from pytearcat.Tensor.core import config
+from pytearcat.Tensor.tensor_class import construct, tensor_series
 
 from .christoffel import calculate_christoffel, D
 
