@@ -1,2 +1,2 @@
-# pytensor
-Repository for the pytensor package.
+# pytearcat
+Repository for the pytearcat package.
