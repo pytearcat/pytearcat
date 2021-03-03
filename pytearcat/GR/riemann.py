@@ -204,7 +204,7 @@ def calculate_riemann(default = True, All = False):
 
     if All == True:
 
-        Riemann.indexcomb('_,_,_,_')
+        Riemann.indexcomb('^,_,_,_')
 
     Riemann.space()
 
