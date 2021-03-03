@@ -299,6 +299,10 @@ def der_examine(b):
         raise(TensorSyntaxError("Syntax Error. Problem with the '_' or '^' symbols."))
 
 def syntax(string,rank):
+
+    '''
+    This function verifies if the syntax for the requested tensor is correct.
+    '''
     
     lista = string.split(',')
 
