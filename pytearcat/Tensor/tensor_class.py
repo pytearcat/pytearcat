@@ -325,7 +325,7 @@ def subirindice(tensor,kstring):
 
                         bla = 'tensor.tensor[index2]%s = temporal'%iterstring2      # Esto asigna a los indices que queremos llegar
 
-                    print('En subir indice\t', iterg, iterstring, iterstring2)
+                    #print('En subir indice\t', iterg, iterstring, iterstring2)
 
                     exec(bla,globals(),locals())
 
