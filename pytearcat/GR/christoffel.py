@@ -2,7 +2,7 @@ from tqdm import tqdm_notebook
 from itertools import product as iterprod
 from pytearcat.Tensor.misc import new_ten,reload_all
 from pytearcat.Tensor.core import config
-from pytearcat.Tensor.tensor_class import tensor_series
+from pytearcat.Tensor.tensor_class import tensor_series, Tensor
 from pytearcat.Tensor.core.core import core_calc, display_IP, Math_IP, Latex_IP
 
 if core_calc == 'sp':
@@ -46,6 +46,43 @@ def D(element,i):
 
         print("ERROR IN THE DERIVATIVE D OF A TENSOR")
 
+class Christoffel(Tensor):
+
+    def __init__(self):
+
+        super().__init__('Christoffel',3)
+
+    def __call__(self,str_index):
+
+        lista = str_index.split(',')
+
+        updn = [symbol[0] for symbol in lista]
+
+        if updn[1] != '_' or updn[2] != '_':
+
+            raise SyntaxError("Cristoffel can be only first or second kind.")
+
+        else:
+
+            return super().__call__(str_index)
+
+    def display(self, index=None, aslist = None):
+
+        if index is None:
+
+            super().display("_,_,_",aslist)
+            super().display("^,_,_",aslist)
+            
+        elif index == "^,_,_" or index == "_,_,_":
+
+            super().display(index,aslist)
+
+        else:
+
+            raise SyntaxError("Cristoffel can be only first or second kind.")
+
+
+
 
 def calculate_christoffel(First_kind=True,Second_kind=True):
     
@@ -61,7 +98,9 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
 
     if config.christ is None:
 
-        Christoffel = new_ten('Christoffel',3)
+        #Christoffel = new_ten('Christoffel',3)
+
+        Christoffel = config.create_ten("Christoffel",Christoffel())
 
         config.christ = Christoffel
 
