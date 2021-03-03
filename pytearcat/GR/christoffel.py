@@ -58,9 +58,9 @@ class Christoffel(Tensor):
 
         updn = [symbol[0] for symbol in lista]
 
-        if updn[1] != '_' or updn[2] != '_':
+        if updn[1] == '^' or updn[2] == '^':
 
-            raise SyntaxError("Cristoffel can be only first or second kind.")
+            raise SyntaxError("Christoffel can be only first or second kind.")
 
         else:
 
@@ -79,7 +79,7 @@ class Christoffel(Tensor):
 
         else:
 
-            raise SyntaxError("Cristoffel can be only first or second kind.")
+            raise SyntaxError("Christoffel can be only first or second kind.")
 
 
 
@@ -97,8 +97,6 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
     
 
     if config.christ is None:
-
-        #Christoffel = new_ten('Christoffel',3)
 
         Christoffel = config.create_ten("Christoffel",Christoffel())
 
@@ -166,7 +164,7 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
 
         #print('Second Kind Christoffel already calculated.')
 
-        display_IP(Latex_IP(r"Second Kind Christoffel Symbol $\Gamma^{\alpha \beta \gamma}$ already calculated"))
+        display_IP(Latex_IP(r"Second Kind Christoffel Symbol $\Gamma^{\alpha}_{\beta \gamma}$ already calculated"))
 
         return Christoffel
 
@@ -174,7 +172,7 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
 
         #print('First and Second kind Christoffel already calculated.')
 
-        display_IP(Latex_IP(r"First and Second Kind Christoffel Symbol $\Gamma_{\alpha \beta \gamma}$ and $\Gamma^{\alpha \beta \gamma}$ already calculated"))
+        display_IP(Latex_IP(r"First and Second Kind Christoffel Symbol $\Gamma_{\alpha \beta \gamma}$ and $\Gamma^{\alpha}_{\beta \gamma}$ already calculated"))
 
         return Christoffel
 
