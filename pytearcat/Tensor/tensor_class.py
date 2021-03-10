@@ -1,6 +1,7 @@
 import numpy as np 
 from itertools import product as iterprod
 from tqdm import tqdm_notebook
+from warnings import warn
 from .core import config
 from .core.core import *
 from .core.display import display
@@ -11,6 +12,7 @@ if core_calc == 'gp':
     import io
     from contextlib import redirect_stdout
     from .core.display import gp_pretty_latex
+    from .core.core import sp_simplify, sp_sympify, sp_latex, sp_Array
 
 def reload_all(new_module):
 
@@ -1035,7 +1037,11 @@ class Tensor:
 
         self.space()
 
-    def display(self, index=None, aslist = None):
+    def display(self, index=None, aslist = None, simplify = False):
+
+        if core_calc == 'sp' and simplify == True:
+
+            warn("The simplify argument is intended to be used only with giacpy.\n The result is not affected when using Sympy.")
         
         if index is None:
 
@@ -1103,14 +1109,27 @@ class Tensor:
 
                 elif core_calc == 'gp':
 
-                    f = io.StringIO()
-                    with redirect_stdout(f):
-                        print(latex(matrix(self.tensor[k])))
-                    out = f.getvalue()
+                    if simplify == False
 
-                    out = out.replace(r"\\",r"\\\\").replace("\\text{","").replace("\"}\"","").replace('\"','').replace('\\}','}').replace('\\{','{')#.replace('\\\\','\\')
+                        f = io.StringIO()
+                        with redirect_stdout(f):
+                            print(latex(matrix(self.tensor[k])))
+                        out = f.getvalue()
 
-                    display_IP(Math_IP(gp_pretty_latex(out)))
+                        out = out.replace(r"\\",r"\\\\").replace("\\text{","").replace("\"}\"","").replace('\"','').replace('\\}','}').replace('\\{','{')#.replace('\\\\','\\')
+
+                        display_IP(Math_IP(gp_pretty_latex(out)))
+
+                    else:
+
+                        f = io.StringIO()
+                        with redirect_stdout(f):
+                            print((self.tensor[k]))
+                        out = f.getvalue()
+
+                        string = sp_latex(sp_simplify(sp_Array(sp_sympify(out))))
+
+                        display_IP(Math_IP(string))
 
             
         else:
@@ -1164,7 +1183,22 @@ class Tensor:
 
                     if core_calc == 'gp':
 
-                        display(valor,string)
+                        if simplify == False:
+
+                            display(valor,string)
+
+                        else:
+
+                            f = io.StringIO()
+                            with redirect_stdout(f):
+                                print(valor)
+                            out = f.getvalue()
+
+                            string2 = sp_latex(sp_simplify(sp_sympify(out)))
+
+                            string = "%s = %s"%(string,string2)
+
+                            display_IP(Math_IP(string))
 
                     elif core_calc == 'sp':
 
