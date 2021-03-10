@@ -256,7 +256,7 @@ def create_metric_matrix(dim, variables_string, ds_input):
 
             if core_calc == 'gp':
 
-                coef = eval(r"coeff(coeff(ds2,%s,1),%s,1)"%(factor0,factor1),locals(),globals())
+                coef = eval(r"simplify(coeff(coeff(ds2,%s,1),%s,1))"%(factor0,factor1),locals(),globals())
 
 
             g_matrix[i,j] =coef/2
@@ -265,7 +265,7 @@ def create_metric_matrix(dim, variables_string, ds_input):
 
             if core_calc == 'gp':
 
-                coef = eval(r"coeff(ds2,%s,2)"%factor0,locals(),globals())
+                coef = eval(r"simplify(coeff(ds2,%s,2))"%factor0,locals(),globals())
 
             g_matrix[i,j] =coef 
     
