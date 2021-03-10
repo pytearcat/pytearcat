@@ -8,13 +8,13 @@ __missing = __required - __installed
 
 if len(__missing) != 0:
 
-    if 'giacpy' in _missing and len(__missing) == 1:
+    if 'giacpy' in __missing and len(__missing) == 1:
 
         pass
 
     else:
 
-        raise(EnvironmentError("There are missing modules: %s"(missing-{'giacpy'})))
+        raise(EnvironmentError("There are missing modules: %s"(__missing-{'giacpy'})))
 
 if 'giacpy' in __installed:
 
