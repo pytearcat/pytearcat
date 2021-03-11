@@ -1109,7 +1109,7 @@ class Tensor:
 
                 elif core_calc == 'gp':
 
-                    if simplify == False
+                    if simplify == False:
 
                         f = io.StringIO()
                         with redirect_stdout(f):
