@@ -3,7 +3,7 @@ import numpy as np
 from collections import Counter
 from copy import deepcopy
 from .errors import TensorSyntaxError
-from .config import greek_dict
+from .greeks import greek_dict
 from .distribute import distribute
 
 

@@ -40,7 +40,7 @@ else:
 
 if core_calc == 'gp':
 
-    from giacpy import *
+    from .gpwrap import *
     import io
     from contextlib import redirect_stdout
     from sympy import simplify as sp_simplify, sympify as sp_sympify, latex as sp_latex, Array as sp_Array

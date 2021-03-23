@@ -50,8 +50,6 @@ def create_metric(ds2 = ''):
             
             lol = "%s"%str(i)
 
-            lol = lol[1:-1]
-
             temp = temp[:] + lol[:] + ','
             
         coords = temp[:-1]
@@ -178,6 +176,8 @@ def metric(functions, coords, ds2):
     #     config.coords = coord_index(variables_string)
     
     variables_string = coords
+
+    print('en metric:',coords)
 
     if ds2 == '':
         
