@@ -2,6 +2,7 @@ from itertools import product as iterprod
 from .core import core, config
 from .misc import new_ten, setorder
 from .tensor_class import ordenar,construct
+#from .LeviCivita import values, LeviCivita
 
 def tdata_construct(elem,dim,n):
 
@@ -17,65 +18,58 @@ def tdata_construct(elem,dim,n):
 
     return eval(string)
 
-def LeviCivita(name='LeviCivita'):
+# def LeviCivita():
     
-    '''
-    LeviCivita Symbol.
+#     '''
+#     LeviCivita Symbol.
 
-    By default as the spatial coordinates permutations i,j,k...
+#     By default as the spatial coordinates permutations i,j,k...
 
-    If time == True then it corresponds to the space-time coordinates permutations.
+#     If time == True then it corresponds to the space-time coordinates permutations.
     
-    '''
+#     '''
 
-    rank = config.dim
+#     rank = config.dim
 
-    Ten = new_ten(name,rank)
+#     Ten = LeviCivita()
 
-    iterstring = ''
-    Larg = ''
-    
-    for i in range(rank):
-            
-        iterstring += '[p[%d]]'%i
-        Larg += 'p[%d],'%i
-    
-    Larg = Larg[:-1]
-    
-    for k in range(2**rank):
+#     vals, order = values(rank,rank)
 
-        for p in iterprod(range(rank), repeat = rank):
-            
-            string = 'Ten.tensor[k]%s = core.LeviCivita(%s)'%(iterstring,Larg)
-            
-            exec(string,locals(),globals())
+#     for i,j in enumerate(order):
 
-    rank = rank - 1
+#         iterstring = '[0][' + ']['.join(j.astype(str)) + ']' 
 
-    
-    Ten.tensor_sp = tdata_construct(0,rank,rank)
+#         string = 'Ten.tensor%s = vals[%d]'%(iterstring,i)
 
-    iterstring = ''
-    Larg = ''
-    
-    for i in range(rank):
-            
-        iterstring += '[p[%d]]'%i
-        Larg += 'p[%d],'%i
-    
-    Larg = Larg[:-1]
+#         exec(string,locals(),globals())
 
 
-    
-    for k in range(2**rank):
+#     for k in range(1,rank):
 
-        for p in iterprod(range(rank), repeat = rank):
+#         string = 'Ten.tensor[%d] = Ten.tensor[0]'%k
 
-            string = 'Ten.tensor_sp[k]%s = core.LeviCivita(%s)'%(iterstring,Larg)
-            
-            exec(string,locals(),globals())
+#         exec(string,locals(),globals())
 
-    return Ten
+#     rank = rank - 1
+
+#     vals, order = values(rank,rank)
+
+#     for i,j in enumerate(order):
+
+#         iterstring = '[0][' + ']['.join(j.astype(str)) + ']' 
+
+#         string = 'Ten.tensor_sp%s = vals[%d]'%(iterstring,i)
+
+#         exec(string,locals(),globals())
+
+#     for k in range(1,rank):
+
+#         string = 'Ten.tensor_sp[%d] = Ten.tensor_sp[0]'%k
+
+#         exec(string,locals(),globals())
+
+
+#     return Ten
 
 def KroneckerDelta(name='KroneckerDelta'):
     
