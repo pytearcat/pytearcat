@@ -11,6 +11,10 @@ if core_calc == 'gp':
     import io
     from contextlib import redirect_stdout
 
+def set_space_time(x=True):
+
+    config.space_time = x
+
 def not_intersection(L1,L2):
     '''
     example: not_intersection(conf_vars,new_vars)

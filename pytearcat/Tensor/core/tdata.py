@@ -208,8 +208,6 @@ class Tdata:
         
     def __mul__(self,other):
 
-        print('MUL')
-
         exec(reload_all('config'),locals(),globals())
 
         if config.space_time == True:
@@ -359,8 +357,6 @@ class Tdata:
             return Tdata(self.full_index,return_tensor)
         
     def __rmul__(self,other):
-
-        print('RMUL')
 
         exec(reload_all('config'),locals(),globals())
 

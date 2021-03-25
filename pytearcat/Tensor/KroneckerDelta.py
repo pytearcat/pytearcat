@@ -1,3 +1,4 @@
+
 import numpy as np
 from itertools import permutations, product as iterprod
 from .tensor_class import ordenar, compare, Tensor
@@ -14,26 +15,22 @@ if core_calc == 'gp':
     from .core.display import gp_pretty_latex
     from .core.core import sp_simplify, sp_sympify, sp_latex, sp_Array
 
-class LeviCivita():
+
+
+class KroneckerDelta():
 
     
-    def __init__(self,convention=1):
+    def __init__(self):
 
         dim = config.dim
 
-        self.name = 'LeviCivitaSymbol'
+        self.name = 'KroneckerDelta'
 
-        self.n = dim
+        self.n = 2
 
         self.orden = ordenar(self.n)
 
         self.indexes = np.full((2**self.n), False)
-
-        if convention != 1 and convention != -1:
-
-            raise(ValueError("Convention must be 1 or -1."))
-
-        self.convention = convention
 
         if core_calc == 'sp':
 
@@ -65,52 +62,33 @@ class LeviCivita():
 
         string = '['+string[:-1]+'],'
 
-        for k in range(self.n-1):
+        for k in range(self.n):
 
             string = '['+(string*(dim-1))[:-1]+'],'  
 
-        string = 'self.tensor_sp = [' + (string*(2**(self.n-1)))[:-1]+']'
+        string = 'self.tensor_sp = [' + (string*(2**(self.n)))[:-1]+']'
 
         exec(string)# primer casillero corresponde al indice de la combinacion de indices (^,_,_,^,_), son 2**n combinaciones, los demas son primer indice, segundo indice, tercer indice, .... del tensor cada uno de ellos va desde 0 a dim, donde hay n dimnesiones
 
         # ----------------------------------------
 
-        rank = config.dim
+        if core_calc == 'sp':
 
-        vals, order = values(rank,rank)
+            Eye = eye(dim)
 
-        for i,j in enumerate(order):
+            self.__assign(Eye.tolist(),'_,_')
+            self.__assign(Eye.tolist(),'^,_')
+            self.__assign(Eye.tolist(),'_,^')
+            self.__assign(Eye.tolist(),'^,^')
+        
+        elif core_calc == 'gp':
 
-            iterstring = '[0][' + ']['.join(j.astype(str)) + ']' 
+            Eye = identity(dim)
 
-            string = 'self.tensor%s = vals[%d]*self.convention'%(iterstring,i)
-
-            exec(string,locals(),globals())
-
-
-        for k in range(1,2**rank):
-
-            string = 'self.tensor[%d] = self.tensor[0]'%k
-
-            exec(string,locals(),globals())
-
-        rank = rank - 1
-
-        vals, order = values(rank,rank)
-
-        for i,j in enumerate(order):
-
-            iterstring = '[0][' + ']['.join(j.astype(str)) + ']' 
-
-            string = 'self.tensor_sp%s = vals[%d]*self.convention'%(iterstring,i)
-
-            exec(string,locals(),globals())
-
-        for k in range(1,2**rank):
-
-            string = 'self.tensor_sp[%d] = self.tensor_sp[0]'%k
-
-            exec(string,locals(),globals())
+            self.__assign(list(Eye),'_,_')
+            self.__assign(list(Eye),'^,_')
+            self.__assign(list(Eye),'_,^')
+            self.__assign(list(Eye),'^,^')
 
     def __repr__(self):
 
@@ -153,7 +131,7 @@ class LeviCivita():
 
             ten_call = 'tensor_sp'
 
-            syntax(str_index,self.n - 1)
+            syntax(str_index,self.n)
 
         lista = str_index.split(',')
 
@@ -257,7 +235,100 @@ class LeviCivita():
 
                 return var 
 
+    def __assign(self, elements, index=None,All = False,printing = False):
 
+        '''
+        # Revisar el nombre de printing. Puede ser Verbose
+
+        It assigns the elements to the tensor on the corresponding index. 
+        If All = True, then it computes the thensor with the rest of the indexes combinations.
+
+        index = '^,^,_'
+        elements = [[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]]]
+
+        NOTE: the argument "elements" has to be shaped like the example so the indexation goes like elements[i][j][k]
+
+        '''
+        dim = config.dim
+
+        if isinstance(elements,Tdata):
+
+            new_lista = index.split(',')
+
+            old_lista = elements.full_index.split(',')
+
+            rank = len(old_lista)
+
+            New_data = construct(0,dim,rank)
+
+            new_index = ''
+            old_index = ''
+
+            for i in range(rank):
+
+                new_index += '[p[%d]]'%i
+
+            for j in range(rank):
+
+                i = 0
+
+                while old_lista[j][1:] != new_lista[i][1:]:
+
+                    i += 1
+
+                old_index += '[p[%d]]'%i
+
+            for p in iterprod(range(dim),repeat=rank):
+
+                string = 'New_data%s = elements.elements%s'%(new_index,old_index)
+
+                exec(string,locals(),globals())
+
+            new_updn = (',').join(x[0] for x in new_lista)
+
+            self.assign(New_data,new_updn,printing=False)
+
+        elif index == None:
+
+            print(ERROR)
+
+        else:
+
+            dim = config.dim
+
+            k = compare(self.n,index) # numero correspondiente a '^,^' o '_,^', etc
+
+
+            for p in iterprod(range(dim),repeat=self.n):
+                            
+                string = 'self.tensor[%s]'%k 
+                string2 = ''
+
+                for l in p:
+                        
+                    string2 += '[%s]'%l
+
+                string = '%s%s = elements%s'%(string,string2,string2)
+
+                try: 
+
+                    exec(string,locals(),globals())
+
+                except AttributeError:
+
+                    pass
+            
+            self.indexes[k] = True
+
+            if printing == True:
+        
+                print('Elements assigned correctly to the components %s'%index)
+
+            if All == True:
+
+                self.indexcomb(index)
+
+        self.space()
 
     def space(self):
         
@@ -286,8 +357,6 @@ class LeviCivita():
                 exec_str = 'self.tensor_sp[%d]%s = self.tensor[%d]%s'%(index,iterstring,index,iterstring2)
 
                 exec(exec_str,locals(),globals())
-
-
 
     def display(self, index=None, aslist = None, simplify = False, spatial = False):
 
@@ -467,21 +536,17 @@ class LeviCivita():
 
                 print('All components are zero')
 
-
     def display_spatial(self, index=None, aslist = None, simplify = False):
 
         if core_calc == 'sp' and simplify == True:
 
             warn("The simplify argument is intended to be used only with giacpy.\n The result is not affected when using Sympy.")
         
-        orden_sp = ordenar(self.n - 1)
-
-
         if index is None:
 
-            index = orden_sp[0]
+            index = self.orden[0]
 
-        rank = self.n - 1
+        rank = self.n
 
         if aslist == None:
 
@@ -496,7 +561,7 @@ class LeviCivita():
         dim = config.dim - 1 # Se elimina la dimension temporal
         
         k = 0
-        for i in orden_sp:
+        for i in self.orden:
             if i == index:
                 break 
             k += 1
@@ -505,7 +570,7 @@ class LeviCivita():
 
             init_printing()
 
-        if k == len(orden_sp):
+        if k == len(self.orden):
 
             raise ValueError('Bad index definition')
 
@@ -646,65 +711,3 @@ class LeviCivita():
             if count == 0:
 
                 print('All components are zero')
-
-
-
-
-
-
-
-def arePermsEqualParity(perm0, perm1):
-    """Check if 2 permutations are of equal parity.
-
-    Assume that both permutation lists are of equal length
-    and have the same elements. No need to check for these
-    conditions.
-    """
-    perm1 = list(perm1) ## copy this into a list so we don't mutate the original
-    perm1_map = dict((v, i) for i,v in enumerate(perm1))
-    transCount = 0
-    for loc, p0 in enumerate(perm0):
-        p1 = perm1[loc]
-        if p0 != p1:
-            sloc = perm1_map[p0]                       # Find position in perm1
-            perm1[loc], perm1[sloc] = p0, p1           # Swap in perm1
-            perm1_map[p0], perm1_map[p1] = loc, sloc   # Swap the map
-            transCount += 1
-    # Even number of transpositions means equal parity
-    value = (transCount % 2) == 0
-    
-    if value:
-        
-        return 1
-    
-    else:
-        
-        return -1
-    
-
-def values(n,dim):
-    
-    x = np.linspace(0,dim-1,dim)
-    
-    elements = np.asarray(list(iterprod(x,repeat=n)),dtype=int) 
-    
-    parity = np.zeros(dim**n,dtype=int)
-    
-    for pos,i in enumerate(elements):
-        
-        #print(i)
-        
-        if any(list(i).count(j) > 1 for j in i): # si hay repetidos
-            
-            #print(0)
-            
-            parity[pos] = 0
-        
-        else: # no estan repetidos
-        
-            parity[pos] = arePermsEqualParity(x,i)
-        
-            #print(parity[pos])
-        
-    return parity,elements
-

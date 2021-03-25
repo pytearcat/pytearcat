@@ -437,7 +437,7 @@ class Tensor:
 
         syntax(str_index,self.n)
 
-        if config.space_time == True:
+        if config.space_time == 1:
 
             dim = config.dim
 

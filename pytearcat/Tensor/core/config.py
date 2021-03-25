@@ -169,4 +169,4 @@ ord_var = ''
 
 ord_n = 0
 
-__all__ = ['g','christ','riemann','ricci','ricciS','G']
+__all__ = ['g','christ','riemann','ricci','ricciS','G','space_time']

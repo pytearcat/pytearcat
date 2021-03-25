@@ -77,6 +77,8 @@ def KroneckerDelta(name='KroneckerDelta'):
     Kronecker Delta considered as a rank 2 tensor.
     
     '''
+
+    ## en giacpy es gp.identity
     
     dim = config.dim
     
