@@ -1,9 +1,11 @@
 import numpy as np
 from itertools import permutations, product as iterprod
-from .tensor_class import ordenar
+from .tensor_class import ordenar, compare, Tensor
 from .core import config
 from .core.core import *
 from .core.display import display
+from .core.interp import syntax
+from .core.tdata import Tdata, construct
 
 if core_calc == 'gp':
 
@@ -61,7 +63,7 @@ class LeviCivita():
 
             string = '['+(string*(dim-1))[:-1]+'],'  
 
-        string = 'self.tensor_sp = [' + (string*(2**self.n))[:-1]+']'
+        string = 'self.tensor_sp = [' + (string*(2**(self.n-1)))[:-1]+']'
 
         exec(string)# primer casillero corresponde al indice de la combinacion de indices (^,_,_,^,_), son 2**n combinaciones, los demas son primer indice, segundo indice, tercer indice, .... del tensor cada uno de ellos va desde 0 a dim, donde hay n dimnesiones
 
@@ -82,7 +84,7 @@ class LeviCivita():
             exec(string,locals(),globals())
 
 
-        for k in range(1,rank):
+        for k in range(1,2**rank):
 
             string = 'self.tensor[%d] = self.tensor[0]'%k
 
@@ -100,7 +102,7 @@ class LeviCivita():
 
             exec(string,locals(),globals())
 
-        for k in range(1,rank):
+        for k in range(1,2**rank):
 
             string = 'self.tensor_sp[%d] = self.tensor_sp[0]'%k
 
@@ -133,19 +135,21 @@ class LeviCivita():
         Funcionando para space only
         '''
 
-        syntax(str_index,self.n)
-
         if config.space_time == True:
 
             dim = config.dim
 
             ten_call = 'tensor'
 
+            syntax(str_index,self.n)
+
         else:
 
             dim = config.dim - 1
 
             ten_call = 'tensor_sp'
+
+            syntax(str_index,self.n - 1)
 
         lista = str_index.split(',')
 
@@ -223,13 +227,13 @@ class LeviCivita():
 
                 for p in iterprod(range(dim), repeat = new_rank):
 
-                    var = 0
+                    var_temp = 0
 
                     for q in range(dim):
 
-                        var += eval('self.%s[Nindex]%s'%(ten_call,old_string),locals(),globals())
+                        var_temp += eval('self.%s[Nindex]%s'%(ten_call,old_string),locals(),globals())
 
-                        exec('temp%s = var'%new_string,locals(),globals())
+                        exec('temp%s = var_temp'%new_string,locals(),globals())
 
                 data_result = Tdata(return_string,temp)
 
@@ -281,7 +285,11 @@ class LeviCivita():
 
 
 
-    def display(self, index=None, aslist = None, simplify = False):
+    def display(self, index=None, aslist = None, simplify = False, spatial = False):
+
+        if spatial == True:
+
+            return self.display_spatial(index, aslist, simplify)
 
         if core_calc == 'sp' and simplify == True:
 
@@ -390,7 +398,7 @@ class LeviCivita():
             for p in iterprod(range(dim),repeat=self.n):
                     
                 string = 'valor = self.tensor[%s]'%k
-                    
+
                 for l in p:
                         
                     string += '[%s]'%l
@@ -454,6 +462,188 @@ class LeviCivita():
             if count == 0:
 
                 print('All components are zero')
+
+
+    def display_spatial(self, index=None, aslist = None, simplify = False):
+
+        if core_calc == 'sp' and simplify == True:
+
+            warn("The simplify argument is intended to be used only with giacpy.\n The result is not affected when using Sympy.")
+        
+        orden_sp = ordenar(self.n - 1)
+
+
+        if index is None:
+
+            index = orden_sp[0]
+
+        rank = self.n - 1
+
+        if aslist == None:
+
+            if rank <= 2:
+
+                aslist = False
+            
+            else:
+
+                aslist = True
+
+        dim = config.dim - 1 # Se elimina la dimension temporal
+        
+        k = 0
+        for i in orden_sp:
+            if i == index:
+                break 
+            k += 1
+
+        if core_calc == 'sp':
+
+            init_printing()
+
+        if k == len(orden_sp):
+
+            raise ValueError('Bad index definition')
+
+        if index == '' and rank == 0: # Scalar
+
+            display(self.tensor_sp)
+        
+        
+        elif aslist == False:
+
+            # if k == len(self.orden):
+
+            #     raise ValueError('Bad index definition')
+
+            if rank == 1 and index == '^':
+                
+                if core_calc == 'sp':
+
+                    display_IP(Array(self.tensor_sp[k]).reshape(dim,1))
+
+                elif core_calc == 'gp':
+
+                    f = io.StringIO()
+
+                    with redirect_stdout(f):
+
+                        print(latex(giac(self.tensor_sp[k]).transpose()))
+                    out = f.getvalue()
+
+                    out = out.replace(r"\\",r"\\\\").replace("\\text{","").replace("\"}\"","").replace('\"','').replace('\\}','}').replace('\\{','{')#.replace('\\\\','\\')
+
+                    display_IP(Math_IP(gp_pretty_latex(out)))
+
+            else:
+
+                if core_calc == 'sp':
+            
+                    display_IP(Array(self.tensor_sp[k]))
+
+                elif core_calc == 'gp':
+
+                    if simplify == False:
+
+                        f = io.StringIO()
+
+                        if rank != 1:
+                            with redirect_stdout(f):
+                                print(latex(matrix(self.tensor_sp[k])))
+                        else:
+                             with redirect_stdout(f):
+                                print(latex(giac(self.tensor_sp[k])))
+                        out = f.getvalue()
+
+                        out = out.replace(r"\\",r"\\\\").replace("\\text{","").replace("\"}\"","").replace('\"','').replace('\\}','}').replace('\\{','{')#.replace('\\\\','\\')
+
+                        display_IP(Math_IP(gp_pretty_latex(out)))
+
+                    else:
+
+                        f = io.StringIO()
+                        with redirect_stdout(f):
+                            print((self.tensor_sp[k]))
+                        out = f.getvalue()
+
+                        string = sp_latex(sp_simplify(sp_Array(sp_sympify(out))))
+
+                        display_IP(Math_IP(string))
+
+            
+        else:
+
+            count = 0
+                
+            for p in iterprod(range(dim),repeat=rank):
+                    
+                string = 'valor = self.tensor_sp[%s]'%k
+
+                for l in p:
+                        
+                    string += '[%s]'%l
+
+                exec(string,locals(),globals())
+                
+                str_name =  "\\varepsilon"
+                
+                string = "{%s}"%str_name
+                    
+                i = 0
+                    
+                for l in index.split(','):
+                        
+                    if core_calc == 'gp':
+
+                        f = io.StringIO()
+                        with redirect_stdout(f):
+                            print(p[i])
+                        out = f.getvalue()
+                            
+                        string = '%s{}%s{%s}'%(string,l,out)
+                    
+                    elif core_calc == 'sp':
+
+                        string = '%s{}%s{%s}'%(string,l,str(p[i]))
+
+                    i += 1
+                    
+                if valor != 0:
+                        
+                    #string += " = %s"% (latex(valor))
+                    
+                    #display_IP(Math(string))
+
+                    if core_calc == 'gp':
+
+                        if simplify == False:
+
+                            display(valor,string)
+
+                        else:
+
+                            f = io.StringIO()
+                            with redirect_stdout(f):
+                                print(valor)
+                            out = f.getvalue()
+
+                            string2 = sp_latex(sp_simplify(sp_sympify(out)))
+
+                            string = "%s = %s"%(string,string2)
+
+                            display_IP(Math_IP(string))
+
+                    elif core_calc == 'sp':
+
+                        display(valor,string)
+
+                    count += 1
+
+            if count == 0:
+
+                print('All components are zero')
+
+
 
 
 
