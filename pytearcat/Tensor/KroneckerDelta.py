@@ -358,7 +358,11 @@ class KroneckerDelta():
 
                 exec(exec_str,locals(),globals())
 
-    def display(self, index=None, aslist = None, simplify = False, spatial = False):
+    def display(self, index=None, aslist = None, simplify = False, spatial = None):
+
+        if config.space_time == False and spatial is None:
+
+            spatial = True
 
         if spatial == True:
 

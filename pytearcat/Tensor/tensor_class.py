@@ -642,7 +642,8 @@ class Tensor:
 
         display_IP(Latex_IP(display_string))
 
-    def assign(self, elements, index=None, All = False,printing = True):
+    def assign_space(self,elements,index,printing = True):
+
 
         '''
         # Revisar el nombre de printing. Puede ser Verbose
@@ -656,6 +657,105 @@ class Tensor:
         NOTE: the argument "elements" has to be shaped like the example so the indexation goes like elements[i][j][k]
 
         '''
+        dim = config.dim - 1
+
+        if isinstance(elements,Tdata):
+
+            new_lista = index.split(',')
+
+            old_lista = elements.full_index.split(',')
+
+            rank = len(old_lista)
+
+            New_data = construct(0,dim,rank)
+
+            new_index = ''
+            old_index = ''
+
+            for i in range(rank):
+
+                new_index += '[p[%d]]'%i
+
+            for j in range(rank):
+
+                i = 0
+
+                while old_lista[j][1:] != new_lista[i][1:]:
+
+                    i += 1
+
+                old_index += '[p[%d]]'%i
+
+            for p in iterprod(range(dim),repeat=rank):
+
+                string = 'New_data%s = elements.elements%s'%(new_index,old_index)
+
+                exec(string,locals(),globals())
+
+            new_updn = (',').join(x[0] for x in new_lista)
+
+            self.assign_space(New_data,new_updn,printing=False)
+
+        elif index == None:
+
+            print(ERROR)
+
+        else:
+
+            dim = config.dim - 1
+
+            k = compare(self.n,index) # numero correspondiente a '^,^' o '_,^', etc
+
+
+            for p in iterprod(range(dim),repeat=self.n):
+                            
+                string = 'self.tensor_sp[%s]'%k 
+                string2 = ''
+
+                for l in p:
+                        
+                    string2 += '[%s]'%l
+
+                string = '%s%s = elements%s'%(string,string2,string2)
+
+                try: 
+
+                    exec(string,locals(),globals())
+
+                except AttributeError:
+
+                    pass
+            
+            self.indexes[k] = True
+
+            if printing == True:
+        
+                print('Elements assigned correctly to the components %s'%index)
+
+
+    def assign(self, elements, index=None, All = False,printing = True, spatial = None):
+
+        '''
+        # Revisar el nombre de printing. Puede ser Verbose
+
+        It assigns the elements to the tensor on the corresponding index. 
+        If All = True, then it computes the thensor with the rest of the indexes combinations.
+
+        index = '^,^,_'
+        elements = [[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]]]
+
+        NOTE: the argument "elements" has to be shaped like the example so the indexation goes like elements[i][j][k]
+
+        '''
+
+        if config.space_time == False and spatial is None:
+
+            spatial = True
+
+        if spatial == True:
+
+            return self.assign_space(elements,index,printing)
+
         dim = config.dim
 
         if isinstance(elements,Tdata):
@@ -968,7 +1068,11 @@ class Tensor:
 
         self.space()
 
-    def display(self, index=None, aslist = None, simplify = False, spatial=False):
+    def display(self, index=None, aslist = None, simplify = False, spatial=None):
+
+        if config.space_time == False and spatial is None:
+
+            spatial = True
 
         if spatial == True:
 
@@ -1430,15 +1534,15 @@ def D(a,b):
 
                 for p in iterprod(range(dim),repeat = new_rank): 
 
-                    var = 0
+                    var_temp = 0
                     
                     for q in range(dim):
     
                         string = 'diff(a.elements%s,coords[%s])'%(old_index,der_index)
 
-                        var += eval(string,locals(),globals())
+                        var_temp += eval(string,locals(),globals())
 
-                    string = 'temp%s = var'%new_index
+                    string = 'temp%s = var_temp'%new_index
 
                     exec(string,locals(),globals())
                 
