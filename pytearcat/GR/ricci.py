@@ -111,7 +111,7 @@ def calculate_ricci_scalar():
 
     if config.ricciS is None:
 
-        Ricci_Scalar = new_ten('Ricci',0)
+        Ricci_Scalar = new_ten('RicciS',0)
 
         config.ricciS = Ricci_Scalar
     
