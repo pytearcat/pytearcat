@@ -75,7 +75,47 @@ def create_fun(f_symbol,var_symbol):
 
     return fun[-1]
 
+
+def create_default(T_name,T_obj):
+
+    if T_name == 'Christoffel':
+
+        christ = T_obj
+
+        ten.append(christ)
+
+    elif T_name == 'Riemann':
+
+        riemann = T_obj
+
+        ten.append(riemann)
+
+    elif T_name == 'Ricci':
+
+        ricci = T_obj
+
+        ten.append(ricci)
+
+    elif T_name == 'RicciS':
+
+        ricciS = T_obj
+
+        ten.append(ricciS)
+
+    elif T_name == 'Einstein':
+
+        G = T_obj
+
+        ten.append(G)
+
+
+
+
 def create_ten(T_name,T_obj):
+
+    if T_name in default_tensors:
+
+        create_default(T_name,T_obj)
 
     string = "%s = T_obj"%T_name
     exec(string,locals(),globals())
