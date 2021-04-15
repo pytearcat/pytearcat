@@ -426,6 +426,64 @@ class Tensor:
         
         return string
 
+    def __scalar_call(self,updn,numbers,Nindex,ten_call):
+    
+        tdat_str = ''
+        
+        new_string_right = ''
+        
+        for i in numbers:
+                
+            new_string_right += '[%s]'%i
+        
+        return eval('self.%s[%s]%s'%(ten_call,Nindex,new_string_right))
+
+    def __Tdata_call(self,updn,coord,numbers,Nindex,dim,ten_call):
+    
+        tdat_str = ''
+        
+        new_string_right = ''
+        
+        k = 0
+        j = 0
+        
+        for i in range(len(updn)):
+            
+            if coord[i] not in numbers:
+            
+                tdat_str += updn[i] + coord[i]
+                
+                new_string_right += '[p[%d]]'%k
+                
+                k += 1
+                
+            else: 
+                
+                new_string_right += '[%s]'%numbers[j]
+                
+                j += 1
+                
+                    
+        new_rank = len(coord)-len(numbers)
+        
+        elements = construct(0,dim,new_rank)
+        
+        new_string_left = ''
+        
+        for k in range(new_rank):
+
+            new_string_left += '[p[%d]]'%k
+        
+        
+        for p in iterprod(range(dim), repeat = new_rank):
+
+            exec_str = 'elements%s = self.%s[%s]%s'%(new_string_left,ten_call,Nindex,new_string_right)
+        
+            exec(exec_str,locals(),globals())
+        
+        return Tdata(tdat_str,elements)
+    
+
     def __call__(self,str_index):
 
         '''
@@ -460,6 +518,22 @@ class Tensor:
         repeated_coord = set([x for x in lista if coord.count(x[1:]) > 1])
 
         non_repeated_coord = set([x for x in lista if coord.count(x[1:]) == 1])
+
+        numbers = []
+        
+        for i in coord:
+            
+            if i in np.asarray([range(4)],dtype=str):
+                
+                numbers.append(i)
+                
+        if len(numbers) == len(coord):
+            
+            return self.__scalar_call(updn,numbers,Nindex,ten_call)
+            
+        elif len(numbers) != 0:
+            
+            return self.__Tdata_call(updn,coord,numbers,Nindex,dim,ten_call)
 
         if len(repeated_coord) == 0:
 
@@ -1217,7 +1291,7 @@ class Tensor:
                     
                     elif core_calc == 'sp':
 
-                        string = '%s{}%s{%s}'%(string,l,str(p[i]))
+                        string = '%s{}%s{%s}\,'%(string,l,str(p[i]))
 
                     i += 1
                     
