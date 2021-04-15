@@ -46,7 +46,7 @@ def D(element,i):
 
         print("ERROR IN THE DERIVATIVE D OF A TENSOR")
 
-class Christoffel(Tensor):
+class ChristoffelClass(Tensor):
 
     def __init__(self):
 
@@ -98,7 +98,7 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
 
     if config.christ is None:
 
-        Christoffel = config.create_ten("Christoffel",Christoffel())
+        Christoffel = config.create_ten("Christoffel",ChristoffelClass())
 
         config.christ = Christoffel
 
