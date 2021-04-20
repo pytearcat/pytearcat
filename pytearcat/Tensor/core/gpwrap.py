@@ -62,186 +62,186 @@ class gpcore(__gp.giacpy.Pygen):
     
     def simplify(self):
         
-        return gpcore(gp.simplify(self))
+        return gpcore(__gp.simplify(self))
 
 #trigonometric functions
 
 def sin(x):
 
-    return gpcore(gp.sin(x))
+    return gpcore(__gp.sin(x))
 
 def cos(x):
 
-    return gpcore(gp.cos(x))
+    return gpcore(__gp.cos(x))
 
 def tan(x):
 
-    return gpcore(gp.tan(x))
+    return gpcore(__gp.tan(x))
 
 def csc(x):
 
-    return gpcore(gp.csc(x))
+    return gpcore(__gp.csc(x))
 
 def sec(x):
 
-    return gpcore(gp.sec(x))
+    return gpcore(__gp.sec(x))
 
 def cot(x):
 
-    return gpcore(gp.cot(x))
+    return gpcore(__gp.cot(x))
 
 # arc trigonometric functions
 
 def asin(x):
 
-    return gpcore(gp.asin(x))
+    return gpcore(__gp.asin(x))
 
 def acos(x):
 
-    return gpcore(gp.acos(x))
+    return gpcore(__gp.acos(x))
 
 def atan(x):
 
-    return gpcore(gp.atan(x))
+    return gpcore(__gp.atan(x))
 
 def acsc(x):
 
-    return gpcore(gp.acsc(x))
+    return gpcore(__gp.acsc(x))
 
 def asec(x):
 
-    return gpcore(gp.asec(x))
+    return gpcore(__gp.asec(x))
 
 def acot(x):
 
-    return gpcore(gp.acot(x))
+    return gpcore(__gp.acot(x))
 
 # hyperbolic functions
 
 def sinh(x):
 
-    return gpcore(gp.sinh(x))
+    return gpcore(__gp.sinh(x))
 
 def cosh(x):
 
-    return gpcore(gp.cosh(x))
+    return gpcore(__gp.cosh(x))
 
 def tanh(x):
 
-    return gpcore(gp.tanh(x))
+    return gpcore(__gp.tanh(x))
 
 def csch(x):
 
-    return gpcore(gp.csch(x))
+    return gpcore(__gp.csch(x))
 
 def sech(x):
 
-    return gpcore(gp.sech(x))
+    return gpcore(__gp.sech(x))
 
 def coth(x):
 
-    return gpcore(gp.coth(x))
+    return gpcore(__gp.coth(x))
 
 # arc hyperbolic functions
 
 def asinh(x):
 
-    return gpcore(gp.asinh(x))
+    return gpcore(__gp.asinh(x))
 
 def acosh(x):
 
-    return gpcore(gp.acosh(x))
+    return gpcore(__gp.acosh(x))
 
 def atanh(x):
 
-    return gpcore(gp.atanh(x))
+    return gpcore(__gp.atanh(x))
 
 def acsch(x):
 
-    return gpcore(gp.acsch(x))
+    return gpcore(__gp.acsch(x))
 
 def asech(x):
 
-    return gpcore(gp.asech(x))
+    return gpcore(__gp.asech(x))
 
 def acoth(x):
 
-    return gpcore(gp.acoth(x))
+    return gpcore(__gp.acoth(x))
 
 # exp
 
 def exp(x):
 
-    return gpcore(gp.exp(x))
+    return gpcore(__gp.exp(x))
 
 # log
 
 def log(x):
 
-    return gpcore(gp.log(x))
+    return gpcore(__gp.log(x))
 
 def log10(x):
 
-    return gpcore(gp.log10(x))
+    return gpcore(__gp.log10(x))
 
 def logb(x,b):
 
-    return gpcore(gp.logb(x,b))
+    return gpcore(__gp.logb(x,b))
 
 # sqrt
 
 def sqrt(x):
 
-    return gpcore(gp.sqrt(x))
+    return gpcore(__gp.sqrt(x))
 
 # abs
 
 def abs(x):
 
-    return gpcore(gp.abs(x))
+    return gpcore(__gp.abs(x))
 
 # general functions
 
 def simplify(x):
 
-    return gpcore(gp.simplify(x))
+    return gpcore(__gp.simplify(x))
 
 def series(f,epsilon,x0,n):
 
-    return gpcore(gp.series(f,epsilon,x0,n))
+    return gpcore(__gp.series(f,epsilon,x0,n))
 
 def giac(x):
 
-    return gpcore(gp.giac(x))
+    return gpcore(__gp.giac(x))
 
 def expand(x):
 
-    return gpcore(gp.expand(x))
+    return gpcore(__gp.expand(x))
 
 def diff(f,x,n = 1):
 
-    return gpcore(gp.diff(f,x,n))
+    return gpcore(__gp.diff(f,x,n))
 
 def divide(a,b):
 
-    return gpcore(gp.divide(a,b))
+    return gpcore(__gp.divide(a,b))
 
 def factor(x):
 
-    return gpcore(gp.factor(x))
+    return gpcore(__gp.factor(x))
 
 def zeros(a,b):
 
-    return gpcore(gp.zeros(a,b))
+    return gpcore(__gp.zeros(a,b))
 
 def coeff(a,x,n):
 
-    return gpcore(gp.coeff(a,x,n))
+    return gpcore(__gp.coeff(a,x,n))
 
 def idn(n):
 
-    return gpcore(gp.idn(n))
+    return gpcore(__gp.idn(n))
 
 def matrix(x):
 
-    return gpcore(gp.matrix(x))
+    return gpcore(__gp.matrix(x))
