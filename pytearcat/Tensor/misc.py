@@ -45,7 +45,7 @@ def setorder(var,n):
 
     '''
 
-    if core_calc == 'gp' and not isinstance(var,core.giacpy.Pygen):
+    if core_calc == 'gp' and not isinstance(var,core.gpcore):
 
         raise(TypeError("var must be a giacpy object."))
 
