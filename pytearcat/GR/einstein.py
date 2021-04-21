@@ -2,7 +2,7 @@ import tqdm
 from itertools import product as iterprod 
 from pytearcat.Tensor.misc import new_ten,reload_all
 from pytearcat.Tensor.core import config
-from pytearcat.Tensor.tensor_class import construct, tensor_series
+from pytearcat.Tensor.tensor_class import construct, tensor_series, Tensor
 from .riemann import calculate_riemann
 from .ricci import calculate_ricci, calculate_ricci_scalar
 from pytearcat.Tensor.core.core import core_calc,display_IP,Latex_IP
@@ -25,7 +25,7 @@ def calculate_einstein(All = False):
 
     if config.G is None:
 
-        Einstein = new_ten('Einstein',2)
+        Einstein =config.create_ten('Einstein',Tensor('Einstein',2))
 
         config.G = Einstein
 

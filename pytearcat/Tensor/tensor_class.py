@@ -520,10 +520,41 @@ class Tensor:
         non_repeated_coord = set([x for x in lista if coord.count(x[1:]) == 1])
 
         numbers = []
+
+        #if  in coords hay numeros, etonces error si any es > dim
         
+        ErrorIndexAlphaNum = False
+        ErrorIndexInt = False
+
         for i in coord:
             
-            if i in np.asarray([range(4)],dtype=str):
+            if (not i.isalnum()) or ("." in i):
+                
+                ErrorIndexAlphaNum= True
+                
+            try:
+                
+                if (int(i) >= dim) or (int(i) < 0):
+                    
+                    ErrorIndexInt = True
+                    
+            except:
+                
+                pass
+
+            if ErrorIndexAlphaNum:
+                
+                raise SyntaxError("Wrong indices. Every index must be a name or a integer without any special characters.")
+            
+            elif ErrorIndexInt:
+                
+                raise SyntaxError("Wrong indices. Every index must be a name or a integer greater than 0 and less than the dimension.")
+                
+
+
+        for i in coord:
+
+            if i in np.asarray([range(dim)],dtype=str):
                 
                 numbers.append(i)
                 
@@ -772,7 +803,7 @@ class Tensor:
 
         elif index == None:
 
-            print(ERROR)
+            raise ValueError("'index' must be a string. e.g.: '^,^,_,^'. ")
 
         else:
 
@@ -871,7 +902,7 @@ class Tensor:
 
         elif index == None:
 
-            print(ERROR)
+            raise ValueError("'index' must be a string. e.g.: '^,^,_,^'. ")
 
         else:
 

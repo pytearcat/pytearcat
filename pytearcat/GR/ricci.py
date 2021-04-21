@@ -4,7 +4,7 @@ from itertools import product as iterprod
 
 from pytearcat.Tensor.misc import new_ten,reload_all
 from pytearcat.Tensor.core import config
-from pytearcat.Tensor.tensor_class import tensor_series
+from pytearcat.Tensor.tensor_class import tensor_series, Tensor
 
 from .christoffel import calculate_christoffel, D
 from .riemann import calculate_riemann
@@ -28,7 +28,7 @@ def calculate_ricci(All = False):
 
     if config.ricci is None:
 
-        Ricci = new_ten('Ricci',2)
+        Ricci = config.create_ten('Ricci',Tensor('Ricci',2))
 
         config.ricci = Ricci
 
@@ -111,7 +111,7 @@ def calculate_ricci_scalar():
 
     if config.ricciS is None:
 
-        Ricci_Scalar = new_ten('RicciS',0)
+        Ricci_Scalar = config.create_ten('RicciS',Tensor('RicciS',0))
 
         config.ricciS = Ricci_Scalar
     

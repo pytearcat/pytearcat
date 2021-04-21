@@ -90,6 +90,14 @@ def new_var(*args):
 
         raise(TypeError("Arguments must be str."))
 
+    if 'epsilon' in input_vars or 'Epsilon' in input_vars:
+
+        raise(NameError("Pytearcat does not support 'epsilon' as a variable name. Please use another name."))
+
+    if 'varepsilon' in input_vars or 'Varepsilon' in input_vars:
+
+        raise(NameError("Pytearcat does not support 'varepsilon' as a variable name. Please use another name."))
+
     names = []
 
     for i in config.var:
@@ -131,6 +139,14 @@ def new_con(*args):
     if not all(isinstance(var, str) for var in input_const):
 
         raise(TypeError("Arguments must be str."))
+
+    if 'epsilon' in input_const or "Epsilon" in input_const:
+
+        raise(NameError("Pytearcat does not support 'epsilon' as a variable name. Please use another name."))
+
+    if 'varepsilon' in input_const or "Varepsilon" in input_const:
+
+        raise(NameError("Pytearcat does not support 'varepsilon' as a variable name. Please use another name."))
 
     names = []
 
@@ -179,6 +195,14 @@ def new_fun(fun_symbol,var_symbol,overwrite=False):
 
         raise(TypeError("Function symbol must be a string"))
 
+    if 'epsilon' in fun_symbol or "Epsilon" in fun_symbol:
+
+        raise(NameError("Pytearcat does not support 'epsilon' as a variable name. Please use another name."))
+
+    if 'varepsilon' in fun_symbol or "Varepsilon" in fun_symbol:
+
+        raise(NameError("Pytearcat does not support 'varepsilon' as a variable name. Please use another name."))
+
     existing_names = []
 
     for i in config.fun:
@@ -200,13 +224,24 @@ def new_fun(fun_symbol,var_symbol,overwrite=False):
         function = config.fun[fun_index]
 
     return function
-    
 
 def new_ten(tname,index):
 
     if len(findall('([^A-Za-z0-9])',tname)) != 0:
 
         raise TensorSyntaxError('The tensor name cannot contain any special character.')
+
+    if tname in config.default_tensors:
+
+        raise NameError("%s is protected as a default tensor name."%tname)
+
+    if 'epsilon' == tname or "Epsilon" == tname:
+
+        raise(NameError("Pytearcat does not support 'epsilon' as a variable name. Please use another name."))
+
+    if 'varepsilon'  == tname or "Varepsilon"  == tname:
+
+        raise(NameError("Pytearcat does not support 'varepsilon' as a variable name. Please use another name."))
 
     A = Tensor(tname,index)
 

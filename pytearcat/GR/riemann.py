@@ -4,7 +4,7 @@ from itertools import product as iterprod
 from pytearcat.Tensor.misc import new_ten,reload_all
 from pytearcat.Tensor.core.core import factor, display_IP, Latex_IP,core_calc,simplify
 from pytearcat.Tensor.core import config
-from pytearcat.Tensor.tensor_class import construct, tensor_series
+from pytearcat.Tensor.tensor_class import construct, tensor_series, Tensor
 
 from .christoffel import calculate_christoffel, D
 
@@ -18,7 +18,9 @@ def calculate_riemann(default = True, All = False):
 
     if config.riemann is None:
 
-        Riemann = new_ten('Riemann',4)
+        #Riemann = new_ten('Riemann',4)
+
+        Riemann = config.create_ten("Riemann",Tensor('Riemann',4))
 
         config.riemann = Riemann
 

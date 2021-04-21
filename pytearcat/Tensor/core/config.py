@@ -191,7 +191,7 @@ LeviCivita_Symbol = None # LeviCivita Symbol
 
 LeviCivita_Tensor = None # LeviCivita Tensor
 
-default_tensors = {'Christoffel' : '\Gamma' , 'Einstein' : 'G', 'Riemann': 'R', 'Ricci' : 'R', 'RicciS' : 'R'}
+default_tensors = {'Christoffel' : '\Gamma' , 'Einstein' : 'G', 'Riemann': 'R', 'Ricci' : 'R', 'RicciS' : 'R','g':'g','G' :'G'}
 
 # ----------------------------
 

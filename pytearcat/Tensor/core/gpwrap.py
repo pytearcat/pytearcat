@@ -1,16 +1,30 @@
 import giacpy as __gp
 from giacpy import latex
-from .tdata import Tdata as __Tdata
+from .tdata import Tdata as _Tdata
+from .display import tolatex, gp_pretty_latex, display_IP, Math_IP
 
 class gpcore(__gp.giacpy.Pygen):
  
     def __init__(self,x):
         
         super().__init__()
+
+    def __repr__(self):    
+        '''
+        a is an element from giacpy
+        b is a string e.g. "T^{a}_{b}^{c}"
+
+        '''
+
+        string = tolatex(self)
+
+        string = gp_pretty_latex(string)
+
+        display_IP(Math_IP(string))
         
     def __mul__(self,other):
         
-        if isinstance(other,__Tdata):
+        if isinstance(other,_Tdata):
         
             return other*self
         
@@ -20,7 +34,7 @@ class gpcore(__gp.giacpy.Pygen):
         
     def __rmul__(self,other):
         
-        if isinstance(other,__Tdata):
+        if isinstance(other,_Tdata):
         
             return self*other
         

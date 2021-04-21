@@ -1,7 +1,7 @@
 from itertools import product as iterprod
 from pytearcat.Tensor.core import config
 from pytearcat.Tensor.core.core import *
-from pytearcat.Tensor.misc import new_var,new_ten, reload_all
+from pytearcat.Tensor.misc import new_var, reload_all
 from pytearcat.Tensor.tensor_class import Tensor, tensor_series
 from pytearcat.Tensor.core.config import *
 
@@ -196,6 +196,8 @@ def metric(functions, coords, ds2):
     return g_matrix, line_element
 
 def create_metric_matrix(dim, variables_string, ds_input):
+
+    print("LOL",ds_input)
     
     # CREAMOS UNA VARIABLE POR CADA DIMENSION Y VERIFICAMOS QUE CALCEN, 
     # QUEDAN ASIGNADAS CON LAS LETRAS QUE SE INGRESARON COMO INPUT 
@@ -278,7 +280,7 @@ def create_metric_matrix(dim, variables_string, ds_input):
             g_matrix[i,j] = tensor_series(g_matrix[i,j])
             g_matrix_inv[i,j] = tensor_series(g_matrix_inv[i,j])
 
-    g = new_ten('g',2)
+    g = config.create_ten('g',Tensor('g',2))
 
     # SOLO EL TENSOR g uv TENDRA DOS OPCIONES DD Y UU, NO HAY DU Y UD PORQUE ESOS SIEMPRE SERAN IDENTIDAD, LUEGO
     if core_calc == 'gp':
