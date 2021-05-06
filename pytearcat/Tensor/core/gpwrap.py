@@ -1,7 +1,173 @@
 import giacpy as __gp
 from giacpy import latex
+import io
+from re import findall, search
+from IPython.display import display as display_IP, Math as Math_IP
+from contextlib import redirect_stdout
 from .tdata import Tdata as _Tdata
-from .display import tolatex, gp_pretty_latex, display_IP, Math_IP
+from pytearcat.Tensor.core import series_expansion 
+from pytearcat.Tensor.core import greeks
+from pytearcat.Tensor.core import fun
+#import sys
+
+import sys
+
+def in_notebook():
+    """
+    Returns ``True`` if the module is running in IPython kernel,
+    ``False`` if in IPython shell or other Python shell.
+    """
+    return 'ipykernel' in sys.modules
+
+# later I found out this:
+
+def ipython_info():
+
+    ip = False
+    if 'ipykernel' in sys.modules:
+        ip = 'notebook'
+    elif 'IPython' in sys.modules:
+        ip = 'terminal'
+    
+    print(ip)
+    return ip
+
+def get_name(element):
+        
+    f = io.StringIO()
+    with redirect_stdout(f):
+        print(element)
+    element = f.getvalue()
+
+    return element[:-1]
+
+def tolatex(element):
+
+    f = io.StringIO()
+    with redirect_stdout(f):
+        print(latex(element))
+    element = f.getvalue()
+
+    string =  element[1:-2]
+
+    return string
+
+def gp_pretty_order(element):
+    
+    ord_n = series_expansion.ord_n
+    ord_var = get_name(series_expansion.ord_var)
+    
+    if ord_var in greeks.greek_dict:
+
+        ord_var = r"\%s"%ord_var
+
+    structure = r"\%s\^\{(\d+)\} \\operatorname\{\\mathrm\{order\\_size\} \}\\left\(\%s\\right\)"%(ord_var,ord_var)
+
+    exponent = findall(structure,element)
+
+    if len(exponent) > 0:
+
+        structure = r"%s^{%s} \operatorname{\mathrm{order\_size} }\left(%s\right)"%(ord_var,exponent[0],ord_var)
+
+        final = element.replace(r"%s"%structure,r"\mathrm{O}\left(%s^{%s}\right)"%(ord_var,exponent[0]))
+        
+    elif len(exponent) == 0:
+
+        structure = r"%s \operatorname{\mathrm{order\_size} }\left(%s\right)"%(ord_var,ord_var)
+
+        final = element.replace(r"%s"%structure,r"\mathrm{O}\left(%s\right)"%ord_var)
+
+    return final
+
+def gp_pretty_latex(element):
+    
+    '''
+    It takes a giacpy latex expression and returns a latex string that is similar to the sympy notation.
+    
+        - It rewrites the derivatives
+        - It rewrites the expansion order
+    
+    '''
+    
+    names = {}
+    variables = []
+
+    result = element[:]
+    
+    greek_dict =greeks.greek_dict
+
+    for i in fun.fun:
+
+        x = r'%s'%str(latex(i))[1:].split("\left")[0].replace('\\','').replace('{','\\{').replace('}','\\}').replace('mathrm','\\\\mathrm')
+
+        names[x] = str(i).split('(')[1][:-1]
+
+    for i in names:
+
+        j = findall(r'(?<=\W)%s\^\{\\left\((.*?)\\right\)\}'%i,element)
+        
+        for k in j:
+
+            ind = k.split(',')
+
+            ini,fin = search(r'%s\^\{\\left\(%s\\right\)\}'%(i,k),element).span()
+            
+            while element[ini] != ' ' and element[ini] != ',' and element[ini] != '\\' and element[ini] != '-' and element[ini] != '+':
+
+                ini -= 1
+
+            string = ''
+
+            l_dict = {}
+
+            for l in ind: 
+
+                l_dict[l] = ind.count(l)  
+                
+            for l in l_dict:  # L = '1'
+
+                y = names[i].split(',')[int(l)-1]
+                    
+                if y in greek_dict.keys():
+                        
+                    y = r'\\%s'%y
+                
+                if l_dict[l] == 1:
+                    
+                    string += r'\frac{\partial }{\partial %s}'%y
+
+                else:
+
+                    string += r'\frac{\partial^%d }{\partial %s^%d}'%(l_dict[l],y,l_dict[l])
+
+            string+= i
+
+            result = result.replace(element[ini:fin],string)    
+
+    for func in names:
+
+        if func in greek_dict.keys():
+
+            result = result.replace(func,greek_dict[func])
+            
+    if series_expansion.ord_status == True:
+
+        result = gp_pretty_order(result)
+
+    return result.replace('\\\\','\\').replace("\"","").replace("\\{","{").replace("\\}","}")
+
+
+    def tolatex(element):
+
+        f = io.StringIO()
+        with redirect_stdout(f):
+            print(latex(element))
+        element = f.getvalue()
+
+        string =  element[1:-2]
+
+        return gp_pretty_latex(string)
+
 
 class gpcore(__gp.giacpy.Pygen):
  
@@ -9,18 +175,69 @@ class gpcore(__gp.giacpy.Pygen):
         
         super().__init__()
 
-    def __repr__(self):    
-        '''
-        a is an element from giacpy
-        b is a string e.g. "T^{a}_{b}^{c}"
+    def __getitem__(self,rollno):
 
-        '''
+        return gpcore(super().__getitem__(rollno))
+
+    def __setitem__(self,rollno,name):
+
+        return gpcore(super().__setitem__(rollno,name))
+
+    def __str__(self):
+
+        #print("STR")
+
+        return super().__str__()
+
+    def _repr_html_(self):
+
+        #print("llamando a html")
 
         string = tolatex(self)
 
         string = gp_pretty_latex(string)
 
-        display_IP(Math_IP(string))
+        #display_IP(Math_IP(string))
+
+        return "$$ %s $$"%string
+
+
+    #def __repr_latex_(self):
+
+    #    print("llamando a latex")
+
+    #    return "llamando a latex"
+
+    #def __call__(self):
+
+    #    print("llamando a call")
+
+    #    return "llamando al call"
+
+    #def printf(self):
+
+    #    print("llamando a printf")
+    #    return " llamando a printf"
+
+    #def print(self):
+
+    #    print("llamando a print")
+    #    return " llamando a printf"
+
+    #def about(self):
+
+    #    print("llamando a about")
+
+    #    return "about"
+
+    def __repr__(self):    
+
+        #print("llamando a repr")
+
+        
+
+        return ""
+        #return "llamando a repr" #str(self)
         
     def __mul__(self,other):
         

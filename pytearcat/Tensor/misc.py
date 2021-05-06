@@ -1,6 +1,7 @@
 import numpy as np 
 from re import findall,search
 from .core import config
+from .core import series_expansion
 from .core.core import get_name, simplify, expand, series as Series,core_calc
 from .core import core
 from .core.errors import TensorSyntaxError
@@ -10,6 +11,36 @@ if core_calc == 'gp':
 
     import io
     from contextlib import redirect_stdout
+
+def simplify_pt(x):
+
+    if core_calc == 'gp':
+
+        iscoreobj = isinstance(x,core.gpcore)
+
+    elif core_calc == 'sp':
+
+        iscoreobj =  isinstance(x,core.Expr)
+
+    isnumber = False
+
+    if isinstance(x,int) or isinstance(x,float) or isinstance(x,np.number):
+
+        isnumber = True
+
+    elif isinstance(x,Tensor):
+
+        return x.simplify()
+
+    elif iscoreobj or isnumber:
+
+        return simplify(x)
+
+    else:
+
+        raise TypeError("The arg is not a mathematical object.")
+
+    
 
 def set_space_time(x=True):
 
@@ -53,10 +84,13 @@ def setorder(var,n):
 
         raise(TypeError("var must be a sympy object."))
 
+    series_expansion.ord_status = True
     config.ord_status = True
 
+    series_expansion.ord_var = var
     config.ord_var = var
 
+    series_expansion.ord_n = n
     config.ord_n = n
 
 def series(element):

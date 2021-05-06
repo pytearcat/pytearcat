@@ -1,6 +1,8 @@
 from .greeks import *
 
 from .core import core_calc
+from .fun import fun
+from .series_expansion import *
 
 if core_calc == 'sp':
 
@@ -171,7 +173,7 @@ var = [] # Lista con variables de tipo sympy
 
 con = [] # Lista con constantes de tipo sympy
 
-fun = [] # Lista con funciones de tipo sympy
+#fun = [] # Lista con funciones de tipo sympy
 
 # Tensores tipicos -------- # Proteger estos nombres para que no puedan ser sobreescritos. Que newten arroje error 
 
@@ -203,10 +205,10 @@ temp_name = []
 
 # Order  (epsilon)
 
-ord_status = False
+#ord_status = False
 
-ord_var = ''
+#ord_var = ''
 
-ord_n = 0
+#ord_n = 0
 
 __all__ = ['g','christ','riemann','ricci','ricciS','G','space_time']

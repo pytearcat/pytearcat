@@ -38,6 +38,8 @@ def create_metric(ds2 = ''):
 
             config.G = None
 
+            config.__all__.remove('g')
+
     if core_calc == 'sp':
 
         coords = ','.join(list(map(str,config.coords.values())))
@@ -177,8 +179,6 @@ def metric(functions, coords, ds2):
     
     variables_string = coords
 
-    print('en metric:',coords)
-
     if ds2 == '':
         
         ds2 = input('Enter the metric in the form: ds2=-dt*dt+a**2*(dx**2+dy**2+dz**2): \n' )
@@ -196,8 +196,6 @@ def metric(functions, coords, ds2):
     return g_matrix, line_element
 
 def create_metric_matrix(dim, variables_string, ds_input):
-
-    print("LOL",ds_input)
     
     # CREAMOS UNA VARIABLE POR CADA DIMENSION Y VERIFICAMOS QUE CALCEN, 
     # QUEDAN ASIGNADAS CON LAS LETRAS QUE SE INGRESARON COMO INPUT 
