@@ -1,5 +1,5 @@
 from .core import *
-from pytearcat.Tensor.core import config
+from pytearcat.tensor.core import config
 from itertools import product as iterprod
 from .interp import add_examine, mul_examine
 

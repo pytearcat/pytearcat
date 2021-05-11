@@ -1,5 +1,5 @@
 from re import findall,search
-from pytearcat.Tensor.core import config
+from pytearcat.tensor.core import config
 from .core import get_name, latex, display_IP, Math_IP, core_calc
 
 if core_calc == "gp":

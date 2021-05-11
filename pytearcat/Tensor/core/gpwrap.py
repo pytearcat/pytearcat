@@ -5,9 +5,9 @@ from re import findall, search
 from IPython.display import display as display_IP, Math as Math_IP
 from contextlib import redirect_stdout
 from .tdata import Tdata as _Tdata
-from pytearcat.Tensor.core import series 
-from pytearcat.Tensor.core import greek
-from pytearcat.Tensor.core import fun
+from pytearcat.tensor.core import series 
+from pytearcat.tensor.core import greek
+from pytearcat.tensor.core import fun
 #import sys
 
 import sys
