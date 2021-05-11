@@ -5,7 +5,7 @@ from re import findall, search
 from IPython.display import display as display_IP, Math as Math_IP
 from contextlib import redirect_stdout
 from .tdata import Tdata as _Tdata
-from pytearcat.Tensor.core import series_expansion 
+from pytearcat.Tensor.core import series 
 from pytearcat.Tensor.core import greek
 from pytearcat.Tensor.core import fun
 #import sys
@@ -54,8 +54,8 @@ def tolatex(element):
 
 def gp_pretty_order(element):
     
-    ord_n = series_expansion.ord_n
-    ord_var = get_name(series_expansion.ord_var)
+    ord_n = series.ord_n
+    ord_var = get_name(series.ord_var)
     
     if ord_var in greek.greek_dict:
 
@@ -150,7 +150,7 @@ def gp_pretty_latex(element):
 
             result = result.replace(func,greek_dict[func])
             
-    if series_expansion.ord_status == True:
+    if series.ord_status == True:
 
         result = gp_pretty_order(result)
 
