@@ -1,4 +1,4 @@
-from .greeks import *
+from .greek import *
 
 from .core import core_calc
 from .fun import fun

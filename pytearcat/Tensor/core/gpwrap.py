@@ -6,7 +6,7 @@ from IPython.display import display as display_IP, Math as Math_IP
 from contextlib import redirect_stdout
 from .tdata import Tdata as _Tdata
 from pytearcat.Tensor.core import series_expansion 
-from pytearcat.Tensor.core import greeks
+from pytearcat.Tensor.core import greek
 from pytearcat.Tensor.core import fun
 #import sys
 
@@ -57,7 +57,7 @@ def gp_pretty_order(element):
     ord_n = series_expansion.ord_n
     ord_var = get_name(series_expansion.ord_var)
     
-    if ord_var in greeks.greek_dict:
+    if ord_var in greek.greek_dict:
 
         ord_var = r"\%s"%ord_var
 
@@ -94,7 +94,7 @@ def gp_pretty_latex(element):
 
     result = element[:]
     
-    greek_dict =greeks.greek_dict
+    greek_dict =greek.greek_dict
 
     for i in fun.fun:
 
