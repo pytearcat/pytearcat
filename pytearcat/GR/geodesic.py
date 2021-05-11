@@ -9,7 +9,7 @@ from .christoffel import calculate_christoffel
 if core_calc == 'sp':
 
     from pytearcat.tensor.core.core import diff, Rational, sympify, factor
-t
+
 elif core_calc == 'gp':
 
     from pytearcat.tensor.core.core import diff, divide as Rational
