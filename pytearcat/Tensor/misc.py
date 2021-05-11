@@ -5,7 +5,7 @@ from .core import series_expansion
 from .core.core import get_name, simplify, expand, series as Series,core_calc
 from .core import core
 from .core.error import TensorSyntaxError
-from .tensor_class import Tensor
+from .tensor import Tensor
 
 if core_calc == 'gp':
 

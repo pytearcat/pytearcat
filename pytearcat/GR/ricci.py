@@ -4,7 +4,7 @@ from itertools import product as iterprod
 
 from pytearcat.tensor.misc import new_ten,reload_all
 from pytearcat.tensor.core import config
-from pytearcat.tensor.tensor_class import tensor_series, Tensor
+from pytearcat.tensor.tensor import tensor_series, Tensor
 
 from .christoffel import calculate_christoffel, D
 from .riemann import calculate_riemann

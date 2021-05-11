@@ -2,7 +2,7 @@ from tqdm import tqdm_notebook
 from itertools import product as iterprod
 from pytearcat.tensor.misc import new_ten,reload_all
 from pytearcat.tensor.core import config
-from pytearcat.tensor.tensor_class import tensor_series, Tensor
+from pytearcat.tensor.tensor import tensor_series, Tensor
 from pytearcat.tensor.core.core import core_calc, display_IP, Math_IP, Latex_IP
 
 if core_calc == 'sp':

@@ -2,7 +2,7 @@ from itertools import product as iterprod
 from pytearcat.tensor.core import config
 from pytearcat.tensor.core.core import *
 from pytearcat.tensor.misc import new_var, reload_all
-from pytearcat.tensor.tensor_class import Tensor, tensor_series
+from pytearcat.tensor.tensor import Tensor, tensor_series
 from pytearcat.tensor.core.config import *
 
 if core_calc == 'gp':

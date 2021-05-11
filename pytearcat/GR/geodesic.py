@@ -2,7 +2,7 @@ from tqdm import tqdm_notebook
 from itertools import product as iterprod
 from pytearcat.tensor.misc import new_var, new_fun
 from pytearcat.tensor.core import config
-from pytearcat.tensor.tensor_class import tensor_series
+from pytearcat.tensor.tensor import tensor_series
 from pytearcat.tensor.core.core import core_calc
 from .christoffel import calculate_christoffel
 

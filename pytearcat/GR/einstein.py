@@ -2,7 +2,7 @@ import tqdm
 from itertools import product as iterprod 
 from pytearcat.tensor.misc import new_ten,reload_all
 from pytearcat.tensor.core import config
-from pytearcat.tensor.tensor_class import construct, tensor_series, Tensor
+from pytearcat.tensor.tensor import construct, tensor_series, Tensor
 from .riemann import calculate_riemann
 from .ricci import calculate_ricci, calculate_ricci_scalar
 from pytearcat.tensor.core.core import core_calc,display_IP,Latex_IP

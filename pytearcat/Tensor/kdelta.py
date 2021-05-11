@@ -1,7 +1,7 @@
 
 import numpy as np
 from itertools import permutations, product as iterprod
-from .tensor_class import ordenar, compare, Tensor
+from .tensor import ordenar, compare, Tensor
 from .core import config
 from .core.core import *
 from .core.display import display
