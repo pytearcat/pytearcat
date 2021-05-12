@@ -40,6 +40,34 @@ def simplify_pt(x):
 
         raise TypeError("The arg is not a mathematical object.")
 
+def expand_pt(x):
+
+    if core_calc == 'gp':
+
+        iscoreobj = isinstance(x,core.gpcore)
+
+    elif core_calc == 'sp':
+
+        iscoreobj =  isinstance(x,core.Expr)
+
+    isnumber = False
+
+    if isinstance(x,int) or isinstance(x,float) or isinstance(x,np.number):
+
+        isnumber = True
+
+    elif isinstance(x,Tensor):
+
+        return x.expand()
+
+    elif iscoreobj or isnumber:
+
+        return expand(x)
+
+    else:
+
+        raise TypeError("The arg is not a mathematical object.")
+
     
 
 def set_space_time(x=True):

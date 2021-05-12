@@ -83,7 +83,7 @@ class KroneckerDelta():
         
         elif core_calc == 'gp':
 
-            Eye = identity(dim)
+            Eye = idn(dim)
 
             self.__assign(list(Eye),'_,_')
             self.__assign(list(Eye),'^,_')

@@ -83,14 +83,14 @@ class LeviCivita():
 
             iterstring = '[0][' + ']['.join(j.astype(str)) + ']' 
 
-            string = 'self.tensor%s = vals[%d]*self.convention'%(iterstring,i)
+            string = 'self.tensor%s = int(vals[%d]*self.convention)'%(iterstring,i)
 
             exec(string,locals(),globals())
 
 
         for k in range(1,2**rank):
 
-            string = 'self.tensor[%d] = self.tensor[0]'%k
+            string = 'self.tensor[%d] =self.tensor[0]'%k
 
             exec(string,locals(),globals())
 
@@ -102,7 +102,7 @@ class LeviCivita():
 
             iterstring = '[0][' + ']['.join(j.astype(str)) + ']' 
 
-            string = 'self.tensor_sp%s = vals[%d]*self.convention'%(iterstring,i)
+            string = 'self.tensor_sp%s = int(vals[%d]*self.convention)'%(iterstring,i)
 
             exec(string,locals(),globals())
 

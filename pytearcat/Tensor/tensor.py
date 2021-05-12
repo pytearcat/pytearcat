@@ -1060,6 +1060,126 @@ class Tensor:
 
         self.space()
 
+    def expand(self,index=None):
+
+        '''
+        Expand the Tensor. If index is given, it will expand only the given index combination ('^,_,_')
+        '''
+
+        dim = config.dim
+
+        if (index not in self.orden and index is not None) or index == '':
+
+            raise ValueError('Bad index definition')
+        
+
+        if index is None:
+
+            listax = list(range(2**self.n))
+
+            if self.n == 0:
+
+
+                self.tensor = self.tensor.expand()  
+
+        else:
+
+            listax = [compare(self.n,index)]
+        
+        for k in listax: 
+            
+            if self.indexes[k] == True:
+
+                if self.name == 'Riemann' and k == 0: 
+
+                    Riemann_list = construct('False',dim,4)
+
+                    for p in iterprod(range(dim),repeat=self.n):
+
+                        counta = p[0]
+                        countb = p[1]
+                        countc = p[2]
+                        countd = p[3]
+
+                        if Riemann_list[counta][countb][countc][countd] == False:
+                            
+                            string = 'self.tensor[%s]'%k 
+
+                            for l in p:
+                                    
+                                string += '[%s]'%l
+
+                            string = string + '=' + string + '.expand()'
+
+                            exec(string,locals(),globals())
+
+                            print('Fully Simplified:  ',counta,countb,countc,countd)
+
+                            # Skew Symmetry
+
+                            if Riemann_list[counta][countb][countd][countc] == False:
+
+                                self.tensor[0][counta][countb][countd][countc] = -self.tensor[0][counta][countb][countc][countd]
+
+                                Riemann_list[counta][countb][countd][countc] = True
+
+                            if Riemann_list[countb][counta][countc][countd] == False:
+
+                                self.tensor[0][countb][counta][countc][countd] = -self.tensor[0][counta][countb][countc][countd]
+
+                                Riemann_list[countb][counta][countc][countd] = True
+
+                            # Interchange Symmetry
+
+                            if Riemann_list[countc][countd][counta][countb] == False:
+
+                                self.tensor[0][countc][countd][counta][countb] = self.tensor[0][counta][countb][countc][countd]
+
+                                Riemann_list[countc][countd][counta][countb] = True
+
+                            # Bianchi Identity (First)
+
+                            if Riemann_list[counta][countc][countd][countb] == False and Riemann_list[counta][countd][countb][countc] == True:
+
+                                self.tensor[0][counta][countc][countd][countb] = -self.tensor[0][counta][countb][countc][countd] - self.tensor[0][counta][countd][countb][countc]
+
+                                Riemann_list[counta][countc][countd][countb] = True
+
+                            if Riemann_list[counta][countd][countb][countc] == False and Riemann_list[counta][countc][countd][countb] == True:
+
+                                self.tensor[0][counta][countd][countb][countc] = -self.tensor[0][counta][countb][countc][countd] - self.tensor[0][counta][countc][countd][countb]
+
+                                Riemann_list[counta][countd][countb][countc] = True
+
+
+                            Riemann_list[counta][countb][countc][countd] = True
+                    
+                else:
+                
+                    for p in iterprod(range(dim),repeat=self.n):
+                                
+                        string = 'self.tensor[%s]'%k 
+
+                        for l in p:
+                                
+                            string += '[%s]'%l
+
+                        if config.ord_status == False:
+
+                            string = string + '= expand(' + string + ')'
+
+                        else:
+
+                            string = string + '= expand(tensor_series(' + string + '))'
+
+                        #print(string)
+
+                        exec(string,locals(),globals())
+
+        self.space()
+
+
+
     def factor(self,index=None):
 
         '''

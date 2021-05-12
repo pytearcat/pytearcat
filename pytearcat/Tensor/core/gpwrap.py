@@ -5,7 +5,7 @@ from re import findall, search
 from IPython.display import display as display_IP, Math as Math_IP
 from contextlib import redirect_stdout
 from .tdata import Tdata as _Tdata
-from pytearcat.tensor.core import series 
+from pytearcat.tensor.core import series as ptseries
 from pytearcat.tensor.core import greek
 from pytearcat.tensor.core import fun
 #import sys
@@ -54,8 +54,8 @@ def tolatex(element):
 
 def gp_pretty_order(element):
     
-    ord_n = series.ord_n
-    ord_var = get_name(series.ord_var)
+    ord_n = ptseries.ord_n
+    ord_var = get_name(ptseries.ord_var)
     
     if ord_var in greek.greek_dict:
 
@@ -150,7 +150,7 @@ def gp_pretty_latex(element):
 
             result = result.replace(func,greek_dict[func])
             
-    if series.ord_status == True:
+    if ptseries.ord_status == True:
 
         result = gp_pretty_order(result)
 
@@ -293,7 +293,11 @@ class gpcore(__gp.giacpy.Pygen):
     
     def simplify(self):
         
-        return gpcore(__gp.simplify(self))
+        return  gpcore(super().simplify())#simplify(self)
+
+    def expand(self):
+
+        return gpcore(super().expand())
 
 #trigonometric functions
 
@@ -436,6 +440,10 @@ def abs(x):
 def simplify(x):
 
     return gpcore(__gp.simplify(x))
+
+def expand(x):
+
+    return gpcore(__gp.expand(x))
 
 def series(f,epsilon,x0,n):
 

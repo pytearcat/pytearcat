@@ -264,8 +264,6 @@ class Tdata:
 
                         other_iterstr += '[p[%d]]'%new_index[name]
 
-                #print('%s\t;\t%s'%(self_iterstr,other_iterstr))
-
                 if new_rank != 0:
 
                     for p in iterprod(range(dim),repeat=new_rank): # for para ir asignarlo
