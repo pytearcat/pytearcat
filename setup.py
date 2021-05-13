@@ -3,13 +3,13 @@ from setuptools import setup, find_packages
 with open("README.md", "r") as readme_file:
     readme = readme_file.read()
 
-requirements = ["jupyter>=1.0.0", "numpy==1.19.3", "sympy>=1.7.1", "tqdm>=4.55.0"]
+requirements = ["jupyter>=1.0.0", "numpy==1.19.3", "sympy>=1.7.1", "tqdm>=4.55.0", "jedi==0.17.2"]
 
 ext_requirements = {"Giacpy" : ["giacpy>=0.7.0"]}
 
 setup(
     name="pytearcat",
-    version="0.0.7",
+    version="0.0.8",
     author="Joaquin Sureda",
     author_email="jmsureda@uc.cl",
     description="A package to perform tensor algebra calculations.",

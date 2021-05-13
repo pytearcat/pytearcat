@@ -2,8 +2,8 @@ import re
 import numpy as np
 from collections import Counter
 from copy import deepcopy
-from .errors import TensorSyntaxError
-from .config import greek_dict
+from .error import TensorSyntaxError
+from .greek import greek_dict
 from .distribute import distribute
 
 

@@ -6,6 +6,7 @@ from .core import config
 from .core.core import *
 from .core.display import display
 from .core.interp import syntax, add_examine, mul_examine, der_examine
+from .core.tdata import Tdata, construct
 
 if core_calc == 'gp':
 
@@ -29,76 +30,6 @@ def reload_all(new_module):
     string = string.replace('module',new_module)
 
     return string
-
-def out_intersection(L1,I1,L2,I2):
-    '''
-    example: not_intersection(conf_vars,new_vars)
-
-    retorna las variables que no son compartidas en L1 y L2
-    '''
-    L = L1+L2
-    
-    I = I1+I2
-
-    lista_intersection = [i for i in L2 if i in L1]
-
-    lista = [x for x in L if x not in lista_intersection]
-
-    out = {lista[i] : i for i in range(len(lista))}
-
-    ind_dict =  dict((k,i) for i,k in enumerate(L))
-
-    ind_out = [ I[ind_dict[x]] + L[ind_dict[x]] for x in out ]
-
-    string = ','.join(ind_out)
-
-    return out, string
-
-def in_intersection(L1,I1,L2,I2):
-
-    '''
-    example: in_intersection(conf_vars,new_vars)  ['^i','_j'] ['_i','^l']
-
-    ['i','j','i','l']
-
-    retorna un diccionario con la interseccion
-    '''
-
-    L = L1+L2
-    
-    I = I1+I2
-
-    lista_intersection = [i for i in L2 if i in L1]
-
-    in_dict = {lista_intersection[i] : i for i in range(len(lista_intersection))}
-
-    full_rep = []
-
-    for i in range(len(L)):
-
-        if L[i] in lista_intersection:
-
-            full_rep.append('%s%s'%(I[i],L[i]))
-
-    return in_dict, full_rep
-
-def construct(elem,dim,n):
-    
-    '''
-    It builds a nested list filled with elem on every item. 
-    It returns an object with shape (dim,dim,dim,...,dim) of n entries.
-    elem must be a string and you can recover each elem by using result[i][j][k] with i,j,k integers < dim
-    '''
-    
-    string = ('%s,'%elem)*dim
-
-    string = '['+string[:-1]+'],'
-
-    for k in range(n-1):
-
-        string = '['+(string*dim)[:-1]+'],' 
-    
-    return eval(string[:-1])
 
 def ordenar(n):
 
@@ -495,6 +426,64 @@ class Tensor:
         
         return string
 
+    def __scalar_call(self,updn,numbers,Nindex,ten_call):
+    
+        tdat_str = ''
+        
+        new_string_right = ''
+        
+        for i in numbers:
+                
+            new_string_right += '[%s]'%i
+        
+        return eval('self.%s[%s]%s'%(ten_call,Nindex,new_string_right))
+
+    def __Tdata_call(self,updn,coord,numbers,Nindex,dim,ten_call):
+    
+        tdat_str = ''
+        
+        new_string_right = ''
+        
+        k = 0
+        j = 0
+        
+        for i in range(len(updn)):
+            
+            if coord[i] not in numbers:
+            
+                tdat_str += updn[i] + coord[i]
+                
+                new_string_right += '[p[%d]]'%k
+                
+                k += 1
+                
+            else: 
+                
+                new_string_right += '[%s]'%numbers[j]
+                
+                j += 1
+                
+                    
+        new_rank = len(coord)-len(numbers)
+        
+        elements = construct(0,dim,new_rank)
+        
+        new_string_left = ''
+        
+        for k in range(new_rank):
+
+            new_string_left += '[p[%d]]'%k
+        
+        
+        for p in iterprod(range(dim), repeat = new_rank):
+
+            exec_str = 'elements%s = self.%s[%s]%s'%(new_string_left,ten_call,Nindex,new_string_right)
+        
+            exec(exec_str,locals(),globals())
+        
+        return Tdata(tdat_str,elements)
+    
+
     def __call__(self,str_index):
 
         '''
@@ -506,7 +495,7 @@ class Tensor:
 
         syntax(str_index,self.n)
 
-        if config.space_time == True:
+        if config.space_time == 1:
 
             dim = config.dim
 
@@ -529,6 +518,53 @@ class Tensor:
         repeated_coord = set([x for x in lista if coord.count(x[1:]) > 1])
 
         non_repeated_coord = set([x for x in lista if coord.count(x[1:]) == 1])
+
+        numbers = []
+
+        #if  in coords hay numeros, etonces error si any es > dim
+        
+        ErrorIndexAlphaNum = False
+        ErrorIndexInt = False
+
+        for i in coord:
+            
+            if (not i.isalnum()) or ("." in i):
+                
+                ErrorIndexAlphaNum= True
+                
+            try:
+                
+                if (int(i) >= dim) or (int(i) < 0):
+                    
+                    ErrorIndexInt = True
+                    
+            except:
+                
+                pass
+
+            if ErrorIndexAlphaNum:
+                
+                raise SyntaxError("Wrong indices. Every index must be a name or a integer without any special characters.")
+            
+            elif ErrorIndexInt:
+                
+                raise SyntaxError("Wrong indices. Every index must be a name or a integer greater than 0 and less than the dimension.")
+                
+
+
+        for i in coord:
+
+            if i in np.asarray([range(dim)],dtype=str):
+                
+                numbers.append(i)
+                
+        if len(numbers) == len(coord):
+            
+            return self.__scalar_call(updn,numbers,Nindex,ten_call)
+            
+        elif len(numbers) != 0:
+            
+            return self.__Tdata_call(updn,coord,numbers,Nindex,dim,ten_call)
 
         if len(repeated_coord) == 0:
 
@@ -594,13 +630,13 @@ class Tensor:
 
                 for p in iterprod(range(dim), repeat = new_rank):
 
-                    var = 0
+                    var_temp = 0
 
                     for q in range(dim):
 
-                        var += eval('self.%s[Nindex]%s'%(ten_call,old_string),locals(),globals())
+                        var_temp += eval('self.%s[Nindex]%s'%(ten_call,old_string),locals(),globals())
 
-                        exec('temp%s = var'%new_string,locals(),globals())
+                        exec('temp%s = var_temp'%new_string,locals(),globals())
 
                 data_result = Tdata(return_string,temp)
 
@@ -711,7 +747,8 @@ class Tensor:
 
         display_IP(Latex_IP(display_string))
 
-    def assign(self, elements, index=None, All = False,printing = True):
+    def assign_space(self,elements,index,printing = True):
+
 
         '''
         # Revisar el nombre de printing. Puede ser Verbose
@@ -725,6 +762,105 @@ class Tensor:
         NOTE: the argument "elements" has to be shaped like the example so the indexation goes like elements[i][j][k]
 
         '''
+        dim = config.dim - 1
+
+        if isinstance(elements,Tdata):
+
+            new_lista = index.split(',')
+
+            old_lista = elements.full_index.split(',')
+
+            rank = len(old_lista)
+
+            New_data = construct(0,dim,rank)
+
+            new_index = ''
+            old_index = ''
+
+            for i in range(rank):
+
+                new_index += '[p[%d]]'%i
+
+            for j in range(rank):
+
+                i = 0
+
+                while old_lista[j][1:] != new_lista[i][1:]:
+
+                    i += 1
+
+                old_index += '[p[%d]]'%i
+
+            for p in iterprod(range(dim),repeat=rank):
+
+                string = 'New_data%s = elements.elements%s'%(new_index,old_index)
+
+                exec(string,locals(),globals())
+
+            new_updn = (',').join(x[0] for x in new_lista)
+
+            self.assign_space(New_data,new_updn,printing=False)
+
+        elif index == None:
+
+            raise ValueError("'index' must be a string. e.g.: '^,^,_,^'. ")
+
+        else:
+
+            dim = config.dim - 1
+
+            k = compare(self.n,index) # numero correspondiente a '^,^' o '_,^', etc
+
+
+            for p in iterprod(range(dim),repeat=self.n):
+                            
+                string = 'self.tensor_sp[%s]'%k 
+                string2 = ''
+
+                for l in p:
+                        
+                    string2 += '[%s]'%l
+
+                string = '%s%s = elements%s'%(string,string2,string2)
+
+                try: 
+
+                    exec(string,locals(),globals())
+
+                except AttributeError:
+
+                    pass
+            
+            self.indexes[k] = True
+
+            if printing == True:
+        
+                print('Elements assigned correctly to the components %s'%index)
+
+
+    def assign(self, elements, index=None, All = False,printing = True, spatial = None):
+
+        '''
+        # Revisar el nombre de printing. Puede ser Verbose
+
+        It assigns the elements to the tensor on the corresponding index. 
+        If All = True, then it computes the thensor with the rest of the indexes combinations.
+
+        index = '^,^,_'
+        elements = [[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]]]
+
+        NOTE: the argument "elements" has to be shaped like the example so the indexation goes like elements[i][j][k]
+
+        '''
+
+        if config.space_time == False and spatial is None:
+
+            spatial = True
+
+        if spatial == True:
+
+            return self.assign_space(elements,index,printing)
+
         dim = config.dim
 
         if isinstance(elements,Tdata):
@@ -766,7 +902,7 @@ class Tensor:
 
         elif index == None:
 
-            print(ERROR)
+            raise ValueError("'index' must be a string. e.g.: '^,^,_,^'. ")
 
         else:
 
@@ -924,6 +1060,126 @@ class Tensor:
 
         self.space()
 
+    def expand(self,index=None):
+
+        '''
+        Expand the Tensor. If index is given, it will expand only the given index combination ('^,_,_')
+        '''
+
+        dim = config.dim
+
+        if (index not in self.orden and index is not None) or index == '':
+
+            raise ValueError('Bad index definition')
+        
+
+        if index is None:
+
+            listax = list(range(2**self.n))
+
+            if self.n == 0:
+
+
+                self.tensor = self.tensor.expand()  
+
+        else:
+
+            listax = [compare(self.n,index)]
+        
+        for k in listax: 
+            
+            if self.indexes[k] == True:
+
+                if self.name == 'Riemann' and k == 0: 
+
+                    Riemann_list = construct('False',dim,4)
+
+                    for p in iterprod(range(dim),repeat=self.n):
+
+                        counta = p[0]
+                        countb = p[1]
+                        countc = p[2]
+                        countd = p[3]
+
+                        if Riemann_list[counta][countb][countc][countd] == False:
+                            
+                            string = 'self.tensor[%s]'%k 
+
+                            for l in p:
+                                    
+                                string += '[%s]'%l
+
+                            string = string + '=' + string + '.expand()'
+
+                            exec(string,locals(),globals())
+
+                            print('Fully Simplified:  ',counta,countb,countc,countd)
+
+                            # Skew Symmetry
+
+                            if Riemann_list[counta][countb][countd][countc] == False:
+
+                                self.tensor[0][counta][countb][countd][countc] = -self.tensor[0][counta][countb][countc][countd]
+
+                                Riemann_list[counta][countb][countd][countc] = True
+
+                            if Riemann_list[countb][counta][countc][countd] == False:
+
+                                self.tensor[0][countb][counta][countc][countd] = -self.tensor[0][counta][countb][countc][countd]
+
+                                Riemann_list[countb][counta][countc][countd] = True
+
+                            # Interchange Symmetry
+
+                            if Riemann_list[countc][countd][counta][countb] == False:
+
+                                self.tensor[0][countc][countd][counta][countb] = self.tensor[0][counta][countb][countc][countd]
+
+                                Riemann_list[countc][countd][counta][countb] = True
+
+                            # Bianchi Identity (First)
+
+                            if Riemann_list[counta][countc][countd][countb] == False and Riemann_list[counta][countd][countb][countc] == True:
+
+                                self.tensor[0][counta][countc][countd][countb] = -self.tensor[0][counta][countb][countc][countd] - self.tensor[0][counta][countd][countb][countc]
+
+                                Riemann_list[counta][countc][countd][countb] = True
+
+                            if Riemann_list[counta][countd][countb][countc] == False and Riemann_list[counta][countc][countd][countb] == True:
+
+                                self.tensor[0][counta][countd][countb][countc] = -self.tensor[0][counta][countb][countc][countd] - self.tensor[0][counta][countc][countd][countb]
+
+                                Riemann_list[counta][countd][countb][countc] = True
+
+
+                            Riemann_list[counta][countb][countc][countd] = True
+                    
+                else:
+                
+                    for p in iterprod(range(dim),repeat=self.n):
+                                
+                        string = 'self.tensor[%s]'%k 
+
+                        for l in p:
+                                
+                            string += '[%s]'%l
+
+                        if config.ord_status == False:
+
+                            string = string + '= expand(' + string + ')'
+
+                        else:
+
+                            string = string + '= expand(tensor_series(' + string + '))'
+
+                        #print(string)
+
+                        exec(string,locals(),globals())
+
+        self.space()
+
+
+
     def factor(self,index=None):
 
         '''
@@ -1037,7 +1293,15 @@ class Tensor:
 
         self.space()
 
-    def display(self, index=None, aslist = None, simplify = False):
+    def display(self, index=None, aslist = None, simplify = False, spatial=None):
+
+        if config.space_time == False and spatial is None:
+
+            spatial = True
+
+        if spatial == True:
+
+            return self.display_spatial(index, aslist, simplify)
 
         if core_calc == 'sp' and simplify == True:
 
@@ -1093,8 +1357,10 @@ class Tensor:
                 elif core_calc == 'gp':
 
                     f = io.StringIO()
+
                     with redirect_stdout(f):
-                        print(latex(matrix(self.tensor[k].reshape(dim,1))))
+
+                        print(latex(giac(self.tensor[k]).transpose()))
                     out = f.getvalue()
 
                     out = out.replace(r"\\",r"\\\\").replace("\\text{","").replace("\"}\"","").replace('\"','').replace('\\}','}').replace('\\{','{')#.replace('\\\\','\\')
@@ -1112,8 +1378,13 @@ class Tensor:
                     if simplify == False:
 
                         f = io.StringIO()
-                        with redirect_stdout(f):
-                            print(latex(matrix(self.tensor[k])))
+
+                        if self.n != 1:
+                            with redirect_stdout(f):
+                                print(latex(matrix(self.tensor[k])))
+                        else:
+                             with redirect_stdout(f):
+                                print(latex(giac(self.tensor[k])))
                         out = f.getvalue()
 
                         out = out.replace(r"\\",r"\\\\").replace("\\text{","").replace("\"}\"","").replace('\"','').replace('\\}','}').replace('\\{','{')#.replace('\\\\','\\')
@@ -1153,6 +1424,182 @@ class Tensor:
                 else:
 
                     str_name = self.name
+                
+                string = "{%s}"%str_name
+                    
+                i = 0
+                    
+                for l in index.split(','):
+                        
+                    if core_calc == 'gp':
+
+                        f = io.StringIO()
+                        with redirect_stdout(f):
+                            print(p[i])
+                        out = f.getvalue()
+                            
+                        string = '%s{}%s{%s}'%(string,l,out)
+                    
+                    elif core_calc == 'sp':
+
+                        string = '%s{}%s{%s}\,'%(string,l,str(p[i]))
+
+                    i += 1
+                    
+                if valor != 0:
+                        
+                    #string += " = %s"% (latex(valor))
+                    
+                    #display_IP(Math(string))
+
+                    if core_calc == 'gp':
+
+                        if simplify == False:
+
+                            display(valor,string)
+
+                        else:
+
+                            f = io.StringIO()
+                            with redirect_stdout(f):
+                                print(valor)
+                            out = f.getvalue()
+
+                            string2 = sp_latex(sp_simplify(sp_sympify(out)))
+
+                            string = "%s = %s"%(string,string2)
+
+                            display_IP(Math_IP(string))
+
+                    elif core_calc == 'sp':
+
+                        display(valor,string)
+
+                    count += 1
+
+            if count == 0:
+
+                print('All components are zero')
+
+    def display_spatial(self, index=None, aslist = None, simplify = False):
+
+        if core_calc == 'sp' and simplify == True:
+
+            warn("The simplify argument is intended to be used only with giacpy.\n The result is not affected when using Sympy.")
+        
+        if index is None:
+
+            index = self.orden[0]
+
+        rank = self.n
+
+        if aslist == None:
+
+            if rank <= 2:
+
+                aslist = False
+            
+            else:
+
+                aslist = True
+
+        dim = config.dim - 1 # Se elimina la dimension temporal
+        
+        k = 0
+        for i in self.orden:
+            if i == index:
+                break 
+            k += 1
+
+        if core_calc == 'sp':
+
+            init_printing()
+
+        if k == len(self.orden):
+
+            raise ValueError('Bad index definition')
+
+        if index == '' and rank == 0: # Scalar
+
+            display(self.tensor_sp)
+        
+        
+        elif aslist == False:
+
+            # if k == len(self.orden):
+
+            #     raise ValueError('Bad index definition')
+
+            if rank == 1 and index == '^':
+                
+                if core_calc == 'sp':
+
+                    display_IP(Array(self.tensor_sp[k]).reshape(dim,1))
+
+                elif core_calc == 'gp':
+
+                    f = io.StringIO()
+
+                    with redirect_stdout(f):
+
+                        print(latex(giac(self.tensor_sp[k]).transpose()))
+                    out = f.getvalue()
+
+                    out = out.replace(r"\\",r"\\\\").replace("\\text{","").replace("\"}\"","").replace('\"','').replace('\\}','}').replace('\\{','{')#.replace('\\\\','\\')
+
+                    display_IP(Math_IP(gp_pretty_latex(out)))
+
+            else:
+
+                if core_calc == 'sp':
+            
+                    display_IP(Array(self.tensor_sp[k]))
+
+                elif core_calc == 'gp':
+
+                    if simplify == False:
+
+                        f = io.StringIO()
+
+                        if rank != 1:
+                            with redirect_stdout(f):
+                                print(latex(matrix(self.tensor_sp[k])))
+                        else:
+                             with redirect_stdout(f):
+                                print(latex(giac(self.tensor_sp[k])))
+                        out = f.getvalue()
+
+                        out = out.replace(r"\\",r"\\\\").replace("\\text{","").replace("\"}\"","").replace('\"','').replace('\\}','}').replace('\\{','{')#.replace('\\\\','\\')
+
+                        display_IP(Math_IP(gp_pretty_latex(out)))
+
+                    else:
+
+                        f = io.StringIO()
+                        with redirect_stdout(f):
+                            print((self.tensor_sp[k]))
+                        out = f.getvalue()
+
+                        string = sp_latex(sp_simplify(sp_Array(sp_sympify(out))))
+
+                        display_IP(Math_IP(string))
+
+            
+        else:
+
+            count = 0
+                
+            for p in iterprod(range(dim),repeat=rank):
+                    
+                string = 'valor = self.tensor_sp[%s]'%k
+
+                for l in p:
+                        
+                    string += '[%s]'%l
+
+                exec(string,locals(),globals())
+                
+                str_name =  "\\varepsilon"
                 
                 string = "{%s}"%str_name
                     
@@ -1211,428 +1658,6 @@ class Tensor:
                 print('All components are zero')
 
 
-class Tdata:
-
-    def __init__(self,str_index,elements):
-
-        '''
-        elements es lo mismo que self.tensor
-        
-        '''
-        
-        self.full_index = str_index # '^i,_j' 
-
-        self.full_list = self.full_index.split(',')
-        
-        self.updn = [symbol[0] for symbol in self.full_list]
-            
-        self.index_names = [symbol[1:] for symbol in self.full_list]
-            
-        self.elements = elements # T
-
-    def __getitem__(self,item):
-
-        return self.elements[item]
-
-    def auto_sum(self):
-
-        '''
-        recibe tdata
-
-        se fija en el index_names y busca los indices repetidos. Suma sobre si mismo una sola vez.
-        Un solo indice repetido
-
-        '''
-
-        exec(reload_all('config'),locals(),globals())
-
-        if config.space_time == True:
-
-            dim = config.dim
-
-        else:
-
-            dim = config.dim - 1
-
-        # AGREGAR UN EXAMINE PARA AUTO_SUM
-
-        lista = self.index_names
-
-        rep = False
-
-        #print('en el auto_sum',self.full_list)
-
-        for i,name_i in enumerate(lista):
-
-            for j,name_j in enumerate(lista):
-
-                if name_i == name_j and i != j:
-
-                    pos_i,pos_j = i,j
-
-                    rep = True
-                    #print(pos_i,pos_j,name_i,name_j)
-
-                    break
-
-        self_index = ''
-
-        return_index = ''
-
-        full_index = ''
-
-        k = 0
-
-        if rep == True: # Si encuentra un indice repetido
-
-            for i in range(len(self.updn)):
-
-                if i == pos_i or i == pos_j:
-                
-                    self_index += '[q]'
-                
-                else:
-                    
-                    self_index += '[p[%d]]'%k
-
-                    return_index += '[p[%d]]'%k
-
-                    full_index += '%s,'%self.full_list[i]
-
-                    k += 1
-
-            full_index = full_index[:-1]
-
-            return_tensor = construct(0,dim,len(self.updn)-2)
-
-            for p in iterprod(range(dim),repeat=len(self.updn)-2): # for para ir asignarlo
-
-                temp = 0
-
-                for q in range(dim):
-
-                    string = 'self.elements%s'%(self_index)
-
-                    temp += eval(string,locals(),globals())
-                
-                string = 'return_tensor%s = temp'%return_index
-
-                exec(string,locals(),globals())
-                
-            return Tdata(full_index,return_tensor)   #se retorna como el self
-
-        else:
-
-            return self
-
-
-
-        
-    def __mul__(self,other):
-
-        exec(reload_all('config'),locals(),globals())
-
-        if config.space_time == True:
-
-            dim = config.dim
-
-        else:
-
-            dim = config.dim - 1
-        
-        if isinstance(other,Tdata):
-        
-            rep_index, rep_list = in_intersection(self.index_names,self.updn,other.index_names,other.updn)
-
-            mul_examine(rep_list)
-
-            new_index, return_string = out_intersection(self.index_names,self.updn,other.index_names,other.updn)
-
-            new_rank = len(new_index)
-
-            if new_rank != 0:
-                
-                return_tensor = construct(0,dim,new_rank)
-
-            if len(rep_index) != 0: # Si hay indices repetidos
-
-                new_iterstr = ''
-
-                for i in range(new_rank):
-
-                    new_iterstr += '[p[%d]]'%i
-
-                self_iterstr = ''
-
-                for i, name in enumerate(self.index_names):
-
-                    if name in rep_index:
-
-                        self_iterstr += '[q[%d]]'%rep_index[name]
-
-                    else:
-
-                        self_iterstr += '[p[%d]]'%new_index[name]
-
-                other_iterstr = ''
-
-                for i, name in enumerate(other.index_names):
-
-                    if name in rep_index:
-
-                        other_iterstr += '[q[%d]]'%rep_index[name]
-
-                    else:
-
-                        other_iterstr += '[p[%d]]'%new_index[name]
-
-                #print('%s\t;\t%s'%(self_iterstr,other_iterstr))
-
-                if new_rank != 0:
-
-                    for p in iterprod(range(dim),repeat=new_rank): # for para ir asignarlo
-
-                        temp = 0
-
-                        for q in iterprod(range(dim), repeat = len(rep_index)):
-
-                            string = 'self.elements%s*other.elements%s'%(self_iterstr,other_iterstr)
-
-                            temp += eval(string,locals(),globals())
-
-                        string = 'return_tensor%s = temp'%new_iterstr
-
-                        exec(string,locals(),globals())
-                
-                else:
-
-                    temp = 0
-
-                    for q in iterprod(range(dim), repeat = len(rep_index)):
-
-                        string = 'self.elements%s*other.elements%s'%(self_iterstr,other_iterstr)
-
-                        temp += eval(string,locals(),globals())
-
-                    return temp
-
-            else:
-
-                return_string = '%s,%s'%(self.full_index,other.full_index)
-
-                new_iterstr = ''
-
-                for i in range(new_rank):
-
-                    new_iterstr += '[p[%d]]'%i
-
-                self_iterstr = ''
-
-                k = 0
-
-                while k < len(self.updn):
-
-                    self_iterstr += '[p[%d]]'%k
-
-                    k += 1
-
-                other_iterstr = ''
-
-                while k < len(self.updn)+len(other.updn):
-
-                    other_iterstr += '[p[%d]]'%k
-                    
-                    k += 1
-
-                for p in iterprod(range(dim),repeat=new_rank): # for para ir asignarlo
-
-                    temp = 0
-                    
-                    string = 'self.elements%s*other.elements%s'%(self_iterstr,other_iterstr)
-
-                    temp = eval(string,locals(),globals())
-
-                    string = 'return_tensor%s = temp'%new_iterstr
-
-                    exec(string,locals(),globals())
-
-            return  Tdata(return_string,return_tensor)            
-
-        else: # Not Tdata * Tdata
-
-            same_rank = len(self.updn)
-            
-            return_tensor = construct(0,dim,same_rank)
-
-            index = ''
-
-            for i in range(same_rank):
-
-                index += '[p[%d]]'%i
-
-            for p in iterprod(range(dim),repeat = same_rank):
-
-                string = 'return_tensor%s = self.elements%s*other'%(index,index)
-
-                exec(string,locals(),globals())
-
-            return Tdata(self.full_index,return_tensor)
-        
-    def __rmul__(self,other):
-
-        exec(reload_all('config'),locals(),globals())
-
-        if config.space_time == True:
-
-            dim = config.dim
-
-        else:
-
-            dim = config.dim - 1
-
-        same_rank = len(self.updn)
-            
-        return_tensor = construct(0,dim,same_rank)
-
-        index = ''
-
-        for i in range(same_rank):
-
-            index += '[p[%d]]'%i
-
-        for p in iterprod(range(dim),repeat = same_rank):
-
-            string = 'return_tensor%s = self.elements%s*other'%(index,index)
-
-            exec(string,locals(),globals())
-
-        return Tdata(self.full_index,return_tensor)
-
-    def __add__(self,other):
-
-        exec(reload_all('config'),locals(),globals())
-
-        if config.space_time == True:
-
-            dim = config.dim
-
-        else:
-
-            dim = config.dim - 1
-
-        add_examine(self.full_index,other.full_index)
-
-        self_lista = self.full_index.split(',')
-        other_lista = other.full_index.split(',')
-
-        if set(self_lista) == set(other_lista): 
-
-            self_index = ''
-            other_index = ''
-
-            for i in range(len(self.updn)):
-
-                self_index += '[p[%d]]'%i
-
-            for j in range(len(other.updn)):
-
-                i = 0
-
-                while other_lista[j][1:] != self_lista[i][1:]:
-
-                    i += 1
-
-                other_index += '[p[%d]]'%i
-
-            return_tensor = construct(0,dim,len(self.updn))
-
-            for p in iterprod(range(dim),repeat=len(self.updn)): # for para ir asignarlo
-
-                temp = 0
-
-                string = 'self.elements%s+other.elements%s'%(self_index,other_index)
-
-                temp = eval(string,locals(),globals())
-
-                string = 'return_tensor%s = temp'%self_index   # se ordena como el self
-
-                exec(string,locals(),globals())
-            
-            return Tdata(self.full_index,return_tensor)   #se retorna como el self
-
-        else:
-
-            print('ERROR')
-
-    def __sub__(self,other):
-
-        exec(reload_all('config'),locals(),globals())
-
-        if config.space_time == True:
-
-            dim = config.dim
-
-        else:
-
-            dim = config.dim - 1
-
-        self_lista = self.full_index.split(',')
-        other_lista = other.full_index.split(',')
-
-        if set(self_lista) == set(other_lista): 
-
-            self_index = ''
-            other_index = ''
-
-            for i in range(len(self.updn)):
-
-                self_index += '[p[%d]]'%i
-
-            for j in range(len(other.updn)):
-
-                i = 0
-
-                while other_lista[j][1:] != self_lista[i][1:]:
-
-                    i += 1
-
-                other_index += '[p[%d]]'%i
-
-            return_tensor = construct(0,dim,len(self.updn))
-
-            for p in iterprod(range(dim),repeat=len(self.updn)): # for para ir asignarlo
-
-                temp = 0
-
-                string = 'self.elements%s - other.elements%s'%(self_index,other_index)
-
-                temp = eval(string,locals(),globals())
-
-                string = 'return_tensor%s = temp'%self_index   # se ordena como el self
-
-                exec(string,locals(),globals())
-            
-            return Tdata(self.full_index,return_tensor)   #se retorna como el self
-
-        else:
-
-            print('error')
-
-    def factor(self):
-
-        '''
-        Simplify the Tensor. If index is given, it will simplify only the given index combination ('^,_,_')
-        '''
-
-        self.elements = sympify(factor(self.elements))
-
-    def simplify(self):
-
-        '''
-        Simplify the Tensor. If index is given, it will simplify only the given index combination ('^,_,_')
-        '''
-
-        self.elements = sympify(simplify(np.array(self.elements)).tolist())
 
 def D(a,b):
 
@@ -1734,15 +1759,15 @@ def D(a,b):
 
                 for p in iterprod(range(dim),repeat = new_rank): 
 
-                    var = 0
+                    var_temp = 0
                     
                     for q in range(dim):
     
                         string = 'diff(a.elements%s,coords[%s])'%(old_index,der_index)
 
-                        var += eval(string,locals(),globals())
+                        var_temp += eval(string,locals(),globals())
 
-                    string = 'temp%s = var'%new_index
+                    string = 'temp%s = var_temp'%new_index
 
                     exec(string,locals(),globals())
                 

@@ -1,4 +1,8 @@
+from .greek import *
+
 from .core import core_calc
+from .fun import fun
+from .series import *
 
 if core_calc == 'sp':
 
@@ -73,7 +77,47 @@ def create_fun(f_symbol,var_symbol):
 
     return fun[-1]
 
+
+def create_default(T_name,T_obj):
+
+    if T_name == 'Christoffel':
+
+        christ = T_obj
+
+        ten.append(christ)
+
+    elif T_name == 'Riemann':
+
+        riemann = T_obj
+
+        ten.append(riemann)
+
+    elif T_name == 'Ricci':
+
+        ricci = T_obj
+
+        ten.append(ricci)
+
+    elif T_name == 'RicciS':
+
+        ricciS = T_obj
+
+        ten.append(ricciS)
+
+    elif T_name == 'Einstein':
+
+        G = T_obj
+
+        ten.append(G)
+
+
+
+
 def create_ten(T_name,T_obj):
+
+    if T_name in default_tensors:
+
+        create_default(T_name,T_obj)
 
     string = "%s = T_obj"%T_name
     exec(string,locals(),globals())
@@ -129,7 +173,7 @@ var = [] # Lista con variables de tipo sympy
 
 con = [] # Lista con constantes de tipo sympy
 
-fun = [] # Lista con funciones de tipo sympy
+#fun = [] # Lista con funciones de tipo sympy
 
 # Tensores tipicos -------- # Proteger estos nombres para que no puedan ser sobreescritos. Que newten arroje error 
 
@@ -149,7 +193,7 @@ LeviCivita_Symbol = None # LeviCivita Symbol
 
 LeviCivita_Tensor = None # LeviCivita Tensor
 
-default_tensors = {'Christoffel' : '\Gamma' , 'Einstein' : 'G', 'Riemann': 'R', 'Ricci' : 'R', 'RicciS' : 'R'}
+default_tensors = {'Christoffel' : '\Gamma' , 'Einstein' : 'G', 'Riemann': 'R', 'Ricci' : 'R', 'RicciS' : 'R','g':'g','G' :'G'}
 
 # ----------------------------
 
@@ -161,17 +205,10 @@ temp_name = []
 
 # Order  (epsilon)
 
-ord_status = False
+#ord_status = False
 
-ord_var = ''
+#ord_var = ''
 
-ord_n = 0
+#ord_n = 0
 
-# Greek Alphabet
-
-greek = [r'\alpha',  r'\beta', r'\gamma', r'\delta',r'\mu', r'\nu',r'\varrho', r'\rho',r'\sigma',r'\tau', r'\omega', r'\kappa', r'\lambda',r'\varepsilon', r'\epsilon', r'\eta',r'\vartheta',  r'\theta', r'\iota',r'\zeta', r'\omicron', r'\pi', r'\upsilon', r'\varphi',r'\phi',r'\chi',r'\psi']
-
-greek_dict = {'alpha' : r'\alpha', 'beta' : r'\beta', 'gamma' : r'\gamma', 'delta': r'\delta', 'mu' : r'\mu', 'nu' : r'\nu','varrho' : r'\rho', 'rho' : r'\rho', 'sigma' : r'\sigma', 'tau' : r'\tau', 'omega' : r'\omega', 'kappa' : r'\kappa', 'lambda' : r'\lambda','varepsilon' : r'\epsilon', 'epsilon' : r'\epsilon', 'eta' : r'\eta','vartheta' : r'\theta', 'theta' : r'\theta', 'iota': r'\iota', 'zeta' : r'\zeta', 'omicron' : r'\omicron', 'pi' : r'\pi', 'upsilon' : r'\upsilon','varphi' : r'\phi', 'phi': r'\phi', 'chi': r'\chi', 'psi' : r'\psi',\
-    'Alpha' : r'\Alpha', 'Beta' : r'\Beta', 'Gamma' : r'\Gamma', 'Delta': r'\Delta', 'Mu' : r'\Mu', 'Nu' : r'\Nu', 'Rho' : r'\Rho', 'Sigma' : r'\Sigma', 'Tau' : r'\Tau', 'Omega' : r'\Omega', 'Kappa' : r'\Kappa', 'Lambda' : r'\Lambda', 'Epsilon' : r'\Epsilon', 'Eta' : r'\Eta', 'Theta' : r'\Theta', 'Iota': r'\Iota', 'Zeta' : r'\Zeta', 'Omicron' : r'\Omicron', 'Pi' : r'\Pi', 'Upsilon' : r'\Upsilon', 'Phi' : r'\Phi', 'Chi' : r'\Chi', 'Psi' : r'\Psi'}
-
-__all__ = ['g','christ','riemann','ricci','ricciS','G']
+__all__ = ['g','christ','riemann','ricci','ricciS','G','space_time']

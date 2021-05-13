@@ -1,18 +1,18 @@
 from tqdm import tqdm_notebook
 from itertools import product as iterprod
-from pytearcat.Tensor.misc import new_var, new_fun
-from pytearcat.Tensor.core import config
-from pytearcat.Tensor.tensor_class import tensor_series
-from pytearcat.Tensor.core.core import core_calc
+from pytearcat.tensor.misc import new_var, new_fun
+from pytearcat.tensor.core import config
+from pytearcat.tensor.tensor import tensor_series
+from pytearcat.tensor.core.core import core_calc
 from .christoffel import calculate_christoffel
 
 if core_calc == 'sp':
 
-    from pytearcat.Tensor.core.core import diff, Rational, sympify, factor
-    
+    from pytearcat.tensor.core.core import diff, Rational, sympify, factor
+
 elif core_calc == 'gp':
 
-    from pytearcat.Tensor.core.core import diff, divide as Rational
+    from pytearcat.tensor.core.core import diff, divide as Rational
 
 def geodesic():
 

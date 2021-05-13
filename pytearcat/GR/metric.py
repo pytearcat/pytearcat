@@ -1,15 +1,15 @@
 from itertools import product as iterprod
-from pytearcat.Tensor.core import config
-from pytearcat.Tensor.core.core import *
-from pytearcat.Tensor.misc import new_var,new_ten, reload_all
-from pytearcat.Tensor.tensor_class import Tensor, tensor_series
-from pytearcat.Tensor.core.config import *
+from pytearcat.tensor.core import config
+from pytearcat.tensor.core.core import *
+from pytearcat.tensor.misc import new_var, reload_all
+from pytearcat.tensor.tensor import Tensor, tensor_series
+from pytearcat.tensor.core.config import *
 
 if core_calc == 'gp':
 
     import io
     from contextlib import redirect_stdout
-    from pytearcat.Tensor.core.display import gp_pretty_latex
+    from pytearcat.tensor.core.display import gp_pretty_latex
 
 
 def create_metric(ds2 = ''):
@@ -38,6 +38,8 @@ def create_metric(ds2 = ''):
 
             config.G = None
 
+            config.__all__.remove('g')
+
     if core_calc == 'sp':
 
         coords = ','.join(list(map(str,config.coords.values())))
@@ -49,8 +51,6 @@ def create_metric(ds2 = ''):
         for i in list(config.coords.values()):
             
             lol = "%s"%str(i)
-
-            lol = lol[1:-1]
 
             temp = temp[:] + lol[:] + ','
             
@@ -278,7 +278,7 @@ def create_metric_matrix(dim, variables_string, ds_input):
             g_matrix[i,j] = tensor_series(g_matrix[i,j])
             g_matrix_inv[i,j] = tensor_series(g_matrix_inv[i,j])
 
-    g = new_ten('g',2)
+    g = config.create_ten('g',Tensor('g',2))
 
     # SOLO EL TENSOR g uv TENDRA DOS OPCIONES DD Y UU, NO HAY DU Y UD PORQUE ESOS SIEMPRE SERAN IDENTIDAD, LUEGO
     if core_calc == 'gp':

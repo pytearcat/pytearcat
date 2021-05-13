@@ -1,5 +1,5 @@
 from re import findall,search
-from pytearcat.Tensor.core import config
+from pytearcat.tensor.core import config
 from .core import get_name, latex, display_IP, Math_IP, core_calc
 
 if core_calc == "gp":
@@ -15,13 +15,17 @@ if core_calc == "gp":
 
             ord_var = r"\%s"%ord_var
 
-        if ord_n+1 > 1:
+        structure = r"\%s\^\{(\d+)\} \\operatorname\{\\mathrm\{order\\_size\} \}\\left\(\%s\\right\)"%(ord_var,ord_var)
 
-            structure = r"%s^{%d} \operatorname{\mathrm{order\_size} }\left(%s\right)"%(ord_var,ord_n+1,ord_var)
+        exponent = findall(structure,element)
 
-            final = element.replace(r"%s"%structure,r"\mathrm{O}\left(%s^{%d}\right)"%(ord_var,ord_n+1))
+        if len(exponent) > 0:
 
-        elif ord_n + 1 == 1:
+            structure = r"%s^{%s} \operatorname{\mathrm{order\_size} }\left(%s\right)"%(ord_var,exponent[0],ord_var)
+
+            final = element.replace(r"%s"%structure,r"\mathrm{O}\left(%s^{%s}\right)"%(ord_var,exponent[0]))
+            
+        elif len(exponent) == 0:
 
             structure = r"%s \operatorname{\mathrm{order\_size} }\left(%s\right)"%(ord_var,ord_var)
 

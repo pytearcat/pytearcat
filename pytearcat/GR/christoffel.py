@@ -1,17 +1,17 @@
 from tqdm import tqdm_notebook
 from itertools import product as iterprod
-from pytearcat.Tensor.misc import new_ten,reload_all
-from pytearcat.Tensor.core import config
-from pytearcat.Tensor.tensor_class import tensor_series, Tensor
-from pytearcat.Tensor.core.core import core_calc, display_IP, Math_IP, Latex_IP
+from pytearcat.tensor.misc import new_ten,reload_all
+from pytearcat.tensor.core import config
+from pytearcat.tensor.tensor import tensor_series, Tensor
+from pytearcat.tensor.core.core import core_calc, display_IP, Math_IP, Latex_IP
 
 if core_calc == 'sp':
 
-    from pytearcat.Tensor.core.core import diff, Rational, factor
+    from pytearcat.tensor.core.core import diff, Rational, factor
 
 elif core_calc == 'gp':
 
-    from pytearcat.Tensor.core.core import diff, divide, simplify,series
+    from pytearcat.tensor.core.core import diff, divide, simplify,series
 
 def D(element,i):
 
@@ -46,7 +46,7 @@ def D(element,i):
 
         print("ERROR IN THE DERIVATIVE D OF A TENSOR")
 
-class Christoffel(Tensor):
+class ChristoffelClass(Tensor):
 
     def __init__(self):
 
@@ -98,7 +98,7 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
 
     if config.christ is None:
 
-        Christoffel = config.create_ten("Christoffel",Christoffel())
+        Christoffel = config.create_ten("Christoffel",ChristoffelClass())
 
         config.christ = Christoffel
 

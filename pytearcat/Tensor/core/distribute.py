@@ -1,5 +1,5 @@
 import numpy as np
-from .errors import TensorSyntaxError
+from .error import TensorSyntaxError
 
 def delete_blanks(element):
     

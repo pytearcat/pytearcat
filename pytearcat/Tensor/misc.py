@@ -1,15 +1,78 @@
 import numpy as np 
 from re import findall,search
 from .core import config
+from .core import series
 from .core.core import get_name, simplify, expand, series as Series,core_calc
 from .core import core
-from .core.errors import TensorSyntaxError
-from .tensor_class import Tensor
+from .core.error import TensorSyntaxError
+from .tensor import Tensor
 
 if core_calc == 'gp':
 
     import io
     from contextlib import redirect_stdout
+
+def simplify_pt(x):
+
+    if core_calc == 'gp':
+
+        iscoreobj = isinstance(x,core.gpcore)
+
+    elif core_calc == 'sp':
+
+        iscoreobj =  isinstance(x,core.Expr)
+
+    isnumber = False
+
+    if isinstance(x,int) or isinstance(x,float) or isinstance(x,np.number):
+
+        isnumber = True
+
+    elif isinstance(x,Tensor):
+
+        return x.simplify()
+
+    elif iscoreobj or isnumber:
+
+        return simplify(x)
+
+    else:
+
+        raise TypeError("The arg is not a mathematical object.")
+
+def expand_pt(x):
+
+    if core_calc == 'gp':
+
+        iscoreobj = isinstance(x,core.gpcore)
+
+    elif core_calc == 'sp':
+
+        iscoreobj =  isinstance(x,core.Expr)
+
+    isnumber = False
+
+    if isinstance(x,int) or isinstance(x,float) or isinstance(x,np.number):
+
+        isnumber = True
+
+    elif isinstance(x,Tensor):
+
+        return x.expand()
+
+    elif iscoreobj or isnumber:
+
+        return expand(x)
+
+    else:
+
+        raise TypeError("The arg is not a mathematical object.")
+
+    
+
+def set_space_time(x=True):
+
+    config.space_time = x
 
 def not_intersection(L1,L2):
     '''
@@ -41,7 +104,7 @@ def setorder(var,n):
 
     '''
 
-    if core_calc == 'gp' and not isinstance(var,core.giacpy.Pygen):
+    if core_calc == 'gp' and not isinstance(var,core.gpcore):
 
         raise(TypeError("var must be a giacpy object."))
 
@@ -49,10 +112,13 @@ def setorder(var,n):
 
         raise(TypeError("var must be a sympy object."))
 
+    series.ord_status = True
     config.ord_status = True
 
+    series.ord_var = var
     config.ord_var = var
 
+    series.ord_n = n
     config.ord_n = n
 
 def series(element):
@@ -85,6 +151,14 @@ def new_var(*args):
     if not all(isinstance(var, str) for var in input_vars):
 
         raise(TypeError("Arguments must be str."))
+
+    if 'epsilon' in input_vars or 'Epsilon' in input_vars:
+
+        raise(NameError("Pytearcat does not support 'epsilon' as a variable name. Please use another name."))
+
+    if 'varepsilon' in input_vars or 'Varepsilon' in input_vars:
+
+        raise(NameError("Pytearcat does not support 'varepsilon' as a variable name. Please use another name."))
 
     names = []
 
@@ -127,6 +201,14 @@ def new_con(*args):
     if not all(isinstance(var, str) for var in input_const):
 
         raise(TypeError("Arguments must be str."))
+
+    if 'epsilon' in input_const or "Epsilon" in input_const:
+
+        raise(NameError("Pytearcat does not support 'epsilon' as a variable name. Please use another name."))
+
+    if 'varepsilon' in input_const or "Varepsilon" in input_const:
+
+        raise(NameError("Pytearcat does not support 'varepsilon' as a variable name. Please use another name."))
 
     names = []
 
@@ -175,6 +257,14 @@ def new_fun(fun_symbol,var_symbol,overwrite=False):
 
         raise(TypeError("Function symbol must be a string"))
 
+    if 'epsilon' in fun_symbol or "Epsilon" in fun_symbol:
+
+        raise(NameError("Pytearcat does not support 'epsilon' as a variable name. Please use another name."))
+
+    if 'varepsilon' in fun_symbol or "Varepsilon" in fun_symbol:
+
+        raise(NameError("Pytearcat does not support 'varepsilon' as a variable name. Please use another name."))
+
     existing_names = []
 
     for i in config.fun:
@@ -196,13 +286,24 @@ def new_fun(fun_symbol,var_symbol,overwrite=False):
         function = config.fun[fun_index]
 
     return function
-    
 
 def new_ten(tname,index):
 
     if len(findall('([^A-Za-z0-9])',tname)) != 0:
 
         raise TensorSyntaxError('The tensor name cannot contain any special character.')
+
+    if tname in config.default_tensors:
+
+        raise NameError("%s is protected as a default tensor name."%tname)
+
+    if 'epsilon' == tname or "Epsilon" == tname:
+
+        raise(NameError("Pytearcat does not support 'epsilon' as a variable name. Please use another name."))
+
+    if 'varepsilon'  == tname or "Varepsilon"  == tname:
+
+        raise(NameError("Pytearcat does not support 'varepsilon' as a variable name. Please use another name."))
 
     A = Tensor(tname,index)
 
