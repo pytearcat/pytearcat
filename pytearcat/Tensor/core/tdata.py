@@ -91,12 +91,34 @@ def construct(elem,dim,n):
 
 class Tdata:
 
+    '''
+    A class to represent the data of a Tensor.
+    
+
+    ...
+
+    Attributes 
+    -----------
+
+    str_index : str
+        String indicating the corresponding index combination of the Tensor, i.e. "^i,_j"
+
+    elements : list or array
+        list containing the data elements of the corresponding index combination.
+
+    Methods
+    ----------
+    factor():
+        Factors the Tensor data
+    
+    simplify():
+        Simplifies the Tensor data
+    
+
+    '''
+
     def __init__(self,str_index,elements):
 
-        '''
-        elements es lo mismo que self.tensor
-        
-        '''
         
         self.full_index = str_index # '^i,_j' 
 
@@ -497,7 +519,7 @@ class Tdata:
     def factor(self):
 
         '''
-        Simplify the Tensor. If index is given, it will simplify only the given index combination ('^,_,_')
+        Factor the Tensor data.
         '''
 
         self.elements = sympify(factor(self.elements))
@@ -505,7 +527,7 @@ class Tdata:
     def simplify(self):
 
         '''
-        Simplify the Tensor. If index is given, it will simplify only the given index combination ('^,_,_')
+        Simplify the Tensor data.
         '''
 
         self.elements = sympify(simplify(np.array(self.elements)).tolist())
