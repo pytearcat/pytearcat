@@ -953,6 +953,18 @@ class Tensor:
         if (index not in self.orden and index is not None) or index == '':
 
             raise ValueError('Bad index definition')
+
+        if config.space_time == 1:
+
+            dim = config.dim
+
+            ten_call = 'tensor'
+
+        else:
+
+            dim = config.dim - 1
+
+            ten_call = 'tensor_sp'
         
 
         if index is None:
@@ -962,7 +974,7 @@ class Tensor:
             if self.n == 0:
 
 
-                self.tensor = self.tensor.simplify()  
+                self.tensor = eval("self.%s.simplify()"%ten_call,locals(),globals())
 
         else:
 
@@ -985,7 +997,7 @@ class Tensor:
 
                         if Riemann_list[counta][countb][countc][countd] == False:
                             
-                            string = 'self.tensor[%s]'%k 
+                            string = 'self.%s[%s]'%(ten_call,k) 
 
                             for l in p:
                                     
@@ -1002,12 +1014,14 @@ class Tensor:
                             if Riemann_list[counta][countb][countd][countc] == False:
 
                                 self.tensor[0][counta][countb][countd][countc] = -self.tensor[0][counta][countb][countc][countd]
+                                self.tensor_sp[0][counta][countb][countd][countc] = -self.tensor_sp[0][counta][countb][countc][countd]
 
                                 Riemann_list[counta][countb][countd][countc] = True
 
                             if Riemann_list[countb][counta][countc][countd] == False:
 
                                 self.tensor[0][countb][counta][countc][countd] = -self.tensor[0][counta][countb][countc][countd]
+                                self.tensor_sp[0][countb][counta][countc][countd] = -self.tensor_sp[0][counta][countb][countc][countd]
 
                                 Riemann_list[countb][counta][countc][countd] = True
 
@@ -1016,6 +1030,7 @@ class Tensor:
                             if Riemann_list[countc][countd][counta][countb] == False:
 
                                 self.tensor[0][countc][countd][counta][countb] = self.tensor[0][counta][countb][countc][countd]
+                                self.tensor_sp[0][countc][countd][counta][countb] = self.tensor_sp[0][counta][countb][countc][countd]
 
                                 Riemann_list[countc][countd][counta][countb] = True
 
@@ -1024,12 +1039,14 @@ class Tensor:
                             if Riemann_list[counta][countc][countd][countb] == False and Riemann_list[counta][countd][countb][countc] == True:
 
                                 self.tensor[0][counta][countc][countd][countb] = -self.tensor[0][counta][countb][countc][countd] - self.tensor[0][counta][countd][countb][countc]
+                                self.tensor_sp[0][counta][countc][countd][countb] = -self.tensor_sp[0][counta][countb][countc][countd] - self.tensor_sp[0][counta][countd][countb][countc]
 
                                 Riemann_list[counta][countc][countd][countb] = True
 
                             if Riemann_list[counta][countd][countb][countc] == False and Riemann_list[counta][countc][countd][countb] == True:
 
                                 self.tensor[0][counta][countd][countb][countc] = -self.tensor[0][counta][countb][countc][countd] - self.tensor[0][counta][countc][countd][countb]
+                                self.tensor_sp[0][counta][countd][countb][countc] = -self.tensor_sp[0][counta][countb][countc][countd] - self.tensor_sp[0][counta][countc][countd][countb]
 
                                 Riemann_list[counta][countd][countb][countc] = True
 
@@ -1040,7 +1057,7 @@ class Tensor:
                 
                     for p in iterprod(range(dim),repeat=self.n):
                                 
-                        string = 'self.tensor[%s]'%k 
+                        string = 'self.%s[%s]'%(ten_call,k) 
 
                         for l in p:
                                 
@@ -1058,7 +1075,9 @@ class Tensor:
 
                         exec(string,locals(),globals())
 
-        self.space()
+        if config.space_time == 1:
+        
+            self.space()
 
     def expand(self,index=None):
 
@@ -1071,6 +1090,19 @@ class Tensor:
         if (index not in self.orden and index is not None) or index == '':
 
             raise ValueError('Bad index definition')
+
+        
+        if config.space_time == 1:
+
+            dim = config.dim
+
+            ten_call = 'tensor'
+
+        else:
+
+            dim = config.dim - 1
+
+            ten_call = 'tensor_sp'
         
 
         if index is None:
@@ -1080,7 +1112,7 @@ class Tensor:
             if self.n == 0:
 
 
-                self.tensor = self.tensor.expand()  
+                self.tensor = eval("self.%s.expand()"%ten_call,locals(),globals())
 
         else:
 
@@ -1103,7 +1135,7 @@ class Tensor:
 
                         if Riemann_list[counta][countb][countc][countd] == False:
                             
-                            string = 'self.tensor[%s]'%k 
+                            string = 'self.%s[%s]'%(ten_call,k) 
 
                             for l in p:
                                     
@@ -1120,12 +1152,14 @@ class Tensor:
                             if Riemann_list[counta][countb][countd][countc] == False:
 
                                 self.tensor[0][counta][countb][countd][countc] = -self.tensor[0][counta][countb][countc][countd]
+                                self.tensor_sp[0][counta][countb][countd][countc] = -self.tensor_sp[0][counta][countb][countc][countd]
 
                                 Riemann_list[counta][countb][countd][countc] = True
 
                             if Riemann_list[countb][counta][countc][countd] == False:
 
                                 self.tensor[0][countb][counta][countc][countd] = -self.tensor[0][counta][countb][countc][countd]
+                                self.tensor_sp[0][countb][counta][countc][countd] = -self.tensor_sp[0][counta][countb][countc][countd]
 
                                 Riemann_list[countb][counta][countc][countd] = True
 
@@ -1134,6 +1168,7 @@ class Tensor:
                             if Riemann_list[countc][countd][counta][countb] == False:
 
                                 self.tensor[0][countc][countd][counta][countb] = self.tensor[0][counta][countb][countc][countd]
+                                self.tensor_sp[0][countc][countd][counta][countb] = self.tensor_sp[0][counta][countb][countc][countd]
 
                                 Riemann_list[countc][countd][counta][countb] = True
 
@@ -1142,12 +1177,14 @@ class Tensor:
                             if Riemann_list[counta][countc][countd][countb] == False and Riemann_list[counta][countd][countb][countc] == True:
 
                                 self.tensor[0][counta][countc][countd][countb] = -self.tensor[0][counta][countb][countc][countd] - self.tensor[0][counta][countd][countb][countc]
+                                self.tensor_sp[0][counta][countc][countd][countb] = -self.tensor_sp[0][counta][countb][countc][countd] - self.tensor_sp[0][counta][countd][countb][countc]
 
                                 Riemann_list[counta][countc][countd][countb] = True
 
                             if Riemann_list[counta][countd][countb][countc] == False and Riemann_list[counta][countc][countd][countb] == True:
 
                                 self.tensor[0][counta][countd][countb][countc] = -self.tensor[0][counta][countb][countc][countd] - self.tensor[0][counta][countc][countd][countb]
+                                self.tensor_sp[0][counta][countd][countb][countc] = -self.tensor_sp[0][counta][countb][countc][countd] - self.tensor_sp[0][counta][countc][countd][countb]
 
                                 Riemann_list[counta][countd][countb][countc] = True
 
@@ -1158,7 +1195,7 @@ class Tensor:
                 
                     for p in iterprod(range(dim),repeat=self.n):
                                 
-                        string = 'self.tensor[%s]'%k 
+                        string = 'self.%s[%s]'%(ten_call,k) 
 
                         for l in p:
                                 
@@ -1176,14 +1213,14 @@ class Tensor:
 
                         exec(string,locals(),globals())
 
-        self.space()
+        if config.space_time == 1:
 
-
+            self.space()
 
     def factor(self,index=None):
 
         '''
-        Simplify the Tensor. If index is given, it will simplify only the given index combination ('^,_,_')
+        Expand the Tensor. If index is given, it will expand only the given index combination ('^,_,_')
         '''
 
         dim = config.dim
@@ -1191,6 +1228,19 @@ class Tensor:
         if (index not in self.orden and index is not None) or index == '':
 
             raise ValueError('Bad index definition')
+
+        
+        if config.space_time == 1:
+
+            dim = config.dim
+
+            ten_call = 'tensor'
+
+        else:
+
+            dim = config.dim - 1
+
+            ten_call = 'tensor_sp'
         
 
         if index is None:
@@ -1200,7 +1250,7 @@ class Tensor:
             if self.n == 0:
 
 
-                self.tensor = factor(self.tensor)
+                self.tensor = eval("self.%s.factor()"%ten_call,locals(),globals())
 
         else:
 
@@ -1223,29 +1273,31 @@ class Tensor:
 
                         if Riemann_list[counta][countb][countc][countd] == False:
                             
-                            string = 'self.tensor[%s]'%k 
+                            string = 'self.%s[%s]'%(ten_call,k) 
 
                             for l in p:
                                     
                                 string += '[%s]'%l
 
-                            string = string + '= sympify(factor(%s))'%string
+                            string = string + '=' + string + '.factor()'
 
                             exec(string,locals(),globals())
 
-                            print('Simplified:  ',counta,countb,countc,countd)
+                            print('Fully Simplified:  ',counta,countb,countc,countd)
 
                             # Skew Symmetry
 
                             if Riemann_list[counta][countb][countd][countc] == False:
 
                                 self.tensor[0][counta][countb][countd][countc] = -self.tensor[0][counta][countb][countc][countd]
+                                self.tensor_sp[0][counta][countb][countd][countc] = -self.tensor_sp[0][counta][countb][countc][countd]
 
                                 Riemann_list[counta][countb][countd][countc] = True
 
                             if Riemann_list[countb][counta][countc][countd] == False:
 
                                 self.tensor[0][countb][counta][countc][countd] = -self.tensor[0][counta][countb][countc][countd]
+                                self.tensor_sp[0][countb][counta][countc][countd] = -self.tensor_sp[0][counta][countb][countc][countd]
 
                                 Riemann_list[countb][counta][countc][countd] = True
 
@@ -1254,6 +1306,7 @@ class Tensor:
                             if Riemann_list[countc][countd][counta][countb] == False:
 
                                 self.tensor[0][countc][countd][counta][countb] = self.tensor[0][counta][countb][countc][countd]
+                                self.tensor_sp[0][countc][countd][counta][countb] = self.tensor_sp[0][counta][countb][countc][countd]
 
                                 Riemann_list[countc][countd][counta][countb] = True
 
@@ -1262,12 +1315,14 @@ class Tensor:
                             if Riemann_list[counta][countc][countd][countb] == False and Riemann_list[counta][countd][countb][countc] == True:
 
                                 self.tensor[0][counta][countc][countd][countb] = -self.tensor[0][counta][countb][countc][countd] - self.tensor[0][counta][countd][countb][countc]
+                                self.tensor_sp[0][counta][countc][countd][countb] = -self.tensor_sp[0][counta][countb][countc][countd] - self.tensor_sp[0][counta][countd][countb][countc]
 
                                 Riemann_list[counta][countc][countd][countb] = True
 
                             if Riemann_list[counta][countd][countb][countc] == False and Riemann_list[counta][countc][countd][countb] == True:
 
                                 self.tensor[0][counta][countd][countb][countc] = -self.tensor[0][counta][countb][countc][countd] - self.tensor[0][counta][countc][countd][countb]
+                                self.tensor_sp[0][counta][countd][countb][countc] = -self.tensor_sp[0][counta][countb][countc][countd] - self.tensor_sp[0][counta][countc][countd][countb]
 
                                 Riemann_list[counta][countd][countb][countc] = True
 
@@ -1276,22 +1331,29 @@ class Tensor:
                     
                 else:
                 
-
                     for p in iterprod(range(dim),repeat=self.n):
                                 
-                        string = 'self.tensor[%s]'%k 
+                        string = 'self.%s[%s]'%(ten_call,k) 
 
                         for l in p:
                                 
                             string += '[%s]'%l
 
-                        string = string + '= sympify(factor(%s))'%string
+                        if config.ord_status == False:
+
+                            string = string + '= factor(' + string + ')'
+
+                        else:
+
+                            string = string + '= factor(tensor_series(' + string + '))'
 
                         #print(string)
 
                         exec(string,locals(),globals())
 
-        self.space()
+        if config.space_time == 1:
+
+            self.space()
 
     def display(self, index=None, aslist = None, simplify = False, spatial=None):
 

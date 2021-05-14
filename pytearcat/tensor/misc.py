@@ -2,7 +2,7 @@ import numpy as np
 from re import findall,search
 from .core import config
 from .core import series
-from .core.core import get_name, simplify, expand, series as Series,core_calc
+from .core.core import get_name, simplify, factor, expand, series as Series,core_calc
 from .core import core
 from .core.error import TensorSyntaxError
 from .tensor import Tensor
@@ -11,6 +11,35 @@ if core_calc == 'gp':
 
     import io
     from contextlib import redirect_stdout
+
+def factor_pt(x):
+
+    if core_calc == 'gp':
+
+        iscoreobj = isinstance(x,core.gpcore)
+
+    elif core_calc == 'sp':
+
+        iscoreobj =  isinstance(x,core.Expr)
+
+    isnumber = False
+
+    if isinstance(x,int) or isinstance(x,float) or isinstance(x,np.number):
+
+        isnumber = True
+
+    elif isinstance(x,Tensor):
+
+        return x.factor()
+
+    elif iscoreobj or isnumber:
+
+        return factor(x)
+
+    else:
+
+        raise TypeError("The arg is not a mathematical object.")
+
 
 def simplify_pt(x):
 

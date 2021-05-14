@@ -299,6 +299,10 @@ class gpcore(__gp.giacpy.Pygen):
 
         return gpcore(super().expand())
 
+    def factor(self):
+
+        return gpcore(super().factor())
+
 #trigonometric functions
 
 def sin(x):
@@ -444,6 +448,10 @@ def simplify(x):
 def expand(x):
 
     return gpcore(__gp.expand(x))
+
+def factor(x):
+
+    return gpcore(__gp.factor(x))
 
 def series(f,epsilon,x0,n):
 
