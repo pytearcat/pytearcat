@@ -5,123 +5,123 @@ from .core import get_name, latex, display_IP, Math_IP, core_calc
 if core_calc == "gp":
 
     from .core import tolatex, expand
-    from .gpwrap import gpcore, gp_pretty_latex
+    from .gpwrap import gpcore
 
-    # def gp_pretty_order(element):
+    def gp_pretty_order(element):
         
-    #     ord_n = config.ord_n
-    #     ord_var = get_name(config.ord_var)
+        ord_n = config.ord_n
+        ord_var = get_name(config.ord_var)
         
-    #     if ord_var in config.greek_dict:
+        if ord_var in config.greek_dict:
 
-    #         ord_var = r"\%s"%ord_var
+            ord_var = r"\%s"%ord_var
 
-    #     structure = r"\%s\^\{(\d+)\} \\operatorname\{\\mathrm\{order\\_size\} \}\\left\(\%s\\right\)"%(ord_var,ord_var)
+        structure = r"\%s\^\{(\d+)\} \\operatorname\{\\mathrm\{order\\_size\} \}\\left\(\%s\\right\)"%(ord_var,ord_var)
 
-    #     exponent = findall(structure,element)
+        exponent = findall(structure,element)
 
-    #     if len(exponent) > 0:
+        if len(exponent) > 0:
 
-    #         structure = r"%s^{%s} \operatorname{\mathrm{order\_size} }\left(%s\right)"%(ord_var,exponent[0],ord_var)
+            structure = r"%s^{%s} \operatorname{\mathrm{order\_size} }\left(%s\right)"%(ord_var,exponent[0],ord_var)
 
-    #         final = element.replace(r"%s"%structure,r"\mathrm{O}\left(%s^{%s}\right)"%(ord_var,exponent[0]))
+            final = element.replace(r"%s"%structure,r"\mathrm{O}\left(%s^{%s}\right)"%(ord_var,exponent[0]))
             
-    #     elif len(exponent) == 0:
+        elif len(exponent) == 0:
 
-    #         structure = r"%s \operatorname{\mathrm{order\_size} }\left(%s\right)"%(ord_var,ord_var)
+            structure = r"%s \operatorname{\mathrm{order\_size} }\left(%s\right)"%(ord_var,ord_var)
 
-    #         final = element.replace(r"%s"%structure,r"\mathrm{O}\left(%s\right)"%ord_var)
+            final = element.replace(r"%s"%structure,r"\mathrm{O}\left(%s\right)"%ord_var)
 
-    #     return final
+        return final
 
-    # def gp_pretty_latex(element):
+    def gp_pretty_latex(element):
         
-    #     '''
-    #     It takes a giacpy latex expression and returns a latex string that is similar to the sympy notation.
+        '''
+        It takes a giacpy latex expression and returns a latex string that is similar to the sympy notation.
         
-    #         - It rewrites the derivatives
-    #         - It rewrites the expansion order
+            - It rewrites the derivatives
+            - It rewrites the expansion order
         
-    #     '''
+        '''
         
-    #     names = {}
-    #     variables = []
+        names = {}
+        variables = []
 
-    #     result = element[:]
+        result = element[:]
         
-    #     greek_dict =config.greek_dict
+        greek_dict =config.greek_dict
 
-    #     for i in config.fun:
+        for i in config.fun:
 
-    #         x = r'%s'%str(latex(i))[1:].split("\left")[0].replace('\\','').replace('{','\\{').replace('}','\\}').replace('mathrm','\\\\mathrm')
+            x = r'%s'%str(latex(i))[1:].split("\left")[0].replace('\\','').replace('{','\\{').replace('}','\\}').replace('mathrm','\\\\mathrm')
 
-    #         names[x] = str(i).split('(')[1][:-1]
+            names[x] = str(i).split('(')[1][:-1]
 
-    #     for i in names:
+        for i in names:
 
-    #         j = findall(r'(?<=\W)%s\^\{\\left\((.*?)\\right\)\}'%i,element)
+            j = findall(r'(?<=\W)%s\^\{\\left\((.*?)\\right\)\}'%i,element)
             
-    #         for k in j:
+            for k in j:
 
-    #             ind = k.split(',')
+                ind = k.split(',')
 
-    #             ini,fin = search(r'%s\^\{\\left\(%s\\right\)\}'%(i,k),element).span()
+                ini,fin = search(r'%s\^\{\\left\(%s\\right\)\}'%(i,k),element).span()
                 
-    #             while element[ini] != ' ' and element[ini] != ',' and element[ini] != '\\' and element[ini] != '-' and element[ini] != '+':
+                while element[ini] != ' ' and element[ini] != ',' and element[ini] != '\\' and element[ini] != '-' and element[ini] != '+':
 
-    #                 ini -= 1
+                    ini -= 1
 
-    #             string = ''
+                string = ''
 
-    #             l_dict = {}
+                l_dict = {}
 
-    #             for l in ind: 
+                for l in ind: 
 
-    #                 l_dict[l] = ind.count(l)  
+                    l_dict[l] = ind.count(l)  
                     
-    #             for l in l_dict:  # L = '1'
+                for l in l_dict:  # L = '1'
 
-    #                 y = names[i].split(',')[int(l)-1]
+                    y = names[i].split(',')[int(l)-1]
                         
-    #                 if y in greek_dict.keys():
+                    if y in greek_dict.keys():
                             
-    #                     y = r'\\%s'%y
+                        y = r'\\%s'%y
                     
-    #                 if l_dict[l] == 1:
+                    if l_dict[l] == 1:
                         
-    #                     string += r'\frac{\partial }{\partial %s}'%y
+                        string += r'\frac{\partial }{\partial %s}'%y
 
-    #                 else:
+                    else:
 
-    #                     string += r'\frac{\partial^%d }{\partial %s^%d}'%(l_dict[l],y,l_dict[l])
+                        string += r'\frac{\partial^%d }{\partial %s^%d}'%(l_dict[l],y,l_dict[l])
 
-    #             string+= i
+                string+= i
 
-    #             result = result.replace(element[ini:fin],string)    
+                result = result.replace(element[ini:fin],string)    
 
-    #     for func in names:
+        for func in names:
 
-    #         if func in greek_dict.keys():
+            if func in greek_dict.keys():
 
-    #             result = result.replace(func,greek_dict[func])
+                result = result.replace(func,greek_dict[func])
                 
-    #     if config.ord_status == True:
+        if config.ord_status == True:
 
-    #         result = gp_pretty_order(result)
+            result = gp_pretty_order(result)
 
-    #     return result.replace('\\\\','\\').replace("\"","").replace("\\{","{").replace("\\}","}")
+        return result.replace('\\\\','\\').replace("\"","").replace("\\{","{").replace("\\}","}")
 
 
-    #     def tolatex(element):
+        def tolatex(element):
 
-    #         f = io.StringIO()
-    #         with redirect_stdout(f):
-    #             print(latex(element))
-    #         element = f.getvalue()
+            f = io.StringIO()
+            with redirect_stdout(f):
+                print(latex(element))
+            element = f.getvalue()
 
-    #         string =  element[1:-2]
+            string =  element[1:-2]
 
-    #         return gp_pretty_latex(string)
+            return gp_pretty_latex(string)
 
     def display(a , b=None):    
         '''
