@@ -5,9 +5,26 @@ from re import findall, search
 from IPython.display import display as display_IP, Math as Math_IP
 from contextlib import redirect_stdout
 from .tdata import Tdata as _Tdata
-from pytearcat.tensor.core import series as ptseries
+from .ptseries import ord_status as ord_status,ord_var,ord_n
+#from pytearcat.tensor.core import ptseries
 from pytearcat.tensor.core import greek
 from pytearcat.tensor.core import fun
+
+def reload_all(new_module):
+
+    ''' 
+
+    This function reloads all the variables in __all__ from module
+        
+    Thanks to hurturk on https://stackoverflow.com/questions/44492803/python-dynamic-import-how-to-import-from-module-name-from-variable?newreg=9312458d429647fc8ec2a72e5655d197
+        
+    '''
+
+    string = "globals().update({{n: getattr(module, n) for n in module.__all__}} if hasattr(module, '_all_') else {k: v for (k, v) in module.__dict__.items() if not k.startswith('_')})"
+
+    string = string.replace('module',new_module)
+
+    return string
 
 def get_name(element):
         
@@ -31,8 +48,11 @@ def tolatex(element):
 
 def gp_pretty_order(element):
     
-    ord_n = ptseries.ord_n
-    ord_var = get_name(ptseries.ord_var)
+    #ord_n = ord_n
+
+    global ord_status,ord_var,ord_n
+
+    ord_var = get_name(ord_var)
     
     if ord_var in greek.greek_dict:
 
@@ -65,7 +85,8 @@ def gp_pretty_latex(element):
         - It rewrites the expansion order
     
     '''
-    
+
+    global ord_status,ord_var,ord_n 
     names = {}
     variables = []
 
@@ -127,12 +148,19 @@ def gp_pretty_latex(element):
 
             result = result.replace(func,greek_dict[func])
             
-    if ptseries.ord_status == True:
+    if ord_status == True:
 
         result = gp_pretty_order(result)
 
     return result.replace('\\\\','\\').replace("\"","").replace("\\{","{").replace("\\}","}")
 
+def reload_series():
+
+    global ord_status,ord_var,ord_n
+
+    from .ptseries import ord_status,ord_var,ord_n
+
+    return ord_status,ord_var,ord_n
 
 
 class gpcore(__gp.giacpy.Pygen):
@@ -159,9 +187,13 @@ class gpcore(__gp.giacpy.Pygen):
 
         #print("llamando a html")
 
-        if ptseries.ord_status == True:
 
-            a = self.expand()
+        ord_status,ord_var,ord_n = reload_series()
+
+
+        if ord_status == True:
+
+           a = expand(self)
 
         else:
 
@@ -169,7 +201,7 @@ class gpcore(__gp.giacpy.Pygen):
 
         string = tolatex(a)
 
-        string = gp_pretty_latex(a)
+        string = gp_pretty_latex(string)
 
         #display_IP(Math_IP(string))
 

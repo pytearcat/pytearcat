@@ -1,7 +1,7 @@
 import numpy as np 
 from re import findall,search
 from .core import config
-from .core import series
+from .core import ptseries
 from .core.core import get_name, simplify, factor, expand, series as Series,core_calc
 from .core import core
 from .core.error import TensorSyntaxError
@@ -141,13 +141,13 @@ def setorder(var,n):
 
         raise(TypeError("var must be a sympy object."))
 
-    series.ord_status = True
+    ptseries.ord_status = True
     config.ord_status = True
 
-    series.ord_var = var
+    ptseries.ord_var = var
     config.ord_var = var
 
-    series.ord_n = n
+    ptseries.ord_n = n
     config.ord_n = n
 
 def series(element):

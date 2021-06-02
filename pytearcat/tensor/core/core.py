@@ -6,23 +6,18 @@ __required = {'jupyter','numpy' ,'sympy', 'tqdm','giacpy'}
 __installed = {pkg.key for pkg in pkg_resources.working_set}
 __missing = __required - __installed
 
-if len(__missing) != 0:
+#if len(__missing) != 0:
 
-    if 'giacpy' in __missing and len(__missing) == 1:
+#    if 'giacpy' in __missing and len(__missing) == 1:
 
-        pass
+#        pass
 
-    else:
+#    else:
 
-        raise(EnvironmentError("There are missing modules: %s"(__missing-{'giacpy'})))
+#        raise(EnvironmentError("There are missing modules:"(__missing-{'giacpy'})))
 
-if 'giacpy' in __installed:
 
-    core_calc = 'gp'
-
-else:
-
-    core_calc = 'sp'
+core_calc = 'gp'
 
 # OS = system()
 

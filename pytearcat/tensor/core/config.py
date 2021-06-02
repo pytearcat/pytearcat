@@ -2,7 +2,7 @@ from .greek import *
 
 from .core import core_calc
 from .fun import fun
-from .series import *
+from .ptseries import *
 
 if core_calc == 'sp':
 
