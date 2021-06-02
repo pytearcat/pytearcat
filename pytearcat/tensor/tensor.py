@@ -2008,6 +2008,8 @@ def C(a,b):
 
         if config.christ is None:
 
+            print("Christofel Symbols not calculated.")
+
             raise(NotImplementedError)
 
         was_up = False
@@ -2215,6 +2217,6 @@ def tensor_series(element):
 
     elif core_calc == 'sp':
 
-        result = expand(series(element, config.ord_var,0, config.ord_n+1))
+        result = series(expand(element), config.ord_var,0, config.ord_n+1)
 
     return result
