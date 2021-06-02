@@ -5,7 +5,7 @@ from .core import get_name, latex, display_IP, Math_IP, core_calc
 if core_calc == "gp":
 
     from .core import tolatex, expand
-    from .gpwrap import gpcore
+    from .gpwrap import gpcore, gp_pretty_latex
 
     # def gp_pretty_order(element):
         
