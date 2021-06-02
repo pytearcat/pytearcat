@@ -8,165 +8,131 @@ from .tdata import Tdata as _Tdata
 from pytearcat.tensor.core import series as ptseries
 from pytearcat.tensor.core import greek
 from pytearcat.tensor.core import fun
-#import sys
 
-import sys
-
-def in_notebook():
-    """
-    Returns ``True`` if the module is running in IPython kernel,
-    ``False`` if in IPython shell or other Python shell.
-    """
-    return 'ipykernel' in sys.modules
-
-# later I found out this:
-
-def ipython_info():
-
-    ip = False
-    if 'ipykernel' in sys.modules:
-        ip = 'notebook'
-    elif 'IPython' in sys.modules:
-        ip = 'terminal'
-    
-    print(ip)
-    return ip
-
-def get_name(element):
+# def get_name(element):
         
-    f = io.StringIO()
-    with redirect_stdout(f):
-        print(element)
-    element = f.getvalue()
+#     f = io.StringIO()
+#     with redirect_stdout(f):
+#         print(element)
+#     element = f.getvalue()
 
-    return element[:-1]
+#     return element[:-1]
 
-def tolatex(element):
+# def tolatex(element):
 
-    f = io.StringIO()
-    with redirect_stdout(f):
-        print(latex(element))
-    element = f.getvalue()
+#     f = io.StringIO()
+#     with redirect_stdout(f):
+#         print(latex(element))
+#     element = f.getvalue()
 
-    string =  element[1:-2]
+#     string =  element[1:-2]
 
-    return string
+#     return string
 
-def gp_pretty_order(element):
+# def gp_pretty_order(element):
     
-    ord_n = ptseries.ord_n
-    ord_var = get_name(ptseries.ord_var)
+#     ord_n = ptseries.ord_n
+#     ord_var = get_name(ptseries.ord_var)
     
-    if ord_var in greek.greek_dict:
+#     if ord_var in greek.greek_dict:
 
-        ord_var = r"\%s"%ord_var
+#         ord_var = r"\%s"%ord_var
 
-    structure = r"\%s\^\{(\d+)\} \\operatorname\{\\mathrm\{order\\_size\} \}\\left\(\%s\\right\)"%(ord_var,ord_var)
+#     structure = r"\%s\^\{(\d+)\} \\operatorname\{\\mathrm\{order\\_size\} \}\\left\(\%s\\right\)"%(ord_var,ord_var)
 
-    exponent = findall(structure,element)
+#     exponent = findall(structure,element)
 
-    if len(exponent) > 0:
+#     if len(exponent) > 0:
 
-        structure = r"%s^{%s} \operatorname{\mathrm{order\_size} }\left(%s\right)"%(ord_var,exponent[0],ord_var)
+#         structure = r"%s^{%s} \operatorname{\mathrm{order\_size} }\left(%s\right)"%(ord_var,exponent[0],ord_var)
 
-        final = element.replace(r"%s"%structure,r"\mathrm{O}\left(%s^{%s}\right)"%(ord_var,exponent[0]))
+#         final = element.replace(r"%s"%structure,r"\mathrm{O}\left(%s^{%s}\right)"%(ord_var,exponent[0]))
         
-    elif len(exponent) == 0:
+#     elif len(exponent) == 0:
 
-        structure = r"%s \operatorname{\mathrm{order\_size} }\left(%s\right)"%(ord_var,ord_var)
+#         structure = r"%s \operatorname{\mathrm{order\_size} }\left(%s\right)"%(ord_var,ord_var)
 
-        final = element.replace(r"%s"%structure,r"\mathrm{O}\left(%s\right)"%ord_var)
+#         final = element.replace(r"%s"%structure,r"\mathrm{O}\left(%s\right)"%ord_var)
 
-    return final
+#     return final
 
-def gp_pretty_latex(element):
+# def gp_pretty_latex(element):
     
-    '''
-    It takes a giacpy latex expression and returns a latex string that is similar to the sympy notation.
+#     '''
+#     It takes a giacpy latex expression and returns a latex string that is similar to the sympy notation.
     
-        - It rewrites the derivatives
-        - It rewrites the expansion order
+#         - It rewrites the derivatives
+#         - It rewrites the expansion order
     
-    '''
+#     '''
     
-    names = {}
-    variables = []
+#     names = {}
+#     variables = []
 
-    result = element[:]
+#     result = element[:]
     
-    greek_dict =greek.greek_dict
+#     greek_dict =greek.greek_dict
 
-    for i in fun.fun:
+#     for i in fun.fun:
 
-        x = r'%s'%str(latex(i))[1:].split("\left")[0].replace('\\','').replace('{','\\{').replace('}','\\}').replace('mathrm','\\\\mathrm')
+#         x = r'%s'%str(latex(i))[1:].split("\left")[0].replace('\\','').replace('{','\\{').replace('}','\\}').replace('mathrm','\\\\mathrm')
 
-        names[x] = str(i).split('(')[1][:-1]
+#         names[x] = str(i).split('(')[1][:-1]
 
-    for i in names:
+#     for i in names:
 
-        j = findall(r'(?<=\W)%s\^\{\\left\((.*?)\\right\)\}'%i,element)
+#         j = findall(r'(?<=\W)%s\^\{\\left\((.*?)\\right\)\}'%i,element)
         
-        for k in j:
+#         for k in j:
 
-            ind = k.split(',')
+#             ind = k.split(',')
 
-            ini,fin = search(r'%s\^\{\\left\(%s\\right\)\}'%(i,k),element).span()
+#             ini,fin = search(r'%s\^\{\\left\(%s\\right\)\}'%(i,k),element).span()
             
-            while element[ini] != ' ' and element[ini] != ',' and element[ini] != '\\' and element[ini] != '-' and element[ini] != '+':
+#             while element[ini] != ' ' and element[ini] != ',' and element[ini] != '\\' and element[ini] != '-' and element[ini] != '+':
 
-                ini -= 1
+#                 ini -= 1
 
-            string = ''
+#             string = ''
 
-            l_dict = {}
+#             l_dict = {}
 
-            for l in ind: 
+#             for l in ind: 
 
-                l_dict[l] = ind.count(l)  
+#                 l_dict[l] = ind.count(l)  
                 
-            for l in l_dict:  # L = '1'
+#             for l in l_dict:  # L = '1'
 
-                y = names[i].split(',')[int(l)-1]
+#                 y = names[i].split(',')[int(l)-1]
                     
-                if y in greek_dict.keys():
+#                 if y in greek_dict.keys():
                         
-                    y = r'\\%s'%y
+#                     y = r'\\%s'%y
                 
-                if l_dict[l] == 1:
+#                 if l_dict[l] == 1:
                     
-                    string += r'\frac{\partial }{\partial %s}'%y
+#                     string += r'\frac{\partial }{\partial %s}'%y
 
-                else:
+#                 else:
 
-                    string += r'\frac{\partial^%d }{\partial %s^%d}'%(l_dict[l],y,l_dict[l])
+#                     string += r'\frac{\partial^%d }{\partial %s^%d}'%(l_dict[l],y,l_dict[l])
 
-            string+= i
+#             string+= i
 
-            result = result.replace(element[ini:fin],string)    
+#             result = result.replace(element[ini:fin],string)    
 
-    for func in names:
+#     for func in names:
 
-        if func in greek_dict.keys():
+#         if func in greek_dict.keys():
 
-            result = result.replace(func,greek_dict[func])
+#             result = result.replace(func,greek_dict[func])
             
-    if ptseries.ord_status == True:
+#     if ptseries.ord_status == True:
 
-        result = gp_pretty_order(result)
+#         result = gp_pretty_order(result)
 
-    return result.replace('\\\\','\\').replace("\"","").replace("\\{","{").replace("\\}","}")
+#     return result.replace('\\\\','\\').replace("\"","").replace("\\{","{").replace("\\}","}")
 
-
-    def tolatex(element):
-
-        f = io.StringIO()
-        with redirect_stdout(f):
-            print(latex(element))
-        element = f.getvalue()
-
-        string =  element[1:-2]
-
-        return gp_pretty_latex(string)
 
 
 class gpcore(__gp.giacpy.Pygen):
@@ -193,42 +159,21 @@ class gpcore(__gp.giacpy.Pygen):
 
         #print("llamando a html")
 
-        string = tolatex(self)
+        if ptseries.ord_status == True:
 
-        string = gp_pretty_latex(string)
+            a = self.expand()
+
+        else:
+
+            a = self
+
+        string = tolatex(a)
+
+        string = gp_pretty_latex(a)
 
         #display_IP(Math_IP(string))
 
         return "$$ %s $$"%string
-
-
-    #def __repr_latex_(self):
-
-    #    print("llamando a latex")
-
-    #    return "llamando a latex"
-
-    #def __call__(self):
-
-    #    print("llamando a call")
-
-    #    return "llamando al call"
-
-    #def printf(self):
-
-    #    print("llamando a printf")
-    #    return " llamando a printf"
-
-    #def print(self):
-
-    #    print("llamando a print")
-    #    return " llamando a printf"
-
-    #def about(self):
-
-    #    print("llamando a about")
-
-    #    return "about"
 
     def __repr__(self):    
 

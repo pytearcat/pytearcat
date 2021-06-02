@@ -5,6 +5,7 @@ from .core import get_name, latex, display_IP, Math_IP, core_calc
 if core_calc == "gp":
 
     from .core import tolatex, expand
+    from .gpwrap import gpcore
 
     def gp_pretty_order(element):
         
@@ -129,6 +130,10 @@ if core_calc == "gp":
 
         '''
 
+        if not isinstance(a,gpcore):
+
+            raise TypeError("The argument must be a single element, not a list or array.")
+
         if config.ord_status == True:
 
             a = expand(a)
@@ -144,6 +149,8 @@ if core_calc == "gp":
         display_IP(Math_IP(string))
 
 if core_calc == 'sp':
+
+    import core
     
     def display(a,b = None):
 
@@ -152,6 +159,11 @@ if core_calc == 'sp':
         b is an string e.g. "T^{a}_{b}^{c}"
         
         '''
+
+        if not isinstance(a,core.Expr):
+
+            raise TypeError("The argument must be a single element, not a list or array.")
+
     
         string = str(latex(a))
 
