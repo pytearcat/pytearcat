@@ -2213,7 +2213,7 @@ def tensor_series(element):
 
     if core_calc == 'gp':
 
-        result = series(expand(element),config.ord_var,0,config.ord_n)
+        result = series(element,config.ord_var,0,config.ord_n)
 
     elif core_calc == 'sp':
 

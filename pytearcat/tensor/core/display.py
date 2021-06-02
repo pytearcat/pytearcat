@@ -4,7 +4,7 @@ from .core import get_name, latex, display_IP, Math_IP, core_calc
 
 if core_calc == "gp":
 
-    from .core import tolatex
+    from .core import tolatex, expand
 
     def gp_pretty_order(element):
         
@@ -128,6 +128,10 @@ if core_calc == "gp":
         b is a string e.g. "T^{a}_{b}^{c}"
 
         '''
+
+        if config.ord_status == True:
+
+            a = expand(a)
 
         string = tolatex(a)
 
