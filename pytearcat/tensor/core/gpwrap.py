@@ -267,6 +267,14 @@ class gpcore(__gp.giacpy.Pygen):
     def __rpow__(self,other):
         
         return gpcore(super().__rpow__(other))  
+
+    def __neg__(self):
+        
+        return gpcore(super().__neg__())  
+
+    def __pos__(self):
+        
+        return gpcore(super().__pos__())  
     
     def simplify(self):
         
@@ -279,6 +287,8 @@ class gpcore(__gp.giacpy.Pygen):
     def factor(self):
 
         return gpcore(super().factor())
+
+    
 
 #trigonometric functions
 

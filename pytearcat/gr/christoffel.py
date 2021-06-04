@@ -19,6 +19,8 @@ def D(element,i):
     Hasta ahora esta funcion deriva cualquier cosa del tipo "MutableDenseNDimArray" con respecto a una sola coordenada, ingresada en forma de numero.
     '''
 
+    #print("tipo de funcion derivada",type(diff),diff)
+
     coord_index = config.coords
 
     # FIRST CASE: VECTOR DERIVATIVE WITH RESPECT TO ONE COORDINATE  d/dx^m Tensor[_i,^j,^k,_l,...etc]
@@ -31,6 +33,8 @@ def D(element,i):
         #coordinate = sympify(coord_index[i])
 
         str12 = "valor = diff(element,%s)"%(str(coord_index[i]))
+
+        
 
         #str12 = "valor = diff(element,%s)"%str(coord_index[i])
 
