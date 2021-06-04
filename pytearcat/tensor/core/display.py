@@ -150,7 +150,7 @@ if core_calc == "gp":
 
 if core_calc == 'sp':
 
-    import core
+    from pytearcat.tensor.core import core
     
     def display(a,b = None):
 
