@@ -1,5 +1,6 @@
 import numpy as np 
 from itertools import product as iterprod
+from numpy.lib.arraysetops import isin
 from tqdm import tqdm_notebook
 from warnings import warn
 from .core import config
@@ -304,109 +305,98 @@ class Tensor:
 
     def __init__(self,name,n):
 
-        # NAME
+        if n <= 0 or not isinstance(n,int):
+            
+            raise ValueError("The rank of a tensor (n) must be a positive integer.")
 
         dim = config.dim
 
-        try:
+        if dim == 0:
 
-            if dim == 0:
+            raise ValueError('Dimension undefined')
 
-                raise ValueError
+        if name == 'g':
 
-            if name == 'g':
+            if config.g == True:
 
-                if config.g == True:
+                while True:
 
-                    while True:
+                    answer = input('Warning g is already defined as the metric tensor. Are you sure that you want to overwrite it?\nyes/no?')
 
-                        answer = input('Warning g is already defined as the metric tensor. Are you sure that you want to overwrite it?\nyes/no?')
+                    if answer == 'yes' or answer == 'y' or answer == 'Yes':
 
-                        if answer == 'yes' or answer == 'y' or answer == 'Yes':
+                        print('g has been overwritten')
 
-                            print('g has been overwritten')
+                        break
 
-                            break
+                    if answer == 'no' or answer == 'n' or answer == 'No':
 
-                        if answer == 'no' or answer == 'n' or answer == 'No':
+                        raise gError
 
-                            raise gError
+                    else:
 
-                        else:
+                        print('Please try again.\n')
 
-                            print('Please try again.\n')
+        # NAME
 
-            self.name = name
+        self.name = name
 
-            #NUMBER OF INDEX
+        #NUMBER OF INDEX
 
-            self.n = n
+        self.n = n
 
-            #ORDEN DE LOS INDICES up Y down
+        #ORDEN DE LOS INDICES up Y down
 
-            self.orden = ordenar(n)
+        self.orden = ordenar(n)
 
-            self.indexes = np.full((2**n), False)
+        self.indexes = np.full((2**n), False)
 
-            if n != 0:
+        if core_calc == 'sp':
 
-                if core_calc == 'sp':
+            string = 'sympify(np.nan),'*dim
 
-                    string = 'sympify(np.nan),'*dim
+        elif core_calc == 'gp':
+            
+            string = 'np.nan,'*dim
 
-                elif core_calc == 'gp':
-                    
-                    string = 'np.nan,'*dim
+        string = '['+string[:-1]+'],'
 
-                string = '['+string[:-1]+'],'
+        for k in range(n-1):
 
-                for k in range(n-1):
+            string = '['+(string*dim)[:-1]+'],'  
 
-                    string = '['+(string*dim)[:-1]+'],'  
+        # if n == 1:
 
-                # if n == 1:
+        #     string = string[:-1] 
 
-                #     string = string[:-1] 
+        string = 'self.tensor = [' + (string*(2**n))[:-1]+']'
 
-                string = 'self.tensor = [' + (string*(2**n))[:-1]+']'
+        exec(string)# primer casillero corresponde al indice de la combinacion de indices (^,_,_,^,_), son 2**n combinaciones, los demas son primer indice, segundo indice, tercer indice, .... del tensor cada uno de ellos va desde 0 a dim, donde hay n dimnesiones
 
-                exec(string)# primer casillero corresponde al indice de la combinacion de indices (^,_,_,^,_), son 2**n combinaciones, los demas son primer indice, segundo indice, tercer indice, .... del tensor cada uno de ellos va desde 0 a dim, donde hay n dimnesiones
+        #----
 
-                #----
+        if core_calc == 'sp':
 
-                if core_calc == 'sp':
+            string = 'sympify(np.nan),'*(dim-1)
 
-                    string = 'sympify(np.nan),'*(dim-1)
+        elif core_calc == 'gp':
+            
+            string = 'np.nan,'*(dim-1)
 
-                elif core_calc == 'gp':
-                    
-                    string = 'np.nan,'*(dim-1)
+        string = '['+string[:-1]+'],'
 
-                string = '['+string[:-1]+'],'
+        for k in range(n-1):
 
-                for k in range(n-1):
+            string = '['+(string*(dim-1))[:-1]+'],'  
 
-                    string = '['+(string*(dim-1))[:-1]+'],'  
+        # if n == 1:
 
-                # if n == 1:
+        #     string = string[:-1] 
 
-                #     string = string[:-1] 
+        string = 'self.tensor_sp = [' + (string*(2**n))[:-1]+']'
 
-                string = 'self.tensor_sp = [' + (string*(2**n))[:-1]+']'
+        exec(string)# primer casillero corresponde al indice de la combinacion de indices (^,_,_,^,_), son 2**n combinaciones, los demas son primer indice, segundo indice, tercer indice, .... del tensor cada uno de ellos va desde 0 a dim, donde hay n dimnesiones
 
-                exec(string)# primer casillero corresponde al indice de la combinacion de indices (^,_,_,^,_), son 2**n combinaciones, los demas son primer indice, segundo indice, tercer indice, .... del tensor cada uno de ellos va desde 0 a dim, donde hay n dimnesiones
-
-            else: # Caso de un escalar. HAY Q AGREGAR UNA EXCEPCION AQUI
-
-                self.tensor = 0
-
-        except ValueError:
-
-            print('dimension is undefined')
-
-        except gError:
-
-            print('Cannot use g as tensor name')
 
     def __repr__(self):
 

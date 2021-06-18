@@ -191,7 +191,7 @@ def metric(functions, coords, ds2):
     
     g_matrix, line_element = create_metric_matrix(config.dim, variables_string, ds2)  
 
-    print('Metric was defined successfully: \n')    
+    print('Metric defined successfully: \n')    
     
     return g_matrix, line_element
 
@@ -205,8 +205,7 @@ def create_metric_matrix(dim, variables_string, ds_input):
         COORDENADA = variables_string.split(',')
 
         if len(COORDENADA) != dim:
-            print('ERROR: Number of coordinates and dimension are different')
-            break
+            raise ValueError('The number of coordinates and dimension must be equal.')
 
         # HERE WE CREATE THE DIFFERENTIAL COORDINATES WITH THE INPUT NAMES: e.g. dt,dx,dy,dz
 
@@ -345,18 +344,18 @@ def coord_index(coordinates):
 
     return dict(zip(a,b))
 
-
-def coordinates():
-
-    return input("Enter the coordinates separated by comma (,):\n")
-
-
-def def_coords(coords=''):
+def def_coords(coords):
 
     '''
+    It defines the coordinates of the manifold. 
+
     coords = 't,x,y,z'
     
     '''
+
+    if not isinstance(coords,str):
+
+        raise TypeError("The argument must be a string.")
 
     print('Remember that the time coordinate must be the first coordinate.')
 

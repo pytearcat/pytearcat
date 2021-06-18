@@ -5,7 +5,7 @@ with open("README.md", "r") as readme_file:
 
 requirements = ["jupyter>=1.0.0", "numpy==1.19.3", "sympy>=1.7.1", "tqdm>=4.55.0", "jedi==0.17.2"]
 
-ext_requirements = {"Giacpy" : ["giacpy>=0.7.0"]}
+ext_requirements = {"giacpy" : ["giacpy>=0.7.0"]}
 
 setup(
     name="pytearcat",
