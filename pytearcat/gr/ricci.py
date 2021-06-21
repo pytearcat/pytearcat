@@ -97,7 +97,7 @@ def calculate_ricci(All = False):
 
     if All == True:
 
-        Ricci.indexcomb('_,_')
+        Ricci.complete('_,_')
 
     Ricci.space()
 
@@ -109,9 +109,24 @@ def calculate_ricci_scalar():
 
     global Ricci_Scalar
 
+    if config.ricci is None:
+
+        Ricci_local = calculate_ricci()
+        
+    else:
+
+        Ricci_local = config.ricci
+
     if config.ricciS is None:
 
-        Ricci_Scalar = config.create_ten('RicciS',Tensor('RicciS',0))
+        Ricci_Scalar = 0
+
+        for p in tqdm.tqdm_notebook(iterprod(range(config.dim),repeat=2),total=config.dim**2):
+
+            i = p[0]
+            j = p[1]
+
+            Ricci_Scalar += config.g.tensor[3][i][j] * Ricci_local.tensor[0][i][j]
 
         config.ricciS = Ricci_Scalar
     
@@ -121,36 +136,21 @@ def calculate_ricci_scalar():
 
         return config.ricciS
 
-    if config.ricci is None:
-
-        Ricci_local = calculate_ricci()
-    
-    else:
-
-        Ricci_local = config.ricci
-
     display_IP(Latex_IP(r'Ricci Scalar $R$'))
-
-    for p in tqdm.tqdm_notebook(iterprod(range(config.dim),repeat=2),total=config.dim**2):
-
-        i = p[0]
-        j = p[1]
-
-        Ricci_Scalar.tensor += config.g.tensor[3][i][j] * Ricci_local.tensor[0][i][j]
 
     if config.ord_status == True:
 
-        Ricci_Scalar.tensor = tensor_series(Ricci_Scalar.tensor)
+        Ricci_Scalar = tensor_series(Ricci_Scalar)
 
 
     else:
 
         if core_calc == 'sp':
 
-            Ricci_Scalar.tensor = sympify(factor(Ricci_Scalar.tensor))
+            Ricci_Scalar = sympify(factor(Ricci_Scalar))
 
         elif core_calc == 'gp':
 
-            Ricci_Scalar.tensor = simplify(Ricci_Scalar.tensor)
+            Ricci_Scalar = simplify(Ricci_Scalar)
 
     return Ricci_Scalar

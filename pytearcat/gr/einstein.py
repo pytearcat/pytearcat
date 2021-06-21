@@ -68,11 +68,11 @@ def calculate_einstein(All = False):
 
                 if core_calc == 'sp':
 
-                    EinstTemp = Ricci_local.tensor[0][m][n] - Rational(1,2)*(g[0][m][n])*R.tensor
+                    EinstTemp = Ricci_local.tensor[0][m][n] - Rational(1,2)*(g[0][m][n])*R
 
                 elif core_calc == 'gp':
 
-                    EinstTemp = Ricci_local.tensor[0][m][n] - divide(1,2)[0]*(g[0][m][n])*R.tensor
+                    EinstTemp = Ricci_local.tensor[0][m][n] - divide(1,2)[0]*(g[0][m][n])*R
 
                 if config.ord_status == True:
 
@@ -104,7 +104,7 @@ def calculate_einstein(All = False):
 
     if All == True:
 
-        Einstein.indexcomb('_,_')
+        Einstein.complete('_,_')
 
     Einstein.space()
 

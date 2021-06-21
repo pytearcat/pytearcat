@@ -705,7 +705,7 @@ class Tensor:
 
             exec(execstr,locals(),globals())
    
-    def indexcomb(self, kstring):
+    def complete(self, kstring):
 
         # Recibe:
 
@@ -928,7 +928,7 @@ class Tensor:
 
             if All == True:
 
-                self.indexcomb(index)
+                self.complete(index)
 
         self.space()
 
