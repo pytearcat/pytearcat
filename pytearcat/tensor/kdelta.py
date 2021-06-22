@@ -28,7 +28,7 @@ class KroneckerDelta():
 
         self.n = 2
 
-        self.orden = ordenar(self.n)
+        self.sequence = ordenar(self.n)
 
         self.indexes = np.full((2**self.n), False)
 
@@ -374,7 +374,7 @@ class KroneckerDelta():
         
         if index is None:
 
-            index = self.orden[0]
+            index = self.sequence[0]
 
         if aslist == None:
 
@@ -389,7 +389,7 @@ class KroneckerDelta():
         dim = config.dim
         
         k = 0
-        for i in self.orden:
+        for i in self.sequence:
             if i == index:
                 break 
             k += 1
@@ -398,7 +398,7 @@ class KroneckerDelta():
 
             init_printing()
 
-        if k == len(self.orden):
+        if k == len(self.sequence):
 
             raise ValueError('Bad index definition')
 
@@ -409,7 +409,7 @@ class KroneckerDelta():
         
         elif aslist == False:
 
-            # if k == len(self.orden):
+            # if k == len(self.sequence):
 
             #     raise ValueError('Bad index definition')
 
@@ -548,7 +548,7 @@ class KroneckerDelta():
         
         if index is None:
 
-            index = self.orden[0]
+            index = self.sequence[0]
 
         rank = self.n
 
@@ -565,7 +565,7 @@ class KroneckerDelta():
         dim = config.dim - 1 # Se elimina la dimension temporal
         
         k = 0
-        for i in self.orden:
+        for i in self.sequence:
             if i == index:
                 break 
             k += 1
@@ -574,7 +574,7 @@ class KroneckerDelta():
 
             init_printing()
 
-        if k == len(self.orden):
+        if k == len(self.sequence):
 
             raise ValueError('Bad index definition')
 
@@ -585,7 +585,7 @@ class KroneckerDelta():
         
         elif aslist == False:
 
-            # if k == len(self.orden):
+            # if k == len(self.sequence):
 
             #     raise ValueError('Bad index definition')
 

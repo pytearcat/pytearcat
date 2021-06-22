@@ -25,7 +25,7 @@ class LeviCivita():
 
         self.n = dim
 
-        self.orden = ordenar(self.n)
+        self.sequence = ordenar(self.n)
 
         self.indexes = np.full((2**self.n), False)
 
@@ -305,7 +305,7 @@ class LeviCivita():
         
         if index is None:
 
-            index = self.orden[0]
+            index = self.sequence[0]
 
         if aslist == None:
 
@@ -320,7 +320,7 @@ class LeviCivita():
         dim = config.dim
         
         k = 0
-        for i in self.orden:
+        for i in self.sequence:
             if i == index:
                 break 
             k += 1
@@ -329,7 +329,7 @@ class LeviCivita():
 
             init_printing()
 
-        if k == len(self.orden):
+        if k == len(self.sequence):
 
             raise ValueError('Bad index definition')
 
@@ -340,7 +340,7 @@ class LeviCivita():
         
         elif aslist == False:
 
-            # if k == len(self.orden):
+            # if k == len(self.sequence):
 
             #     raise ValueError('Bad index definition')
 
@@ -478,12 +478,12 @@ class LeviCivita():
 
             warn("The simplify argument is intended to be used only with giacpy.\n The result is not affected when using Sympy.")
         
-        orden_sp = ordenar(self.n - 1)
+        sequence_sp = ordenar(self.n - 1)
 
 
         if index is None:
 
-            index = orden_sp[0]
+            index = sequence_sp[0]
 
         rank = self.n - 1
 
@@ -500,7 +500,7 @@ class LeviCivita():
         dim = config.dim - 1 # Se elimina la dimension temporal
         
         k = 0
-        for i in orden_sp:
+        for i in sequence_sp:
             if i == index:
                 break 
             k += 1
@@ -509,7 +509,7 @@ class LeviCivita():
 
             init_printing()
 
-        if k == len(orden_sp):
+        if k == len(sequence_sp):
 
             raise ValueError('Bad index definition')
 
@@ -520,7 +520,7 @@ class LeviCivita():
         
         elif aslist == False:
 
-            # if k == len(self.orden):
+            # if k == len(self.sequence):
 
             #     raise ValueError('Bad index definition')
 

@@ -274,7 +274,7 @@ def createfirstindex(tensor,kstring):
 
     N = tensor.n # Number of index
 
-    objetivo = tensor.orden[0].split(',') # ['_','_','_']
+    objetivo = tensor.sequence[0].split(',') # ['_','_','_']
 
     lista = kstring.split(',')  # ['^','_','_']
 
@@ -347,7 +347,7 @@ class Tensor:
 
         #ORDEN DE LOS INDICES up Y down
 
-        self.orden = ordenar(n)
+        self.sequence = ordenar(n)
 
         self.indexes = np.full((2**n), False)
 
@@ -683,12 +683,12 @@ class Tensor:
 
         if index is None:
 
-            index = self.orden[0]
+            index = self.sequence[0]
 
         dim = config.dim
 
         k = 0
-        for i in self.orden:
+        for i in self.sequence:
             if i == index:
                 break 
             k += 1
@@ -940,7 +940,7 @@ class Tensor:
 
         dim = config.dim
 
-        if (index not in self.orden and index is not None) or index == '':
+        if (index not in self.sequence and index is not None) or index == '':
 
             raise ValueError('Bad index definition')
 
@@ -1077,7 +1077,7 @@ class Tensor:
 
         dim = config.dim
 
-        if (index not in self.orden and index is not None) or index == '':
+        if (index not in self.sequence and index is not None) or index == '':
 
             raise ValueError('Bad index definition')
 
@@ -1215,7 +1215,7 @@ class Tensor:
 
         dim = config.dim
 
-        if (index not in self.orden and index is not None) or index == '':
+        if (index not in self.sequence and index is not None) or index == '':
 
             raise ValueError('Bad index definition')
 
@@ -1361,7 +1361,7 @@ class Tensor:
         
         if index is None:
 
-            index = self.orden[0]
+            index = self.sequence[0]
 
         if aslist == None:
 
@@ -1376,7 +1376,7 @@ class Tensor:
         dim = config.dim
         
         k = 0
-        for i in self.orden:
+        for i in self.sequence:
             if i == index:
                 break 
             k += 1
@@ -1385,7 +1385,7 @@ class Tensor:
 
             init_printing()
 
-        if k == len(self.orden):
+        if k == len(self.sequence):
 
             raise ValueError('Bad index definition')
 
@@ -1396,7 +1396,7 @@ class Tensor:
         
         elif aslist == False:
 
-            # if k == len(self.orden):
+            # if k == len(self.sequence):
 
             #     raise ValueError('Bad index definition')
 
@@ -1541,7 +1541,7 @@ class Tensor:
         
         if index is None:
 
-            index = self.orden[0]
+            index = self.sequence[0]
 
         rank = self.n
 
@@ -1558,7 +1558,7 @@ class Tensor:
         dim = config.dim - 1 # Se elimina la dimension temporal
         
         k = 0
-        for i in self.orden:
+        for i in self.sequence:
             if i == index:
                 break 
             k += 1
@@ -1567,7 +1567,7 @@ class Tensor:
 
             init_printing()
 
-        if k == len(self.orden):
+        if k == len(self.sequence):
 
             raise ValueError('Bad index definition')
 
@@ -1578,7 +1578,7 @@ class Tensor:
         
         elif aslist == False:
 
-            # if k == len(self.orden):
+            # if k == len(self.sequence):
 
             #     raise ValueError('Bad index definition')
 
