@@ -35,7 +35,7 @@ def reload_all(new_module):
 def ordenar(n):
 
     '''
-    Returns a list with all the possible combinations of indexes for a tensor of n indexes [['_','_'],['^','_'],['_','^'],['^','^']]
+    Returns a list with all the possible combinations of indices for a tensor of n indices [['_','_'],['^','_'],['_','^'],['^','^']]
     '''
 
     return [','.join(i) for i in iterprod(['_','^'],repeat = n)]
@@ -153,7 +153,7 @@ def bajarindice(tensor,i,kstring,kstring2):
 
         exec(bla,globals(),locals())
 
-    tensor.indexes[index2] = True
+    tensor.indices[index2] = True
 
     # hasta aqui todo okidoki uwu
 
@@ -199,7 +199,7 @@ def subirindice(tensor,kstring):
 
             index2 = compare(tensor.n,kstring2) # numero correspondiente a '^,^' o '^,_' del tensor
 
-            if tensor.indexes[index2] == True: # si ya esta calculado no hace nada
+            if tensor.indices[index2] == True: # si ya esta calculado no hace nada
 
                 pass
 
@@ -263,7 +263,7 @@ def subirindice(tensor,kstring):
 
                     exec(bla,globals(),locals())
 
-                    tensor.indexes[index2] = True
+                    tensor.indices[index2] = True
 
             subirindice(tensor,kstring2)
 
@@ -301,7 +301,7 @@ def createfirstindex(tensor,kstring):
 
 class Tensor:
 
-    # CREATE A TENSOR WITH A name, n: NUMBER OF INDEXES AND tensor: values of the tensor with coordinates given by the index
+    # CREATE A TENSOR WITH A name, n: NUMBER OF indices AND tensor: values of the tensor with coordinates given by the index
 
     def __init__(self,name,n):
 
@@ -349,7 +349,7 @@ class Tensor:
 
         self.sequence = ordenar(n)
 
-        self.indexes = np.full((2**n), False)
+        self.indices = np.full((2**n), False)
 
         if core_calc == 'sp':
 
@@ -412,7 +412,7 @@ class Tensor:
 
         else:
 
-            string = 'Too many tensor indexes. Please use the display method.'
+            string = 'Too many tensor indices. Please use the display method.'
         
         return string
 
@@ -733,7 +733,7 @@ class Tensor:
 
             NAME = config.default_tensors[NAME]
 
-        display_string = 'All other indexes of %s Tensor $%s$  already calculated.'%(self.name,NAME)
+        display_string = 'All other indices of %s Tensor $%s$  already calculated.'%(self.name,NAME)
 
         display_IP(Latex_IP(display_string))
 
@@ -744,7 +744,7 @@ class Tensor:
         # Revisar el nombre de printing. Puede ser Verbose
 
         It assigns the elements to the tensor on the corresponding index. 
-        If All = True, then it computes the thensor with the rest of the indexes combinations.
+        If All = True, then it computes the thensor with the rest of the indices combinations.
 
         index = '^,^,_'
         elements = [[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]]]
@@ -821,7 +821,7 @@ class Tensor:
 
                     pass
             
-            self.indexes[k] = True
+            self.indices[k] = True
 
             if printing == True:
         
@@ -834,7 +834,7 @@ class Tensor:
         # Revisar el nombre de printing. Puede ser Verbose
 
         It assigns the elements to the tensor on the corresponding index. 
-        If All = True, then it computes the thensor with the rest of the indexes combinations.
+        If All = True, then it computes the thensor with the rest of the indices combinations.
 
         index = '^,^,_'
         elements = [[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]]]
@@ -920,7 +920,7 @@ class Tensor:
 
                     pass
             
-            self.indexes[k] = True
+            self.indices[k] = True
 
             if printing == True:
         
@@ -972,7 +972,7 @@ class Tensor:
         
         for k in listax: 
             
-            if self.indexes[k] == True:
+            if self.indices[k] == True:
 
                 if self.name == 'Riemann' and k == 0: 
 
@@ -1110,7 +1110,7 @@ class Tensor:
         
         for k in listax: 
             
-            if self.indexes[k] == True:
+            if self.indices[k] == True:
 
                 if self.name == 'Riemann' and k == 0: 
 
@@ -1248,7 +1248,7 @@ class Tensor:
         
         for k in listax: 
             
-            if self.indexes[k] == True:
+            if self.indices[k] == True:
 
                 if self.name == 'Riemann' and k == 0: 
 

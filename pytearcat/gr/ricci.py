@@ -47,7 +47,7 @@ def calculate_ricci(All = False):
    
 
 
-    if Ricci.indexes[0] == False:
+    if Ricci.indices[0] == False:
 
         Ricci_list = np.full((config.dim,config.dim), False, dtype=bool)
 
@@ -89,7 +89,7 @@ def calculate_ricci(All = False):
 
                 Ricci_list[j][i] = True
 
-        Ricci.indexes[0] = True
+        Ricci.indices[0] = True
 
     else:
 

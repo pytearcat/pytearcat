@@ -112,9 +112,9 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
 
     # True if the first kind (second kind) symbol is already calculated. False if not.
 
-    calc_fk = Christoffel.indexes[0] 
+    calc_fk = Christoffel.indices[0] 
 
-    calc_sk = Christoffel.indexes[4]
+    calc_sk = Christoffel.indices[4]
 
     
 
@@ -223,7 +223,7 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
                 # Simetria
                 Christoffel.tensor[0][countm][countj][counti] = Christoffel.tensor[0][countm][counti][countj]
 
-                Christoffel.indexes[0] = True
+                Christoffel.indices[0] = True
 
             if Second_kind==True and not(calc_sk):  #Second Kind ('^,_,_')
                 
@@ -256,7 +256,7 @@ def calculate_christoffel(First_kind=True,Second_kind=True):
                 # Simetria
                 Christoffel.tensor[4][countm][countj][counti] = Christoffel.tensor[4][countm][counti][countj]
 
-                Christoffel.indexes[4] = True
+                Christoffel.indices[4] = True
 
     Christoffel.space()
 

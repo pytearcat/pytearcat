@@ -41,7 +41,7 @@ def calculate_riemann(default = True, All = False):
 
     gmet = config.g.tensor
 
-    if Riemann.indexes[0] == False and default == False:
+    if Riemann.indices[0] == False and default == False:
 
         Riemann_list = construct('False',dim,4)
         
@@ -133,11 +133,11 @@ def calculate_riemann(default = True, All = False):
 
                     Riemann_list[counta][countd][countb][countc] = True
 
-        Riemann.indexes[0] = True
+        Riemann.indices[0] = True
 
     #######################################
 
-    if Riemann.indexes[8] == False:
+    if Riemann.indices[8] == False:
 
         Riemann_list = construct('False',dim,4)
 
@@ -198,7 +198,7 @@ def calculate_riemann(default = True, All = False):
 
                     Riemann_list[counta][countb][countd][countc] = True
 
-        Riemann.indexes[8] = True
+        Riemann.indices[8] = True
 
     else:
 

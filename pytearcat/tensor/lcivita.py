@@ -27,7 +27,7 @@ class LeviCivita():
 
         self.sequence = ordenar(self.n)
 
-        self.indexes = np.full((2**self.n), False)
+        self.indices = np.full((2**self.n), False)
 
         if convention != 1 and convention != -1:
 
@@ -126,7 +126,7 @@ class LeviCivita():
 
         else:
 
-            string = 'Too many tensor indexes. Please use the display method.'
+            string = 'Too many tensor indices. Please use the display method.'
         
         return string
 

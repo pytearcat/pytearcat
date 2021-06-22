@@ -53,7 +53,7 @@ def calculate_einstein(All = False):
         
     #---
 
-    if Einstein.indexes[0] == False:
+    if Einstein.indices[0] == False:
 
         Einstein_list = construct('False',dim,2)
 
@@ -96,7 +96,7 @@ def calculate_einstein(All = False):
 
                 Einstein_list[n][m] = True
 
-        Einstein.indexes[0] = True
+        Einstein.indices[0] = True
 
     else:
 

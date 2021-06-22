@@ -30,7 +30,7 @@ class KroneckerDelta():
 
         self.sequence = ordenar(self.n)
 
-        self.indexes = np.full((2**self.n), False)
+        self.indices = np.full((2**self.n), False)
 
         if core_calc == 'sp':
 
@@ -104,7 +104,7 @@ class KroneckerDelta():
 
         else:
 
-            string = 'Too many tensor indexes. Please use the display method.'
+            string = 'Too many tensor indices. Please use the display method.'
         
         return string
 
@@ -241,7 +241,7 @@ class KroneckerDelta():
         # Revisar el nombre de printing. Puede ser Verbose
 
         It assigns the elements to the tensor on the corresponding index. 
-        If All = True, then it computes the thensor with the rest of the indexes combinations.
+        If All = True, then it computes the thensor with the rest of the indices combinations.
 
         index = '^,^,_'
         elements = [[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]]]
@@ -318,7 +318,7 @@ class KroneckerDelta():
 
                     pass
             
-            self.indexes[k] = True
+            self.indices[k] = True
 
             if printing == True:
         
