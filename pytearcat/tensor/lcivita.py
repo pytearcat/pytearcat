@@ -130,6 +130,64 @@ class LeviCivita():
         
         return string
 
+    def __scalar_call(self,updn,numbers,Nindex,ten_call):
+    
+        tdat_str = ''
+        
+        new_string_right = ''
+        
+        for i in numbers:
+                
+            new_string_right += '[%s]'%i
+        
+        return eval('self.%s[%s]%s'%(ten_call,Nindex,new_string_right))
+
+    def __Tdata_call(self,updn,coord,numbers,Nindex,dim,ten_call):
+    
+        tdat_str = ''
+        
+        new_string_right = ''
+        
+        k = 0
+        j = 0
+        
+        for i in range(len(updn)):
+            
+            if coord[i] not in numbers:
+            
+                tdat_str += updn[i] + coord[i]
+                
+                new_string_right += '[p[%d]]'%k
+                
+                k += 1
+                
+            else: 
+                
+                new_string_right += '[%s]'%numbers[j]
+                
+                j += 1
+                
+                    
+        new_rank = len(coord)-len(numbers)
+        
+        elements = construct(0,dim,new_rank)
+        
+        new_string_left = ''
+        
+        for k in range(new_rank):
+
+            new_string_left += '[p[%d]]'%k
+        
+        
+        for p in iterprod(range(dim), repeat = new_rank):
+
+            exec_str = 'elements%s = self.%s[%s]%s'%(new_string_left,ten_call,Nindex,new_string_right)
+        
+            exec(exec_str,locals(),globals())
+        
+        return Tdata(tdat_str,elements)
+    
+
     def __call__(self,str_index):
 
         '''
@@ -139,21 +197,19 @@ class LeviCivita():
         Funcionando para space only
         '''
 
-        if config.space_time == True:
+        syntax(str_index,self.n)
+
+        if config.space_time == 1:
 
             dim = config.dim
 
             ten_call = 'tensor'
-
-            syntax(str_index,self.n)
 
         else:
 
             dim = config.dim - 1
 
             ten_call = 'tensor_sp'
-
-            syntax(str_index,self.n - 1)
 
         lista = str_index.split(',')
 
@@ -166,6 +222,60 @@ class LeviCivita():
         repeated_coord = set([x for x in lista if coord.count(x[1:]) > 1])
 
         non_repeated_coord = set([x for x in lista if coord.count(x[1:]) == 1])
+
+        numbers = []
+
+        #if  in coords hay numeros, etonces error si any es > dim
+        
+        ErrorIndexAlphaNum = False
+        ErrorIndexInt = False
+
+        for i in coord:
+            
+            if (not i.isalnum()) or ("." in i):
+                
+                ErrorIndexAlphaNum= True
+                
+            try:
+                
+                if (int(i) >= dim) or (int(i) < 0):
+                    
+                    ErrorIndexInt = True
+                    
+            except:
+                
+                pass
+
+            if ErrorIndexAlphaNum:
+                
+                raise SyntaxError("Wrong indices. Every index must be a name or a integer without any special characters.")
+            
+            elif ErrorIndexInt:
+                
+                raise SyntaxError("Wrong indices. Every index must be a name or a integer greater than 0 and less than the dimension.")
+                
+
+
+        for i in coord:
+
+            if i in np.asarray([range(dim)],dtype=str):
+                
+                numbers.append(i)
+                
+        if len(numbers) == len(coord):
+            
+            return self.__scalar_call(updn,numbers,Nindex,ten_call)
+
+        for i in lista:
+
+            if lista.count(i) > 1:
+
+                raise SyntaxError('Problem with the indices. Error in the Einstein summation.')
+            
+        if len(numbers) != 0:
+            
+            return self.__Tdata_call(updn,coord,numbers,Nindex,dim,ten_call)
+
 
         if len(repeated_coord) == 0:
 
@@ -241,7 +351,7 @@ class LeviCivita():
 
                 data_result = Tdata(return_string,temp)
 
-                TEMP = Tensor('TEMP',new_rank) 
+                TEMP = Tensor('TEMP',new_rank)
 
                 TEMP.assign(data_result,return_string,printing=False)
 
@@ -256,7 +366,6 @@ class LeviCivita():
                     var += eval('self.%s[Nindex]%s'%(ten_call,old_string),locals(),globals())
 
                 return var 
-
 
 
     def space(self):
