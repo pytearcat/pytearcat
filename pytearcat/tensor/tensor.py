@@ -551,10 +551,17 @@ class Tensor:
         if len(numbers) == len(coord):
             
             return self.__scalar_call(updn,numbers,Nindex,ten_call)
+
+        for i in lista:
+
+            if lista.count(i) > 1:
+
+                raise SyntaxError('Problem with the indices. Error in the Einstein summation.')
             
-        elif len(numbers) != 0:
+        if len(numbers) != 0:
             
             return self.__Tdata_call(updn,coord,numbers,Nindex,dim,ten_call)
+
 
         if len(repeated_coord) == 0:
 
