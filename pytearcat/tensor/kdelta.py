@@ -120,6 +120,7 @@ class KroneckerDelta():
         
         return eval('self.%s[%s]%s'%(ten_call,Nindex,new_string_right))
 
+
     def __Tdata_call(self,updn,coord,numbers,Nindex,dim,ten_call):
     
         tdat_str = ''
@@ -133,7 +134,7 @@ class KroneckerDelta():
             
             if coord[i] not in numbers:
             
-                tdat_str += updn[i] + coord[i]
+                tdat_str += updn[i] + coord[i] + ','
                 
                 new_string_right += '[p[%d]]'%k
                 
@@ -144,6 +145,8 @@ class KroneckerDelta():
                 new_string_right += '[%s]'%numbers[j]
                 
                 j += 1
+
+        tdat_str = tdat_str[:-1]
                 
                     
         new_rank = len(coord)-len(numbers)
@@ -162,9 +165,14 @@ class KroneckerDelta():
             exec_str = 'elements%s = self.%s[%s]%s'%(new_string_left,ten_call,Nindex,new_string_right)
         
             exec(exec_str,locals(),globals())
-        
-        return Tdata(tdat_str,elements)
-    
+
+        data_result = Tdata(tdat_str,elements)
+
+        TEMP = Tensor('TEMP',new_rank)
+
+        TEMP.assign(data_result,tdat_str,printing=False)
+
+        return TEMP(tdat_str)
 
     def __call__(self,str_index):
 
@@ -239,20 +247,28 @@ class KroneckerDelta():
             if i in np.asarray([range(dim)],dtype=str):
                 
                 numbers.append(i)
+
+        # if numbers esta bien, luego tiene que ir un elif len(numbers) != 0. En ese caso hay problemas
+        # finalmente tiene que ir otro elif, que es si no tiene numeros. Este caso se dividira en si tiene o no indices repetidos.
                 
-        if len(numbers) == len(coord):
+        if len(numbers) == len(coord): # All numbered indices
             
             return self.__scalar_call(updn,numbers,Nindex,ten_call)
 
-        for i in lista:
-
-            if lista.count(i) > 1:
-
-                raise SyntaxError('Problem with the indices. Error in the Einstein summation.')
             
-        if len(numbers) != 0:
+        if len(numbers) != 0: # Some numbered indices and letters
+
+
+            ## Si hay numeros no suma indices repetidos
+            ## En este caso se podría tener que retorne escalar, lo que puede terminar en error.
             
             return self.__Tdata_call(updn,coord,numbers,Nindex,dim,ten_call)
+
+        for i in lista:
+
+            if lista.count(i) > 1: 
+
+                raise SyntaxError('Problem with the indices. Error in the Einstein summation.')
 
 
         if len(repeated_coord) == 0:
