@@ -1681,7 +1681,13 @@ class Tensor:
 
                 exec(string,locals(),globals())
                 
-                str_name =  "\\varepsilon"
+                if self.name in config.default_tensors:
+                    
+                    str_name = config.default_tensors[self.name]
+
+                else:
+
+                    str_name = self.name
                 
                 string = "{%s}"%str_name
                     
