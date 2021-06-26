@@ -671,11 +671,8 @@ class Tensor:
     def space(self):
         
         '''
-        Retorna solo las componentes espaciales del tensor completo
-        
-        Generalizar para todos los indices. El [1:,1:,....,1:]
-        
-        
+        Saves the spatial components of the Tensor on the attribut tensor_sp.
+
         '''
         
         for k in range(2**self.n):
@@ -699,7 +696,7 @@ class Tensor:
     def series(self,index = None):
 
         '''
-        Expands each element of the tensor with the given index.
+        Expands each element of the tensor at the given indices.
         
         '''
 
@@ -729,13 +726,17 @@ class Tensor:
    
     def complete(self, kstring):
 
-        # Recibe:
+        '''
+        It calculates the missing indices combintation of the tensor raising and lowering the indices 
+        from the given indices combination
 
-        # 1) Objeto de clase Tensor al cual queremos subir los indices
+        Receives:
 
-        # 2) string de la forma '_,^,_'
+        - string indicating the starting indices combination i.e., '_,^,_' for a 3-rank tensor.
+        
+        '''
 
-        createfirstindex(self,kstring) # oki
+        createfirstindex(self,kstring) 
 
         lista = []
 
@@ -745,9 +746,9 @@ class Tensor:
 
         string = ''.join(lista)
 
-        string = string[:-1] # '_,_,_'
+        string = string[:-1] 
 
-        subirindice(self,string) # aqui vamoh x3
+        subirindice(self,string)
 
         NAME = self.name 
 
@@ -1369,6 +1370,11 @@ class Tensor:
 
     def display(self, index=None, aslist = None, simplify = False, spatial=None):
 
+        '''
+        Display method of Tensor. By default it displays the tensor with all covariant indices unless index is given.
+
+        '''
+
         if config.space_time == False and spatial is None:
 
             spatial = True
@@ -1750,7 +1756,7 @@ def D(a,b):
 
     We suggest to save this into a Tensor object as
 
-    B = new_ten("B", 3)
+    B = ten("B", 3)
 
     B.assign(A, "^a, ^b, _c")
 
@@ -2000,7 +2006,7 @@ def C(a,b):
 
     We suggest to save this into a Tensor object as
 
-    B = new_ten("B", 3)
+    B = ten("B", 3)
 
     B.assign(A, "^a, ^b, _c")
 
