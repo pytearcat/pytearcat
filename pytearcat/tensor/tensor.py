@@ -758,6 +758,8 @@ class Tensor:
 
         display_string = 'All other indices of %s Tensor $%s$  already calculated.'%(self.name,NAME)
 
+        self.space()
+
         display_IP(Latex_IP(display_string))
 
     def assign_space(self,elements,index,printing = True):
