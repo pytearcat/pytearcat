@@ -7,3 +7,4 @@ Testing.ipynb
 build/
 dist/
 *.egg-info
+Test*
