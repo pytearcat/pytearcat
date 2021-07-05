@@ -516,6 +516,38 @@ class Tdata:
 
             print('error')
 
+    def __truediv__(self,other):
+        
+        exec(reload_all('config'),locals(),globals())
+
+        if config.space_time == True:
+
+            dim = config.dim
+
+        else:
+
+            dim = config.dim - 1
+        
+        if not isinstance(other,Tdata):
+
+            same_rank = len(self.updn)
+            
+            return_tensor = construct(0,dim,same_rank)
+
+            index = ''
+
+            for i in range(same_rank):
+
+                index += '[p[%d]]'%i
+
+            for p in iterprod(range(dim),repeat = same_rank):
+
+                string = 'return_tensor%s = self.elements%s/other'%(index,index)
+
+                exec(string,locals(),globals())
+
+            return Tdata(self.full_index,return_tensor)
+
     def factor(self):
 
         '''
