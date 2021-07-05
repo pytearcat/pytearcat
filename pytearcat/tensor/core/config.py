@@ -63,7 +63,7 @@ def create_fun(f_symbol,var_symbol):
 
     elif core_calc == 'sp':
     
-        str5 = "%s=Function('%s', real=True)(%s)"%(f_symbol,f_symbol,var_symbol)
+        str5 = "%s=Function('%s', real=True, nonzero=True)(%s)"%(f_symbol,f_symbol,var_symbol)
 
     exec(str5,locals(),globals())  
 
