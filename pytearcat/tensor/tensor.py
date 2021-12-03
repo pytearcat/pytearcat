@@ -879,8 +879,9 @@ class Tensor:
 
         Parameters
         ----------
-        elements : array_like
+        elements : array_like or Tdata
             elements to be assigned to the Tensor indices combination. These elemenents must be given in an array-like form such as a numpy array or a nested list.
+            Otherwise, elements can be a 'Tdata' object obtained through the call method of a 'Tensor' object.
         XXXXXXXindex : str, optional
             XXXXXXXstring indicating the indices combination to apply the simplification (the default is None, it implies that it will simplify all the inices combinations of the Tensor).
         All : boolean, optional
@@ -897,26 +898,27 @@ class Tensor:
         ------
         ValueError
             #####If the 'index' specified does not correspond to any possible indices combination.
-
-        Notes
-        -----
         
+        Examples
+        --------
+        Assigning a nested list to a 'Tensor'
+
+        >>> elements = [[-1/a**2, 0, 0, 0], [0, 1, 0, 0], [0, 0, r**2, 0], [0, 0, 0, r**2*sin(theta)**2]] # the 'sin' function is from sympy
+        >>> A = pt.ten('A', 2)
+        >>> A.assign(elements, '_i,_j')
+        
+        Elements assigned correctly to the _i,_j components
+
+
+        Assigning a 'tdata' to a 'Tensor
+
+        >>> elements = g('_i,_j')/a**2 # using the metric already defined
+        >>> A = pt.ten('A',2)
+        >>> A.assign(elements,'_i,_j')
+
+        Elements assigned correctly to the _i,_j components
 
         """
-
-
-        '''
-        # Revisar el nombre de printing. Puede ser Verbose
-
-        It assigns the elements to the tensor on the corresponding index. 
-        If All = True, then it computes the thensor with the rest of the indices combinations.
-
-        index = '^,^,_'
-        elements = [[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]]]
-
-        NOTE: the argument "elements" has to be shaped like the example so the indexation goes like elements[i][j][k]
-
-        '''
 
         if config.space_time == False and spatial is None:
 
@@ -961,19 +963,21 @@ class Tensor:
 
                 exec(string,locals(),globals())
 
-            new_updn = (',').join(x[0] for x in new_lista)
+            #new_updn = (',').join(x[0] for x in new_lista)
 
-            self.assign(New_data,new_updn,printing=False)
+            self.assign(New_data, index, All, printing)
 
         elif index == None:
 
-            raise ValueError("'index' must be a string. e.g.: '^,^,_,^'. ")
+            raise ValueError("'index' must be a string. e.g.: '^i,^j,_k,^l'. ")
 
         else:
 
             dim = config.dim
 
-            k = compare(self.n,index) # numero correspondiente a '^,^' o '_,^', etc
+            updn = (',').join(x[0] for x in index.split(','))
+
+            k = compare(self.n,updn) # numero correspondiente a '^,^' o '_,^', etc
 
 
             for p in iterprod(range(dim),repeat=self.n):
@@ -999,11 +1003,11 @@ class Tensor:
 
             if printing == True:
         
-                print('Elements assigned correctly to the components %s'%index)
+                print('Elements assigned correctly to the %s components'%index)
 
             if All == True:
 
-                self.complete(index)
+                self.complete(updn)
 
         self.space()
 
