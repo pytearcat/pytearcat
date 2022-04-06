@@ -32,17 +32,23 @@ Later, it is possible to access the functions and methods of the package within 
 
 ## How to cite this work
 
-To cite this work, please refer to Pytearcat's release paper [San Martin & Sureda (2021)](https://arxiv.org/abs/2106.15016) and use the following Bibtex citation:
+To cite this work, please refer to Pytearcat's release paper [San Martin & Sureda (2021)](https://doi.org/10.1016/j.ascom.2022.100572) (also available on [arXiv](https://arxiv.org/abs/2106.15016)) and use the following Bibtex citation:
 
 
-```bib
-@misc{pytearcat2021,
-      title={Pytearcat: PYthon TEnsor AlgebRa calCulATor}, 
-      author={Marco San Martín and Joaquin Sureda},
-      year={2021},
-      eprint={2106.15016},
-      archivePrefix={arXiv},
-      primaryClass={gr-qc}
-      }
+```
+@article{pytearcat2022,
+	abstract = {This paper introduces the first release of Pytearcat, a Python package developed to compute tensor algebra operations in the context of theoretical physics, for instance, in general relativity. Given that working with tensors can become a complex task, people often rely on computational tools to perform tensor calculations. We aim to build a tensor calculator based on Python, which benefits from being free and easy to use. Pytearcat syntax resembles the usual physics notation for tensor calculus, such as the Einstein notation for index contraction. This version allows the user to perform many tensor operations, including derivatives and series expansions, along with routines to obtain the typical General Relativity tensors. A particular concern was put in the execution times, leading to incorporate an alternative core for the symbolic calculations, enabling to reach much faster execution times. The syntax and the versatility of Pytearcat are the most important features of this package, where the latter can be used to extend Pytearcat to other areas of theoretical physics.},
+	author = {M. San Mart\'in and J. Sureda},
+	doi = {https://doi.org/10.1016/j.ascom.2022.100572},
+	issn = {2213-1337},
+	journal = {Astronomy and Computing},
+	keywords = {Software, Public release, General relativity, Tensor algebra, Computer algebra system},
+	pages = {100572},
+	title = {Pytearcat: PYthon TEnsor AlgebRa calCulATor A python package for general relativity and tensor calculus},
+	url = {https://www.sciencedirect.com/science/article/pii/S221313372200018X},
+	year = {2022},
+	Bdsk-Url-1 = {https://www.sciencedirect.com/science/article/pii/S221313372200018X},
+	Bdsk-Url-2 = {https://doi.org/10.1016/j.ascom.2022.100572}}
+
 ```
 
