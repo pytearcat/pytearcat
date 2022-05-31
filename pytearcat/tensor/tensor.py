@@ -317,7 +317,7 @@ class Tensor:
     -------
     assign(elements,index=None, All = False, printing = True, spatial = None)
         It assigns the elements to the tensor on the corresponding indices combination. 
-    complete(starting_index)
+    complete(index)
         It calculates the missing indices combintation of the tensor raising and lowering the indices from the given indices combination.
     display(index=None, aslist = None, simplify = False, spatial=None)
         Displays the Tensor. By default it displays the tensor with all covariant indices unless index is given.
@@ -502,12 +502,12 @@ class Tensor:
 
     def __call__(self,str_index):
 
-        '''
-        Solo acepta a lo mas la contraccion de 1 solo indice. Hay que incluir esto
-        en el examine de este call
+        '''Call Method for Tensor Class.
 
-        Funcionando para space only
+        Returns a Tdata object with the indices given as argument of the call.
+        
         '''
+        # Solo acepta a lo mas la contraccion de 1 solo indice. Hay que incluir esto en el examine de este call
 
         syntax(str_index,self.n)
 
@@ -743,19 +743,30 @@ class Tensor:
 
             exec(execstr,locals(),globals())
    
-    def complete(self, starting_index):
+    def complete(self, index):
 
-        '''
-        It calculates the missing indices combintation of the tensor raising and lowering the indices 
-        from the given indices combination
+        '''Calculates the missing indices combintation of the tensor
 
-        Receives:
+        Calculates the missing indices combintation of the tensor using the metric to raise and lower the indices, starting from the given indices combination
 
+        Parameters
+        ----------
+        index : str, optional
+            string indicating the indices combination used to start the complete method
+
+        Raises
+        ------
+        ValueError
+            If the 'index' specified does not correspond to any possible indices combination.
         - string indicating the starting indices combination i.e., '_,^,_' for a 3-rank tensor.
         
         '''
 
-        createfirstindex(self,starting_index) 
+        if (index not in self.sequence and index is not None) or index == '':
+
+            raise ValueError('Bad index definition')
+
+        createfirstindex(self,index) 
 
         lista = []
 
@@ -781,21 +792,10 @@ class Tensor:
 
         display_IP(Latex_IP(display_string))
 
-    def assign_space(self,elements,index,printing = True):
+    def __assign_space(self,elements,index,printing = True):
 
-
-        '''
         # Revisar el nombre de printing. Puede ser Verbose
 
-        It assigns the elements to the tensor on the corresponding index. 
-        If All = True, then it computes the thensor with the rest of the indices combinations.
-
-        index = '^,^,_'
-        elements = [[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]]]
-
-        NOTE: the argument "elements" has to be shaped like the example so the indexation goes like elements[i][j][k]
-
-        '''
         dim = config.dim - 1
 
         if isinstance(elements,Tdata):
@@ -833,7 +833,7 @@ class Tensor:
 
             new_updn = (',').join(x[0] for x in new_lista)
 
-            self.assign_space(New_data,new_updn,printing=False)
+            self.__assign_space(New_data,new_updn,printing=False)
 
         elif index == None:
 
@@ -882,8 +882,8 @@ class Tensor:
         elements : array_like or Tdata
             elements to be assigned to the Tensor indices combination. These elemenents must be given in an array-like form such as a numpy array or a nested list.
             Otherwise, elements can be a 'Tdata' object obtained through the call method of a 'Tensor' object.
-        XXXXXXXindex : str, optional
-            XXXXXXXstring indicating the indices combination to apply the simplification (the default is None, it implies that it will simplify all the inices combinations of the Tensor).
+        index : str, optional
+            string indicating the Tensor indices where to assign the elements.
         All : boolean, optional
             boolean indicating if the rest of indices combinations should be calculated after assigning the 'elements' to the Tensor 
             (the default value is False, it implies that no other indices combination will be calculated).
@@ -926,7 +926,7 @@ class Tensor:
 
         if spatial == True:
 
-            return self.assign_space(elements,index,printing)
+            return self.__assign_space(elements,index,printing)
 
         dim = config.dim
 
@@ -2285,7 +2285,9 @@ def C(a,b):
             
             str_temp = var.full_index[:]
 
-            var = var*config.g('^%s,^%s'%(dummy,moved_symbol))
+            var = var * config.g('^%s,^%s'%(dummy,moved_symbol))
+
+            str_temp = var.full_index[:].replace('dummy', moved_symbol)
 
             var = Tdata(str_temp,var.elements)
 
@@ -2335,6 +2337,26 @@ def create(name,TD):
     T.factor((',').join(TD.updn))
     
     return T
+
+def determinant(T):
+
+    if not isinstance(T,Tdata):
+
+        raise(ValueError("T must ve a Tdata instance."))
+    
+    if len(T.updn) != 2: 
+        
+        raise(ValueError("Must be a rank 2 tensor"))
+        
+    if core_calc == 'sp':
+        
+        return det(Matrix(T.elements))
+        
+    elif core_calc == 'gp':
+        
+        raise(NotImplementedError("Method not implemented for giacpy"))
+        
+        
 
 def create_tensor(T_name,n):
     
