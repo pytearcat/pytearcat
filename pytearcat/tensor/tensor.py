@@ -290,18 +290,54 @@ def createfirstindex(tensor,kstring):
 
             kstring = kstring_new
 
-# class Tdata:
-
-#     def __init__(self,name,str_index,elements):
-
-#         self.name = name
-
-#         self.index = # 
-
-
 class Tensor:
 
-    # CREATE A TENSOR WITH A name, n: NUMBER OF indices AND tensor: values of the tensor with coordinates given by the index
+    r""" Tensor Class
+
+    The 'Tensor' class contains all the relevant information for a Tensor object. 
+
+    Attributes
+    ----------
+    name : str
+        name of the Tensor.
+    n : int
+        rank of the Tensor.
+    dim :   int
+        dimension of the Tensor.
+    sequence : list
+        a list containing all the possible combination of indices for the Tensor.
+    indices : array_like
+        an array containing Boolean values to indicate which combination of the indices were calculated.
+    tensor : array_like
+        an array containing each component of the tensor. Initialized with NaN values.
+    tensor_sp : array_like
+        an array containing only the spatial components of the tensor. Initialized with NaN values.
+    
+    Methods
+    -------
+    assign(elements,index=None, All = False, printing = True, spatial = None)
+        It assigns the elements to the tensor on the corresponding indices combination. 
+    complete(index)
+        It calculates the missing indices combintation of the tensor raising and lowering the indices from the given indices combination.
+    display(index=None, aslist = None, simplify = False, spatial=None)
+        Displays the Tensor. By default it displays the tensor with all covariant indices unless index is given.
+    series(index = None)
+        Performs a series expanson on each component of the Tensor. If index is given, only acts on the given indices combination.
+    simplify(index = None)
+        Simplifies each component of the tensor. If index is given, only acts on the given indices combination.
+    expand(index = None)
+        Expands each component of the tensor. If index is given, only acts on the given indices combination.
+    factor(index = None)
+        Factorizes each component of the tensor. If index is given, only acts on the given indices combination.
+
+    Raises
+    ------
+    ValueError
+        If the rank of a tensor is not a positive integer. If the Dimension is undefined
+    """
+    
+    
+    
 
     def __init__(self,name,n):
 
@@ -337,15 +373,9 @@ class Tensor:
 
                         print('Please try again.\n')
 
-        # NAME
-
         self.name = name
 
-        #NUMBER OF INDEX
-
         self.n = n
-
-        #ORDEN DE LOS INDICES up Y down
 
         self.sequence = ordenar(n)
 
@@ -365,15 +395,9 @@ class Tensor:
 
             string = '['+(string*dim)[:-1]+'],'  
 
-        # if n == 1:
-
-        #     string = string[:-1] 
-
         string = 'self.tensor = [' + (string*(2**n))[:-1]+']'
 
-        exec(string)# primer casillero corresponde al indice de la combinacion de indices (^,_,_,^,_), son 2**n combinaciones, los demas son primer indice, segundo indice, tercer indice, .... del tensor cada uno de ellos va desde 0 a dim, donde hay n dimnesiones
-
-        #----
+        exec(string)
 
         if core_calc == 'sp':
 
@@ -389,14 +413,9 @@ class Tensor:
 
             string = '['+(string*(dim-1))[:-1]+'],'  
 
-        # if n == 1:
-
-        #     string = string[:-1] 
-
         string = 'self.tensor_sp = [' + (string*(2**n))[:-1]+']'
 
-        exec(string)# primer casillero corresponde al indice de la combinacion de indices (^,_,_,^,_), son 2**n combinaciones, los demas son primer indice, segundo indice, tercer indice, .... del tensor cada uno de ellos va desde 0 a dim, donde hay n dimnesiones
-
+        exec(string)
 
     def __repr__(self):
 
@@ -483,12 +502,12 @@ class Tensor:
 
     def __call__(self,str_index):
 
-        '''
-        Solo acepta a lo mas la contraccion de 1 solo indice. Hay que incluir esto
-        en el examine de este call
+        '''Call Method for Tensor Class.
 
-        Funcionando para space only
+        Returns a Tdata object with the indices given as argument of the call.
+        
         '''
+        # Solo acepta a lo mas la contraccion de 1 solo indice. Hay que incluir esto en el examine de este call
 
         syntax(str_index,self.n)
 
@@ -724,19 +743,30 @@ class Tensor:
 
             exec(execstr,locals(),globals())
    
-    def complete(self, kstring):
+    def complete(self, index):
 
-        '''
-        It calculates the missing indices combintation of the tensor raising and lowering the indices 
-        from the given indices combination
+        '''Calculates the missing indices combintation of the tensor
 
-        Receives:
+        Calculates the missing indices combintation of the tensor using the metric to raise and lower the indices, starting from the given indices combination
 
+        Parameters
+        ----------
+        index : str, optional
+            string indicating the indices combination used to start the complete method
+
+        Raises
+        ------
+        ValueError
+            If the 'index' specified does not correspond to any possible indices combination.
         - string indicating the starting indices combination i.e., '_,^,_' for a 3-rank tensor.
         
         '''
 
-        createfirstindex(self,kstring) 
+        if (index not in self.sequence and index is not None) or index == '':
+
+            raise ValueError('Bad index definition')
+
+        createfirstindex(self,index) 
 
         lista = []
 
@@ -762,21 +792,10 @@ class Tensor:
 
         display_IP(Latex_IP(display_string))
 
-    def assign_space(self,elements,index,printing = True):
+    def __assign_space(self,elements,index,printing = True):
 
-
-        '''
         # Revisar el nombre de printing. Puede ser Verbose
 
-        It assigns the elements to the tensor on the corresponding index. 
-        If All = True, then it computes the thensor with the rest of the indices combinations.
-
-        index = '^,^,_'
-        elements = [[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]]]
-
-        NOTE: the argument "elements" has to be shaped like the example so the indexation goes like elements[i][j][k]
-
-        '''
         dim = config.dim - 1
 
         if isinstance(elements,Tdata):
@@ -814,7 +833,7 @@ class Tensor:
 
             new_updn = (',').join(x[0] for x in new_lista)
 
-            self.assign_space(New_data,new_updn,printing=False)
+            self.__assign_space(New_data,new_updn,printing=False)
 
         elif index == None:
 
@@ -852,21 +871,54 @@ class Tensor:
         
                 print('Elements assigned correctly to the components %s'%index)
 
+    def assign(self, elements, index=None, All = False, printing = True, spatial = None):
 
-    def assign(self, elements, index=None, All = False,printing = True, spatial = None):
+        """It assigns the elements to the tensor on the corresponding indices combination.
 
-        '''
-        # Revisar el nombre de printing. Puede ser Verbose
+        Simplifies each component of the tensor. If index is given, only acts on the given indices combination.
 
-        It assigns the elements to the tensor on the corresponding index. 
-        If All = True, then it computes the thensor with the rest of the indices combinations.
+        Parameters
+        ----------
+        elements : array_like or Tdata
+            elements to be assigned to the Tensor indices combination. These elemenents must be given in an array-like form such as a numpy array or a nested list.
+            Otherwise, elements can be a 'Tdata' object obtained through the call method of a 'Tensor' object.
+        index : str, optional
+            string indicating the Tensor indices where to assign the elements.
+        All : boolean, optional
+            boolean indicating if the rest of indices combinations should be calculated after assigning the 'elements' to the Tensor 
+            (the default value is False, it implies that no other indices combination will be calculated).
+        printing : boolean, optional
+            boolean indicating if the method should print the success after assigning the 'elements' to the Tensor
+            (the default value is True, it implies that the method will indicate on which indices combination the 'elements' have been assigned).
+        spatial : boolean, optional
+            boolean indicating if the assignation of the 'elements' corresponds only to the spatial components of the Tensor.
+            (the default value is None, it checks if the user is working only with space coordinates and if that's the case, only assigns the spatial components, else, it assigns the 'elements' to the full Tensor).
+            
+        Raises
+        ------
+        ValueError
+            #####If the 'index' specified does not correspond to any possible indices combination.
+        
+        Examples
+        --------
+        Assigning a nested list to a 'Tensor'
 
-        index = '^,^,_'
-        elements = [[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]]]
+        >>> elements = [[-1/a**2, 0, 0, 0], [0, 1, 0, 0], [0, 0, r**2, 0], [0, 0, 0, r**2*sin(theta)**2]] # the 'sin' function is from sympy
+        >>> A = pt.ten('A', 2)
+        >>> A.assign(elements, '_i,_j')
+        
+        Elements assigned correctly to the _i,_j components
 
-        NOTE: the argument "elements" has to be shaped like the example so the indexation goes like elements[i][j][k]
 
-        '''
+        Assigning a 'tdata' to a 'Tensor
+
+        >>> elements = g('_i,_j')/a**2 # using the metric already defined
+        >>> A = pt.ten('A',2)
+        >>> A.assign(elements,'_i,_j')
+
+        Elements assigned correctly to the _i,_j components
+
+        """
 
         if config.space_time == False and spatial is None:
 
@@ -874,7 +926,7 @@ class Tensor:
 
         if spatial == True:
 
-            return self.assign_space(elements,index,printing)
+            return self.__assign_space(elements,index,printing)
 
         dim = config.dim
 
@@ -911,19 +963,21 @@ class Tensor:
 
                 exec(string,locals(),globals())
 
-            new_updn = (',').join(x[0] for x in new_lista)
+            #new_updn = (',').join(x[0] for x in new_lista)
 
-            self.assign(New_data,new_updn,printing=False)
+            self.assign(New_data, index, All, printing)
 
         elif index == None:
 
-            raise ValueError("'index' must be a string. e.g.: '^,^,_,^'. ")
+            raise ValueError("'index' must be a string. e.g.: '^i,^j,_k,^l'. ")
 
         else:
 
             dim = config.dim
 
-            k = compare(self.n,index) # numero correspondiente a '^,^' o '_,^', etc
+            updn = (',').join(x[0] for x in index.split(','))
+
+            k = compare(self.n,updn) # numero correspondiente a '^,^' o '_,^', etc
 
 
             for p in iterprod(range(dim),repeat=self.n):
@@ -949,19 +1003,30 @@ class Tensor:
 
             if printing == True:
         
-                print('Elements assigned correctly to the components %s'%index)
+                print('Elements assigned correctly to the %s components'%index)
 
             if All == True:
 
-                self.complete(index)
+                self.complete(updn)
 
         self.space()
 
     def simplify(self,index=None):
 
-        '''
-        Simplify the Tensor. If index is given, it will simplify only the given index combination ('^,_,_')
-        '''
+        """Simplifies each component of the tensor.
+
+        Simplifies each component of the tensor. If index is given, only acts on the given indices combination.
+
+        Parameters
+        ----------
+        index : str, optional
+            string indicating the indices combination to apply the simplification (the default is None, it implies that it will simplify all the inices combinations of the Tensor).
+
+        Raises
+        ------
+        ValueError
+            If the 'index' specified does not correspond to any possible indices combination.
+        """
 
         dim = config.dim
 
@@ -1096,9 +1161,20 @@ class Tensor:
 
     def expand(self,index=None):
 
-        '''
-        Expand the Tensor. If index is given, it will expand only the given index combination ('^,_,_')
-        '''
+        """Expands each component of the tensor.
+
+        Expands each component of the tensor. If index is given, only acts on the given indices combination.
+
+        Parameters
+        ----------
+        index : str, optional
+            string indicating the indices combination to apply the expansion (the default is None, it implies that it will expand all the inices combinations of the Tensor).
+
+        Raises
+        ------
+        ValueError
+            If the 'index' specified does not correspond to any possible indices combination.
+        """
 
         dim = config.dim
 
@@ -1234,9 +1310,21 @@ class Tensor:
 
     def factor(self,index=None):
 
-        '''
-        Expand the Tensor. If index is given, it will expand only the given index combination ('^,_,_')
-        '''
+
+        """Factorizes each component of the tensor.
+
+        Factorizes each component of the tensor. If index is given, only acts on the given indices combination.
+
+        Parameters
+        ----------
+        index : str, optional
+            string indicating the indices combination to apply the factorization (the default is None, it implies that it will factor all the inices combinations of the Tensor).
+
+        Raises
+        ------
+        ValueError
+            If the 'index' specified does not correspond to any possible indices combination.
+        """
 
         dim = config.dim
 
@@ -1372,10 +1460,35 @@ class Tensor:
 
     def display(self, index=None, aslist = None, simplify = False, spatial=None):
 
-        '''
-        Display method of Tensor. By default it displays the tensor with all covariant indices unless index is given.
+        """Displays the Tensor. 
 
-        '''
+        Displays the Tensor. By default it displays the tensor with all covariant indices unless 'index' is given.
+
+        Parameters
+        ----------
+        index : str, optional
+            string indicating the indices combination to display the Tensor (the default is None, it implies that the full covariant indices combination will be displayed).
+        aslist : boolean, optional
+            boolean indicating if the Tensor should be displayed in matrix form (False) or component by component as a list (True)
+            (the default is None, it checks the rank of the Tensor, where if it is less than 2 it displays the tensor in matrix form, else it displays the Tensor as a list).
+        simplify : boolean, optional
+            if True, a simplification routin is applied to the displayed components. If False, the Tensor is displayed in its original form (the default is False).
+        spatial : boolean, optional
+            boolean indicating if only the spatial components of the Tensor should be displayed (True) 
+            (the default value is None, it checks if the user is working only with space coordinates and if that's the case, only shows the spatial components, else, it shows the full Tensor).
+
+        Raises
+        ------
+        ValueError
+            If the 'index' specified does not correspond to any possible indices combination.
+
+        Notes
+        -----
+        Note that if 'simplify' is True, the simplification is only performed in the display method and is not saved in the Tensor.
+
+        """
+
+       
 
         if config.space_time == False and spatial is None:
 
@@ -2172,7 +2285,9 @@ def C(a,b):
             
             str_temp = var.full_index[:]
 
-            var = var*config.g('^%s,^%s'%(dummy,moved_symbol))
+            var = var * config.g('^%s,^%s'%(dummy,moved_symbol))
+
+            str_temp = var.full_index[:].replace('dummy', moved_symbol)
 
             var = Tdata(str_temp,var.elements)
 
@@ -2222,6 +2337,26 @@ def create(name,TD):
     T.factor((',').join(TD.updn))
     
     return T
+
+def determinant(T):
+
+    if not isinstance(T,Tdata):
+
+        raise(ValueError("T must ve a Tdata instance."))
+    
+    if len(T.updn) != 2: 
+        
+        raise(ValueError("Must be a rank 2 tensor"))
+        
+    if core_calc == 'sp':
+        
+        return det(Matrix(T.elements))
+        
+    elif core_calc == 'gp':
+        
+        raise(NotImplementedError("Method not implemented for giacpy"))
+        
+        
 
 def create_tensor(T_name,n):
     

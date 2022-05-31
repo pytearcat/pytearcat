@@ -225,7 +225,13 @@ class Tdata:
 
             return self
 
+    def __neg__(self):
 
+        return (-1) * self 
+
+    def __pos__(self):
+
+        return self
 
         
     def __mul__(self,other):
