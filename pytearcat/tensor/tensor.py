@@ -1,3 +1,8 @@
+'''
+Implementation of the 'Tensor' Class and helper functions
+'''
+
+
 import numpy as np 
 from itertools import product as iterprod
 from numpy.lib.arraysetops import isin
@@ -18,7 +23,7 @@ if core_calc == 'gp':
 
 def reload_all(new_module):
 
-    ''' x
+    '''
 
     This function reloads all the variables in __all__ from module
         
@@ -292,7 +297,7 @@ def createfirstindex(tensor,kstring):
 
 class Tensor:
 
-    r""" Tensor Class
+    """ Tensor Class
 
     The 'Tensor' class contains all the relevant information for a Tensor object. 
 
@@ -1919,7 +1924,6 @@ def D(a,b):
 
                 string_return = string_return[:-1]
 
-
                 temp = construct(0,dim,new_rank)
 
                 new_index = ''
@@ -1968,10 +1972,14 @@ def D(a,b):
 
                         var_temp += eval(string,locals(),globals())
 
+                    if new_rank == 0:
+                        
+                        return var_temp
+                    
                     string = 'temp%s = var_temp'%new_index
 
                     exec(string,locals(),globals())
-                
+             
                 return Tdata(string_return, temp)
                 
             else:                   #si se deriva con respecto a un indice no repetido 
@@ -2014,15 +2022,15 @@ def D(a,b):
             
         else:           # si es ^
 
-            #print('entro al ^')
-
             new_rank = old_rank + 1
         
             new_var = 'dummy'
+            i = 0
 
             while new_var in a.index_names:
 
-                new_var += '0'
+                new_var = 'dummy%d'%i 
+                i += 1
 
             new_var = '_' + new_var
 
@@ -2062,27 +2070,25 @@ def D(a,b):
 
             string_return = a.full_index +','+ new_var
 
-            if b[1:] not in a.index_names:
+            if b[1:] not in a.index_names: # Non repeated index
 
                 g_string = b + ',' + new_var2
 
-                #print(g_string, string_return)
-
                 return config.g(g_string)*Tdata(string_return, temp)
 
-            else:
+            else: # Repeated index
 
                 new_var = 'dummy'
+                i = 0
 
                 while new_var in a.index_names or new_var == new_var2[1:]:
 
-                    new_var += '0'
+                    new_var = 'dummy%d'%i 
+                    i += 1
 
                 new_var = '^' + new_var
 
                 g_string = new_var + ',' + new_var2
-
-                #print(g_string, string_return)
 
                 temp_return = config.g(g_string)*Tdata(string_return, temp)
 
@@ -2156,9 +2162,19 @@ def C(a,b):
 
         if b[0] == '^':  # si es _
 
-            was_up = True
+            new_symbol = 'dummy'
+            i = 0
 
-            b = '_' + b[1:]
+            while new_symbol in a.index_names or new_symbol == b[1:]:
+
+                new_symbol = 'dummy%d'%i
+                i += 1
+
+            b_new = '_' + new_symbol
+
+            g_indices = b + ',^%s'%new_symbol # b is the original index, i.e. '^c'
+
+            return C(a, b_new) * config.g(g_indices)
 
         if b[1:] in a.index_names:  #si se deriva con respecto a un indice repetido
 
@@ -2173,7 +2189,7 @@ def C(a,b):
 
             while new_symbol in a.index_names or new_symbol == b[1:]:
 
-                new_symbol += '%d'%i
+                new_symbol = 'dummy%d'%i
                 i += 1
 
             b = b[0] + new_symbol[:]
@@ -2216,7 +2232,7 @@ def C(a,b):
 
         while dummy in a.index_names or dummy == b[1:]:
 
-            dummy += '%d'%i
+            dummy = 'dummy%d'%i
             i += 1
 
         exec(reload_all('config'),locals(),globals())
@@ -2245,6 +2261,8 @@ def C(a,b):
 
                 var = var + config.christ(chrstr)*TEMP_tdata
 
+                #print("Ind^: christ = %s\ttdat = %s\n"%(chrstr,tdata_str))
+
             elif ind[0] == '_':
         
                 chrstr = '^%s,_%s,_%s'%(dummy,ind[1:],b[1:])
@@ -2263,62 +2281,17 @@ def C(a,b):
 
                 var = var - config.christ(chrstr)*TEMP_tdata
 
-        # si el indice c/r al que se deriva estaba arriba entonces multiplicamos por la metrica inversa
+        if was_rep == True:
 
-        # hay que revisar si esta dando bien porque hay q constatar el orden de los indices
-
-        # esta hecho CON LA IDEA DE QUE, HAY Q REVISARLO...., LA IDEA ES: QUE SIEMPRE EL INDICE QUE SE HEREDA QUEDA AL FINAL
-        # POR ORDEN, ASI QUE SIEMPRE HAY QUE REEMPLAZAR SOLO EL ULTIMO INDICE
-
-        if was_up == True:  # solo sube el indice NO SE FIJA SI HAY REPETICION
-
-            dummy = 'dummy'
-
-            i = 0
-
-            while dummy in var.index_names:
-
-                dummy += '%d'%i
-                i += 1
-
-            moved_symbol = var.index_names[-1][:]
-            
-            str_temp = var.full_index[:]
-
-            var = var * config.g('^%s,^%s'%(dummy,moved_symbol))
-
-            str_temp = var.full_index[:].replace('dummy', moved_symbol)
+            str_temp = var.full_index.replace(new_symbol, rep_symbol)
 
             var = Tdata(str_temp,var.elements)
 
-        if was_rep == True:
-
-            moved_symbol = var.index_names[-1][:]
-
-            str_temp = ''
-
-            for i,name in enumerate(var.index_names):
-
-                if i == len(var.index_names) - 1:
-
-                    str_temp += '^' + var.updn[i][1:] + rep_symbol +','
-
-                else: 
-                    
-                    str_temp += var.updn[i] + var.index_names[i]  +','
-
-            str_temp = str_temp[:-1]
-
-            var = Tdata(str_temp,var.elements)     
-######################### SON MUCHOS CASOS ARRIBA REPETIDOS ABAJO REPETIDOS, ABAJO SIN REPETIR ARRIBA SIN REPETIR
-
-        #print(var.full_index)
-
-        #print('antes d entrar al autosum')
-
         return var.auto_sum()
         
-    else: # si var es un int o sympy o symengine
+    # If var is an int or a sympy object
+
+    else: 
     
         return D(a,b)
 

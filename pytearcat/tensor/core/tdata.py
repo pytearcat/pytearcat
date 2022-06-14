@@ -205,21 +205,35 @@ class Tdata:
 
             return_tensor = construct(0,dim,len(self.updn)-2)
 
-            for p in iterprod(range(dim),repeat=len(self.updn)-2): # for para ir asignarlo
+            if len(return_index) > 0:
+
+                for p in iterprod(range(dim),repeat=len(self.updn)-2): # for para ir asignarlo
+
+                    temp = 0
+                    
+                    for q in range(dim):
+
+                        string = 'self.elements%s'%(self_index)
+
+                        temp += eval(string,locals(),globals())
+                    
+                    string = 'return_tensor%s = temp'%return_index
+
+                    exec(string,locals(),globals())
+                    
+                return Tdata(full_index,return_tensor)   #se retorna como el self
+            
+            else:
 
                 temp = 0
-
+                    
                 for q in range(dim):
 
                     string = 'self.elements%s'%(self_index)
 
                     temp += eval(string,locals(),globals())
-                
-                string = 'return_tensor%s = temp'%return_index
 
-                exec(string,locals(),globals())
-                
-            return Tdata(full_index,return_tensor)   #se retorna como el self
+                return temp
 
         else:
 
