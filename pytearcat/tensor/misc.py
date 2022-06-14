@@ -1,3 +1,7 @@
+'''
+A collection of miscelaneous functions
+'''
+
 import numpy as np 
 from re import findall,search
 from .core import config
