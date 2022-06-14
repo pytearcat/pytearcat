@@ -278,7 +278,7 @@ def mul_examine(rep):
 
                     #print('index[0],rep[j][0]',index[0],rep[j][0])
 
-                    raise(TensorSyntaxError('Bad'))
+                    raise(TensorSyntaxError('Bad index Definition'))
     
 def der_examine(b):
 
