@@ -1,10 +1,22 @@
+# Compiled python modules
 *.pyc
-*.vscode
+
+# vscode setting files
+.vscode
+
+# Local Python virtual environment
 venv/
-.DS_Store
-Testing.ipynb
-.ipynb_checkpoints
+
+# Setuptools distribution folder.
 build/
 dist/
 *.egg-info
+
+# Temporary local files
+.ipynb_checkpoints
+.DS_Store
+
+# Testing Files
+
+Testing.ipynb
 Test*
