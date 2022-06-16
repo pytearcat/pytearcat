@@ -9,7 +9,7 @@ ext_requirements = {"giacpy" : ["giacpy>=0.7.0"]}
 
 setup(
     name="pytearcat",
-    version="0.0.4",
+    version="0.0.5",
     author="Joaquin Sureda",
     author_email="jmsureda@uc.cl",
     description="A package to perform tensor algebra calculations.",
