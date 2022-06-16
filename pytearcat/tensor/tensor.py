@@ -2022,83 +2022,19 @@ def D(a,b):
             
         else:           # si es ^
 
-            new_rank = old_rank + 1
-        
-            new_var = 'dummy'
+            new_symbol = 'dummy'
             i = 0
 
-            while new_var in a.index_names:
+            while new_symbol in a.index_names or new_symbol == b[1:]:
 
-                new_var = 'dummy%d'%i 
+                new_symbol = 'dummy%d'%i
                 i += 1
 
-            new_var = '_' + new_var
+            b_new = '_' + new_symbol
 
-            string_return = a.full_index +','+ new_var
-            
-            temp = construct(0,dim,new_rank)
-            
-            k = 0
+            g_indices = b + ',^%s'%new_symbol # b is the original index, i.e. '^c'
 
-            old_index = ''
-
-            while k < old_rank:
-
-                old_index +='[p[%d]]'%k
-
-                k += 1
-            
-            k = 0
-            
-            new_index = ''
-            
-            while k < new_rank:
-
-                new_index +='[p[%d]]'%k
-
-                k += 1
-
-            exec(reload_all('config'),locals(),globals())
-
-            for p in iterprod(range(dim),repeat = new_rank): 
-
-                string = 'temp%s = diff(a.elements%s,%s)'%(new_index,old_index,coords[p[-1]])
-
-                exec(string,locals(),globals())
-
-            new_var2 = '^' + new_var[1:]
-
-            string_return = a.full_index +','+ new_var
-
-            if b[1:] not in a.index_names: # Non repeated index
-
-                g_string = b + ',' + new_var2
-
-                return config.g(g_string)*Tdata(string_return, temp)
-
-            else: # Repeated index
-
-                new_var = 'dummy'
-                i = 0
-
-                while new_var in a.index_names or new_var == new_var2[1:]:
-
-                    new_var = 'dummy%d'%i 
-                    i += 1
-
-                new_var = '^' + new_var
-
-                g_string = new_var + ',' + new_var2
-
-                temp_return = config.g(g_string)*Tdata(string_return, temp)
-
-                temp_return.full_list[0] = '^' + temp_return.full_list[-1][1:]
-
-                string = ','.join(temp_return.full_list)     
-
-                temp_return = Tdata(string,temp_return.elements)
-
-                return temp_return.auto_sum()
+            return D(a, b_new) * config.g(g_indices)
 
     else: # si var es un int o sympy o symengine
 
