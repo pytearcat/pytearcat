@@ -160,12 +160,6 @@ def bajarindice(tensor,i,kstring,kstring2):
 
     tensor.indices[index2] = True
 
-    # hasta aqui todo okidoki uwu
-
-    # ESTA FUNCION SE TENDRA QUE LLAMAR CUANTAS VECES SEA NECESARIA HASTA LLEGAR A TENER TODO ABAJO _ _ _
-
-    # REVISAR EL RESULTADO DE LA PRIMERA BAJADA DE INDICES COMPARAR CON GRTENSOR
-
 
 
 def subirindice(tensor,kstring):
@@ -695,8 +689,15 @@ class Tensor:
     def space(self):
         
         '''
-        Saves the spatial components of the Tensor on the attribut tensor_sp.
+        Saves the spatial components of the Tensor on the attribute tensor_sp.
 
+
+        Examples
+        --------
+        Assuming you have defined a tensor A it is possible to store its spatial by doing
+
+        >>> A.space()
+        
         '''
         
         for k in range(2**self.n):
@@ -719,14 +720,34 @@ class Tensor:
 
     def series(self,index = None):
 
-        '''
-        Expands each element of the tensor at the given indices.
+        '''Expand each element of the tensor at the corresponding index.
+
+        This method explicitly applies the series expansion up to the order defined.
+
+        Parameters
+        ----------
+            index : str, optional
+                string indicating the indices combination used to start the complete method
+                If not given it applies the method to the tensor with all its covariant indices, i.e, '_i,_j,_...'
+
+        Raises
+        ------
+            ValueError
+                If the 'index' specified does not correspond to any possible indices combination.
+
+        See Also
+        ------
+            misc.setorder()
         
         '''
 
         if index is None:
 
             index = self.sequence[0]
+
+        if (index not in self.sequence) or index == '':
+
+            raise ValueError('Bad index definition')
 
         dim = config.dim
 
@@ -756,14 +777,22 @@ class Tensor:
 
         Parameters
         ----------
-        index : str, optional
+        index : str
             string indicating the indices combination used to start the complete method
 
         Raises
         ------
         ValueError
             If the 'index' specified does not correspond to any possible indices combination.
-        - string indicating the starting indices combination i.e., '_,^,_' for a 3-rank tensor.
+
+        Examples
+        --------
+        Assuming you have defined a tensor A with indices '_i,^j', i.e. $A_{i}^{j}$, we can calculate the other indices combinations by writting 
+
+        >>> A.complete('_i,^j)
+        
+        All other indices of A Tensor $A$  already calculated.
+        >>> A.assign(elements, '_i,_j')
         
         '''
 
@@ -1867,26 +1896,37 @@ class Tensor:
 
 def D(a,b):
 
-    '''
-    Derivative of a tensor "a" with respect to the index "b".
+    """Derivative
 
-    a is an object of class Tdata
-    b is a string that indicates the index, written as "_index"
+    Computes the derivative for the Tensor 'a' with respect to the index 'b'.
 
-    It returns an object of class Tdata. 
+    Parameters
+    ----------
+    a : Tdata
+        Tdata instance corresponding to the Tensor for which the derivative will be applied.
+    b : str
+        string corresponding to the index for the covariant derivative.
 
-    -------------
-    Example:
+    Raises
+    ------
+    TensorSyntaxError
+        If the arguments passed have syntax errors.
+    
+    Examples
+    --------
+    Assigning a nested list to a 'Tensor'
 
-    A = D(G("^a, ^b"), "_c")
+    >>> A = D(G("^a, ^b"), "_c")
 
     We suggest to save this into a Tensor object as
 
-    B = ten("B", 3)
+    >>> B = ten("B", 3)
 
-    B.assign(A, "^a, ^b, _c")
+    >>> B.assign(A, "^a, ^b, _c")
 
-    '''
+    >>> Elements assigned correctly to the ^a,^b,_j components
+
+    """
 
     der_examine(b)
 
@@ -2054,26 +2094,36 @@ def D(a,b):
 
 def C(a,b):
 
-    '''
-    Covariant derivative of a tensor "a" with respect to the index "b".
+    """Covariant derivative
 
-    a is an object of class Tdata
-    b is a string that indicates the index, written as "_index"
+    Computes the covariant derivative for the Tensor 'a' with respect to the index 'b'.
 
-    It returns an object of class Tdata. 
+    Parameters
+    ----------
+    a : Tdata
+        Tdata instance corresponding to the Tensor for wich the covariant derivative will be applied.
+    b : str
+        string corresponding to the index for the covariant derivative.
 
-    -------------
-    Example:
+    Raises
+    ------
+    TensorSyntaxError
+        If the arguments passed have syntax errors.
+    
+    Examples
+    --------
+    Assigning a nested list to a 'Tensor'
 
-    A = C(G("^a, ^b"), "_c")
-
+    >>> A = C(G("^a, ^b"), "_c")
     We suggest to save this into a Tensor object as
 
-    B = ten("B", 3)
+    >>> B = ten("B", 3)
 
-    B.assign(A, "^a, ^b, _c")
+    >>> B.assign(A, "^a, ^b, _c")
 
-    '''
+    Elements assigned correctly to the ^a,^b,_j components
+
+    """
 
     der_examine(b)
 
@@ -2248,6 +2298,36 @@ def create(name,TD):
     return T
 
 def determinant(T):
+
+    """Determinant
+
+    Utility to compute the determinant of a rank 2 'Tensor' T
+
+    Parameters
+    ----------
+    T : Tensor
+        Rank 2 'Tensor' instance.
+
+    Raises
+    ------
+    ValueError
+        If it receives anything else than a 'Tensor' object.
+        If it is not a rank 2 tensor.
+    
+    Examples
+    --------
+    Assigning a nested list to a 'Tensor'
+
+    >>>  = C(G("^a, ^b"), "_c")
+    We suggest to save this into a Tensor object as
+
+    >>> B = ten("B", 3)
+
+    >>> B.assign(A, "^a, ^b, _c")
+
+    Elements assigned correctly to the ^a,^b,_j components
+
+    """
 
     if not isinstance(T,Tdata):
 

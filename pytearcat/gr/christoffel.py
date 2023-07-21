@@ -89,6 +89,33 @@ class ChristoffelClass(Tensor):
 
 
 def calculate_christoffel(First_kind=True,Second_kind=True):
+
+    r"""Christoffel
+
+    Computes the Christoffel symbol
+
+    Parameters
+    ----------
+    First_kind : Boolean, optional
+        This boolean indicates if the first kind Christoffel symbol should be calculated. (Default = True)
+    Second_kind : Boolean, optional
+        This boolean indicates if the second kind Christoffel symbol should be calculated. (Default = True)
+
+    Raises
+    ------
+    ValueError
+        If both arguments are False.
+    
+    Examples
+    --------
+        Computing the Christoffel symbols
+        
+        >>> Chr = pt.christoffel()
+
+        Christoffel :math:`\Gamma_{\alpha \beta \gamma}` and :math:`\Gamma^{\alpha}_{\beta \gamma}`
+            0%|          | 0/64 [00:00<?, ?it/s]
+
+    """
     
     global Christoffel
     

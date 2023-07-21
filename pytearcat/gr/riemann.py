@@ -10,6 +10,29 @@ from .christoffel import calculate_christoffel, D
 
 def calculate_riemann(default = True, All = False):
 
+    r"""Riemann Tensor
+
+    Computes the Riemann tensor
+
+    Parameters
+    ----------
+    default : Boolean, optional
+        This boolean indicates only the component :math: `R^{\alpha}_{\beta \gamma \delta}`should be calculated. (Default = True)
+    All : Boolean, optional
+        This boolean indicates if all the tensor components should be calculated. (Default = True)
+
+    
+    Examples
+    --------
+        Computing the Christoffel symbols
+        
+        >>> Chr = pt.christoffel()
+
+        Christoffel :math:`\Gamma_{\alpha \beta \gamma}` and :math:`\Gamma^{\alpha}_{\beta \gamma}`
+            0%|          | 0/64 [00:00<?, ?it/s]
+
+    """
+
     # Riemann (_,_,_,_)
 
     global Riemann

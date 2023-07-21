@@ -14,6 +14,44 @@ if core_calc == 'gp':
 
 def create_metric(ds2 = ''):
 
+    r'''
+    It defines the metric. 
+
+    Parameters
+    ----------
+    ds2 : str
+        string indicating line element representing the metric to be used
+
+    Raises
+    ------
+    TypeError
+        If the argument received is not a string.
+
+    Examples
+    --------
+    
+    >>> # Define the coordinates to be used
+    >>> t,x,y,z = pt.coords('t,x,y,z')
+    >>> # Define any constant (more than one constant can be defined at the same time)
+    >>> a = pt.fun('a','t')
+    >>> g = pt.metric('ds2 = -dt**2 + a**2*(dx**2 + dy**2 + dz**2)')
+
+    Remember that the time coordinate must be the first coordinate.
+
+    Dimension = 4
+
+    Coordinates = t,x,y,z
+    
+    Metric defined successfully: 
+
+    .. math::
+        ds^2 = -1 \cdot dt^2+a^{2}{\left(t \right)} \cdot dx^2+a^{2}{\left(t \right)} \cdot dy^2+a^{2}{\left(t \right)} \cdot dz^2
+
+    .. math::
+        \displaystyle \left[\begin{matrix}-1 & 0 & 0 & 0\\0 & a^{2}{\left(t \right)} & 0 & 0\\0 & 0 & a^{2}{\left(t \right)} & 0\\0 & 0 & 0 & a^{2}{\left(t \right)}\end{matrix}\right]
+    
+    '''
+
     global g
 
     if config.g_status == True:
@@ -349,7 +387,23 @@ def def_coords(coords):
     '''
     It defines the coordinates of the manifold. 
 
-    coords = 't,x,y,z'
+    Parameters
+    ----------
+    coords : str
+        string indicating the indices combination used to start the complete method
+
+    Raises
+    ------
+    TypeError
+        If the argument received is not a string.
+
+    Examples
+    --------
+    Assuming you have defined a tensor A with indices '_i,^j', i.e. $A_{i}^{j}$, we can calculate the other indices combinations by writting 
+
+    >>> t,x,y,z = pt.coords('t,x,y,z')
+    
+    Remember that the time coordinate must be the first coordinate.
     
     '''
 
