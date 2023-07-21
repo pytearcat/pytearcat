@@ -78,11 +78,17 @@ def compare(n,string):
 
 def bajarindice(tensor,i,kstring,kstring2):
 
-    # i: primera posicion que tiene un indice arriba ej: en un string de indices '_,^,^' -> i = 1 (contando desde 0)
+    '''
+    tensor: Tensor object for which we want to lower their indices
 
-    # kstring: string original de los indices tensor ej: '_,^,^'
+    i: first position that has an upper index i.e. in a string of indices '_,^,^' -> i = 1 (counting from 0)
 
-    # kstring2: string objetivo (con el indice i abajo) de los indices del tencor ej: '_,_,^'
+    kstring: original string containing the tensor indices e.g. '_,^,^'
+
+    kstring2: target string (with the i string down) for the tensor indices e.g.  '_,_,^'
+
+    TODO: This function should be implemented as a method of the tensor class
+    '''
 
     index = compare(tensor.n,kstring)
 
@@ -164,11 +170,16 @@ def bajarindice(tensor,i,kstring,kstring2):
 
 def subirindice(tensor,kstring):
 
-    # Recibe:
+    '''
+    Receives 
 
-    # 1) Nombre de la variable de clase Tensor al cual queremos subir los indices
+    1) Tensor object for which we want to raise their indices
 
-    # 2) string de la forma '_,^,_'
+    2) string like '_,^,_'
+    
+
+    TODO: This function should be implemented as a method of the tensor class
+    '''
 
     index = compare(tensor.n,kstring)
 
@@ -268,10 +279,15 @@ def subirindice(tensor,kstring):
 
 def createfirstindex(tensor,kstring):
 
-    # kstring: string original de los indices ej: '^,_,_' ...
-    # tensor: tensor de la clase Tensor
+    '''
+    tensor: object of tensor class for which we want get the full covariant form
 
-    N = tensor.n # Number of index
+    kstring: original string of the current indices of the tensor e.g. '^,_,_'
+
+    TODO: This function should be implemented as a method of the tensor class
+    '''
+
+    N = tensor.n # Number of indices
 
     objetivo = tensor.sequence[0].split(',') # ['_','_','_']
 
