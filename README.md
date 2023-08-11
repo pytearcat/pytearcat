@@ -1,5 +1,7 @@
 [![PyPI build](https://github.com/pytearcat/pytearcat/actions/workflows/python-publish.yml/badge.svg)](https://github.com/pytearcat/pytearcat/actions/workflows/python-publish.yml)
-
+[![PyPI](https://img.shields.io/pypi/v/pytearcat?label=PyPI)](https://pypi.org/project/pytearcat/)
+[![Release Paper](https://img.shields.io/badge/DOI-10.1016%2Fj.ascom.2022.100572-blue)](
+https://doi.org/10.1016/j.ascom.2022.100572)
 # Pytearcat: PYthon TEnsor AlgebRa calCulATor - A python package for general relativity and tensor calculus
 
 Pytearcat is an open-source Python package created to work with general tensor operations, either in the field of General Relativity (GR) or others that need to use tensor calculus. It provides the basic GR tensors built in the package and uses a standard syntax for the Einstein notation. 
