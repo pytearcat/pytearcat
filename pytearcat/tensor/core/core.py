@@ -5,8 +5,19 @@ import pkg_resources
 __required = {'jupyter','numpy' ,'sympy', 'tqdm','giacpy'}
 __installed = {pkg.key for pkg in pkg_resources.working_set}
 __missing = __required - __installed
-
+    
 if len(__missing) != 0:
+
+    # This condition is to allow pytearcat to work in environments with jupyter-core and other 
+    # jupyter instances that are not exacly recognized as jupyter. (Fixes import bug in Google Colab)
+
+    if 'jupyter' in __missing:
+
+        for pkg in __installed:
+
+            if 'jupyter' in pkg:
+
+                __missing -= {'jupyter'}
 
     if 'giacpy' in __missing and len(__missing) == 1:
 
@@ -14,7 +25,7 @@ if len(__missing) != 0:
 
     else:
 
-        raise(EnvironmentError("There are missing modules:"(__missing-{'giacpy'})))
+        raise(EnvironmentError("There are missing modules:",(__missing-{'giacpy'})))
 
 
 if 'giacpy' in __installed:
