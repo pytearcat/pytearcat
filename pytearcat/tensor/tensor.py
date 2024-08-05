@@ -5,7 +5,7 @@ Implementation of the 'Tensor' Class and helper functions
 
 import numpy as np 
 from itertools import product as iterprod
-from numpy.lib.arraysetops import isin
+from numpy import isin
 from tqdm import tqdm_notebook
 from warnings import warn
 from .core import config
