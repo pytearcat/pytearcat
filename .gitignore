@@ -18,8 +18,8 @@ dist/
 
 # Testing Files
 
+.pytest_cache
 Testing.ipynb
-Test*
 
 # Development scripts
 

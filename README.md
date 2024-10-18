@@ -32,7 +32,7 @@ Pytearcat works using Jupyter Notebooks to give the outputs in mathematical form
 import pytearcat as pt
 ```
 
-Later, it is possible to access the functions and methods of the package within the notebook. Different usage examples can be found in the top directory of the GitHub repository.
+Later, it is possible to access the functions and methods of the package within the notebook. Different usage examples can be found in the [Examples](Examples) directory of the GitHub repository.
 
 ## How to cite this work
 
