@@ -1,0 +1,5 @@
+jupyter>=1.0.0
+numpy>=1.22.0
+sympy>=1.7.1
+tqdm>=4.55.0
+jedi>=0.17.2

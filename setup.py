@@ -15,7 +15,7 @@ setup(
     description="A package to perform tensor algebra calculations.",
     long_description=readme,
     long_description_content_type="text/markdown",
-    licence="LICENCE",
+    license="LICENSE",
     url="https://github.com/pytearcat/pytearcat",
     packages=find_packages(),
     install_requires=requirements,
