@@ -3,7 +3,7 @@ import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
 
-notebooks = ["test_metric.ipynb", "test_FLRW.ipynb"]
+notebooks = ["test_metric.ipynb", "test_FLRW.ipynb", "test_Schwarzschild.ipynb"]
 
 predir = "tests/nbtests/"
 @pytest.mark.parametrize("notebook", notebooks)
